@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>evoAIDesk – Smart Lead Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body { font-family: Inter, sans-serif; }
+	:root {
+  --green: #22c55e;   /* Tailwind green-400 */
+  --blue: #3b82f6;    /* Tailwind blue-500 */
+  --white: #ffffff;
+  --muted: #9ca3af;   /* Tailwind gray-400 */
+}
+	
+	.footer-bottom{width: 80%;margin: 64px auto 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-logo{font-size:1.35rem;font-weight:600;letter-spacing:-0.3px}
+.footer-logo .evo{color:var(--green);font-weight:300}
+.footer-logo .ai{color:var(--blue);font-weight:700}
+.footer-links{display:flex;gap:2rem;list-style:none}
+.footer-links a{font-size:0.83rem;color:var(--muted);transition:color 0.2s}
+.footer-links a:hover{color:var(--white)}
+.footer-tagline{font-size:0.78rem;color:var(--muted);letter-spacing:0.06em}
+.footer-copy{font-size:0.78rem;color:var(--muted)}
+.footer-legal{display:flex;gap:1.5rem;list-style:none}
+.footer-legal a{font-size:0.78rem;color:var(--muted);transition:color 0.2s;text-decoration:underline;text-underline-offset:3px}
+.footer-legal a:hover{color:var(--white)}
+
+footer {
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+  </style>
+</head>
+
+ 
+  
+<body class="bg-white text-gray-800">
+
+<!-- NAVBAR -->
+<header class="fixed top-0 w-full z-50 bg-black/70 backdrop-blur">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center text-white">
+    
+    <div class="flex items-center gap-3">
+      <img src="https://desk.evoaiglobal.ai/images/evoaidesk.png" class="h-8">
+    </div>
+
+    <div class="space-x-4 text-sm">
+      <a href="#features" class="hover:text-green-400">Features</a>
+      <a href="evoAIDesk_KnowMore.html" class="hover:text-green-400">Product</a>
+      <a href="login.html" class="px-4 py-2 border border-white/20 rounded-lg">Login</a>
+      <a href="login.html" class="px-4 py-2 bg-green-400 text-black rounded-lg font-semibold">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="bg-black text-white pt-32 pb-24 px-6 text-center relative overflow-hidden">
+
+  <div class="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#00ff99_1px,transparent_1px),linear-gradient(to_bottom,#00ff99_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+
+  <div class="relative max-w-4xl mx-auto">
+    <h2 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+      Smarter Lead Management.<br/>
+      <span class="text-green-400">Faster Conversions.</span>
+    </h2>
+
+    <p class="text-lg text-gray-300 mb-8">
+      Manage, track, and automate your entire sales pipeline — built for modern AI-driven teams.
+    </p>
+
+    <div class="space-x-4">
+      <a href="login.html" class="px-6 py-3 bg-green-400 text-black rounded-xl font-semibold">Get Started</a>
+      <a href="#features" class="px-6 py-3 border border-white/30 rounded-xl">Explore Features</a>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="bg-white py-20 px-6 text-center">
+  <h3 class="text-3xl font-bold mb-6">Losing Leads? Missing Follow-Ups?</h3>
+  <p class="text-gray-600 max-w-2xl mx-auto mb-6">
+    Leads scattered across tools. No visibility. Manual processes slowing your growth.
+  </p>
+  <p class="font-medium text-lg">
+    evoAIDesk brings everything into one intelligent system.
+  </p>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="bg-gray-50 py-20 px-6">
+  <div class="max-w-6xl mx-auto">
+    <h3 class="text-3xl font-bold text-center mb-12">Core Features</h3>
+
+    <div class="grid md:grid-cols-3 gap-8">
+
+      <div class="p-6 bg-white rounded-2xl shadow">
+        <h4 class="font-semibold mb-2">📊 Smart Lead Tracking</h4>
+        <p class="text-gray-600">Track every interaction and status.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-2xl shadow">
+        <h4 class="font-semibold mb-2">⚙️ Automation</h4>
+        <p class="text-gray-600">Automate follow-ups and workflows.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-2xl shadow">
+        <h4 class="font-semibold mb-2">📈 Pipeline View</h4>
+        <p class="text-gray-600">Visualize your entire funnel.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-2xl shadow">
+        <h4 class="font-semibold mb-2">🎯 Lead Scoring</h4>
+        <p class="text-gray-600">Focus on high-value leads.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-2xl shadow">
+        <h4 class="font-semibold mb-2">👥 Team Roles</h4>
+        <p class="text-gray-600">Control access and permissions.</p>
+      </div>
+
+      <div class="p-6 bg-white rounded-2xl shadow">
+        <h4 class="font-semibold mb-2">📑 Custom Views</h4>
+        <p class="text-gray-600">Flexible workflows for teams.</p>
+      </div>
+
+    </div>
+
+    <!-- Link to full page -->
+    <div class="text-center mt-10">
+      <a href="evoAIDesk_KnowMore.html" class="text-green-500 font-semibold hover:underline">
+        Explore Full Product Details →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="bg-black text-white py-20 px-6 text-center">
+  <h3 class="text-3xl font-bold mb-10">How It Works</h3>
+
+  <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-8 text-gray-300">
+    <div>
+      <h4 class="text-green-400 font-semibold mb-2">1. Capture</h4>
+      <p>Bring all leads into one place.</p>
+    </div>
+    <div>
+      <h4 class="text-green-400 font-semibold mb-2">2. Automate</h4>
+      <p>Track and optimize workflows.</p>
+    </div>
+    <div>
+      <h4 class="text-green-400 font-semibold mb-2">3. Convert</h4>
+      <p>Close deals faster with insights.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="py-20 px-6 text-center">
+  <h3 class="text-3xl font-bold mb-10">Built for Teams That Want Results</h3>
+
+  <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-6 text-gray-700">
+    <p>✔ Increase conversion rates</p>
+    <p>✔ Eliminate manual work</p>
+    <p>✔ Improve team coordination</p>
+    <p>✔ Gain real-time visibility</p>
+    <p>✔ Scale without chaos</p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="bg-black text-white py-20 text-center">
+  <h3 class="text-3xl font-bold mb-6">
+    Start Managing Your Leads the Smart Way
+  </h3>
+  <div class="space-x-4">
+    <a href="login.html" class="px-6 py-3 bg-green-400 text-black rounded-xl font-semibold">Get Started</a>
+    <a href="login.html" class="px-6 py-3 border border-white/30 rounded-xl">Login</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-[#0b1220] text-gray-400 pt-20 pb-12 px-6">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-4 gap-12 text-sm">
+
+    <!-- Brand -->
+    <div>
+      <div class="flex items-center gap-3 mb-5">
+        <img src="https://desk.evoaiglobal.ai/images/evoaidesk.png" class="h-9">
+      </div>
+      <p class="text-gray-500 leading-relaxed">
+        Smart lead management platform built for modern AI-driven teams.
+      </p>
+    </div>
+
+    <!-- Product -->
+    <div>
+      <h4 class="text-white font-semibold mb-5">Product</h4>
+      <ul class="space-y-3">
+        <li><a href="#features" class="hover:text-green-400 transition">Features</a></li>
+        <li><a href="evoAIDesk_KnowMore.html" class="hover:text-green-400 transition">Full Product</a></li>
+        <li><a href="login.html" class="hover:text-green-400 transition">Login</a></li>
+      </ul>
+    </div>
+
+    <!-- Company -->
+    <div>
+      <h4 class="text-white font-semibold mb-5">Company</h4>
+      <ul class="space-y-3">
+        <li><a href="https://evoaiglobal.ai" class="hover:text-green-400 transition">About</a></li>
+        <li><a href="https://evoaiglobal.ai/#contact" class="hover:text-green-400 transition">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- CTA -->
+    <div>
+      <h4 class="text-white font-semibold mb-5">Get Started</h4>
+      <p class="text-gray-500 mb-5 leading-relaxed">
+        Start managing your leads smarter today.
+      </p>
+      <a href="login.html" class="inline-block px-6 py-3 bg-green-400 text-black rounded-lg font-semibold hover:opacity-90 transition">
+        Get Started
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Bottom Strip -->
+  <div class="footer-bottom">
+    <p class="footer-copy">&copy; 2026 evoAI. All rights reserved.</p>
+    <p class="footer-copy">Powered by <a href="https://evoaiglobal.ai/#services" style="color:var(--green);text-decoration:underline;text-underline-offset:3px;">evoAI</a></p>
+    <ul class="footer-legal">
+      <li><a href="privacy-policy.html">Privacy Policy</a></li>
+      <li><a href="terms.html">Terms &amp; Conditions</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>

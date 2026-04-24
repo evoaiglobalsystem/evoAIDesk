@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>evoAIDesk - Lead Management System</title>
+
+  <!-- ── Primary SEO ── -->
+  <meta name="description" content="evoAIDesk is a cloud-based CRM and lead management platform built for small and growing businesses. Track leads, automate outreach, score prospects, and close more deals — all from one dashboard." />
+  <meta name="keywords" content="evoAIDesk, lead management system, CRM for small business, AI CRM, lead tracking software, sales pipeline, lead scoring, SMB CRM, n8n automation, evoAI Global" />
+  <meta name="author" content="evoAI Global" />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link rel="canonical" href="https://desk.evoaiglobal.ai/know-more" />
+
+  <!-- ── Open Graph (Facebook / LinkedIn) ── -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="evoAIDesk by evoAI Global" />
+  <meta property="og:title" content="evoAIDesk - Lead Management System for Growing Businesses" />
+  <meta property="og:description" content="Smarter lead management powered by AI. Track every lead, automate outreach, monitor your pipeline, and close more deals — purpose-built for small and medium businesses." />
+  <meta property="og:image" content="https://desk.evoaiglobal.ai/images/evoaidesk.png" />
+  <meta property="og:url" content="https://desk.evoaiglobal.ai/know-more" />
+
+  <!-- ── Twitter / X Card ── -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="evoAIDesk - Lead Management System" />
+  <meta name="twitter:description" content="AI-powered CRM for small businesses. One-click automations, lead scoring, Kanban pipeline, and daily reports — all in one clean dashboard." />
+  <meta name="twitter:image" content="https://desk.evoaiglobal.ai/images/evoaidesk.png" />
+  <meta name="twitter:site" content="@evoaiglobal" />
+
+  <!-- ── Schema.org Structured Data ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "evoAIDesk",
+    "alternateName": "evoAIDesk Lead Management System",
+    "description": "A cloud-based CRM and lead management platform purpose-built for small and growing businesses. Track every lead, automate outreach, monitor your pipeline, and close more deals.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "url": "https://desk.evoaiglobal.ai",
+    "screenshot": "https://desk.evoaiglobal.ai/images/evoaidesk.png",
+    "featureList": [
+      "Lead tracking and pipeline management",
+      "Automatic lead scoring (0–100)",
+      "One-click email and WhatsApp automation",
+      "Kanban board, table, and list views",
+      "CSV import and export",
+      "Daily, weekly, and summary reports",
+      "Role-based access control",
+      "Multi-user team support"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "availability": "https://schema.org/InStock"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "evoAI Global",
+      "url": "https://evoaiglobal.ai",
+      "email": "info@evoaiglobal.ai",
+      "logo": "https://desk.evoaiglobal.ai/images/evoaidesk.png"
+    }
+  }
+  </script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0b1f3a;--surface:#0e1420;--surface2:#141c2a;--border:#1e2d42;
+  --accent:#00e5a0;--accent2:#00b8ff;--danger:#ff4d6d;--warn:#ffb730;
+  --text:#e8f0fe;--muted:#6b7fa3;--purple:#c084fc;
+}
+body{
+  background: var(--bg);
+}
+.doc{
+  width:90%;
+  max-width:1400px; /* optional safety cap */
+  margin:0px auto;
+  padding:32px 24px 48px;
+  background:#080c10;
+  font-family:'Sora',sans-serif;
+  color:#e8f0fe;
+}
+
+.hero{border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:36px 40px;margin-bottom:20px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,160,.07) 0%,transparent 70%);}
+.hero::after{content:'';position:absolute;bottom:-40px;left:30%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,184,255,.05) 0%,transparent 70%);}
+.hero-top{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap;}
+.logo-img{height:36px;width:auto;display:block;object-fit:contain;}
+.logo-badge{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:500;}
+.hero-divider{flex:1;height:1px;background:var(--border);min-width:20px;}
+.product-tag{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.hero-title{font-size:1.95rem;font-weight:800;letter-spacing:-.035em;line-height:1.15;margin-bottom:10px;}
+.hero-title .g{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:.9rem;color:var(--muted);line-height:1.65;max-width:580px;margin-bottom:24px;}
+.hero-pills{display:flex;flex-wrap:wrap;gap:7px;}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:.7rem;font-weight:600;color:var(--muted);}
+.pill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.pill.green .dot{background:var(--accent);}
+.pill.blue .dot{background:var(--accent2);}
+.pill.purple .dot{background:var(--purple);}
+.pill.orange .dot{background:var(--warn);}
+.pill.red .dot{background:var(--danger);}
+
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 15px;}
+.stat-label{font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.stat-val{font-size:1.35rem;font-weight:700;font-family:'DM Mono',monospace;}
+.stat-sub{font-size:.6rem;color:var(--muted);margin-top:3px;}
+.c-green{color:var(--accent);}.c-blue{color:var(--accent2);}.c-purple{color:var(--purple);}.c-orange{color:var(--warn);}.c-red{color:var(--danger);}
+
+.section-label{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px;}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.feat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:11px;flex-shrink:0;}
+.feat-icon.teal{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);}
+.feat-icon.blue{background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.2);}
+.feat-icon.purple{background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.2);}
+.feat-icon.orange{background:rgba(255,183,48,.1);border:1px solid rgba(255,183,48,.25);}
+.feat-icon.red{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.2);}
+.feat-title{font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:5px;}
+.feat-desc{font-size:.7rem;color:var(--muted);line-height:1.6;}
+.feat-tag{display:inline-block;margin-top:8px;font-size:.58rem;font-family:'DM Mono',monospace;letter-spacing:.06em;padding:2px 7px;border-radius:20px;}
+.feat-tag.smb{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.22);color:var(--accent);}
+.feat-tag.auto{background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.22);color:var(--accent2);}
+.feat-tag.insight{background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.22);color:var(--purple);}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:20px;}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.info-title{font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+.stage-list{display:flex;flex-direction:column;gap:6px;}
+.stage-row{display:flex;align-items:center;gap:9px;font-size:.72rem;}
+.stage-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.stage-name{color:var(--text);font-weight:600;width:105px;flex-shrink:0;}
+.stage-bar{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.stage-fill{height:100%;border-radius:2px;}
+.stage-pts{font-family:'DM Mono',monospace;font-size:.63rem;color:var(--accent);width:34px;text-align:right;flex-shrink:0;}
+
+.score-section{display:flex;flex-direction:column;gap:7px;}
+.score-tier{display:flex;align-items:center;gap:9px;padding:7px 11px;border-radius:8px;font-size:.7rem;}
+.score-tier.hot{background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.2);}
+.score-tier.warm{background:rgba(255,183,48,.07);border:1px solid rgba(255,183,48,.2);}
+.score-tier.cold{background:rgba(100,180,255,.07);border:1px solid rgba(100,180,255,.2);}
+.score-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.score-label{font-weight:700;width:50px;flex-shrink:0;}
+.hot .score-dot{background:#ff4d6d;}.hot .score-label{color:#ff4d6d;}
+.warm .score-dot{background:#ffb730;}.warm .score-label{color:#ffb730;}
+.cold .score-dot{background:#64b4ff;}.cold .score-label{color:#64b4ff;}
+.score-range{font-family:'DM Mono',monospace;font-size:.64rem;color:var(--muted);width:52px;}
+.score-desc{color:var(--muted);}
+
+.pipeline-row{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:20px;}
+.pipe-stage{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 6px;text-align:center;}
+.pipe-stage-name{font-size:.57rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
+.pipe-stage-dot{width:22px;height:22px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:700;font-family:'DM Mono',monospace;}
+
+.benefits-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:20px;}
+.benefit{display:flex;gap:11px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px;}
+.benefit-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.benefit-text .b-title{font-size:.77rem;font-weight:700;color:var(--text);margin-bottom:3px;}
+.benefit-text .b-desc{font-size:.67rem;color:var(--muted);line-height:1.55;}
+
+.auto-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:20px;}
+.auto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:11px;}
+.auto-btn{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px;font-size:.68rem;color:var(--muted);font-family:'Sora',sans-serif;text-align:left;}
+.auto-btn-icon{font-size:.82rem;margin-bottom:4px;display:block;}
+.auto-btn-label{font-weight:600;color:var(--text);display:block;margin-bottom:2px;}
+.auto-btn-badge{font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.05em;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.22);color:var(--accent);padding:1px 6px;border-radius:20px;display:inline-block;margin-top:2px;}
+
+.views-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.view-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:15px;}
+.view-name{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.view-desc{font-size:.69rem;color:var(--muted);line-height:1.55;}
+.view-icon-wrap{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── NEW: Config + Contact section ── */
+.config-contact-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:20px;}
+.config-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.config-card.highlight{border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.03);}
+.config-title{font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.config-item{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(30,45,66,.5);}
+.config-item:last-child{border-bottom:none;padding-bottom:0;}
+.config-item-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.config-item-text .ci-title{font-size:.76rem;font-weight:600;color:var(--text);margin-bottom:2px;}
+.config-item-text .ci-desc{font-size:.67rem;color:var(--muted);line-height:1.55;}
+.contact-card{background:linear-gradient(135deg,rgba(0,229,160,.05) 0%,rgba(0,184,255,.05) 100%);border:1px solid rgba(0,229,160,.28);border-radius:10px;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;}
+.contact-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,160,.12);border:1px solid rgba(0,229,160,.3);border-radius:6px;padding:4px 10px;font-size:.65rem;font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:.05em;margin-bottom:14px;}
+.contact-headline{font-size:.98rem;font-weight:800;color:var(--text);letter-spacing:-.02em;line-height:1.3;margin-bottom:8px;}
+.contact-sub{font-size:.72rem;color:var(--muted);line-height:1.6;margin-bottom:18px;}
+.contact-email-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#080c10;font-family:'Sora',sans-serif;font-size:.8rem;font-weight:700;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;text-decoration:none;letter-spacing:.01em;}
+.contact-email-btn:hover{background:#00fdb4;}
+.contact-divider{height:1px;background:rgba(0,229,160,.18);margin:16px 0;}
+.contact-also{font-size:.68rem;color:var(--muted);}
+.contact-also strong{color:var(--text);}
+
+.import-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:17px 19px;margin-bottom:20px;}
+.import-cols{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;}
+.import-chip{font-size:.61rem;font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:4px;}
+
+.footer{border-top:1px solid var(--border);padding-top:18px;margin-top:4px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-left .footer-brand-logo{height:24px;width:auto;display:block;margin-bottom:5px;}
+.footer-left .footer-meta{font-size:.6rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.powered{font-size:.65rem;color:var(--muted);display:flex;align-items:center;gap:6px;text-align:right;}
+.powered a{color:var(--accent2);text-decoration:none;font-weight:600;}
+.footer-right{text-align:right;}
+.footer-right .copy{font-size:.58rem;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace;}
+
+.mono{font-family:'DM Mono',monospace;}
+
+/* ── Lead Sources Section ── */
+.sources-section{background:var(--surface);border:1px solid rgba(0,229,160,.25);border-radius:10px;padding:18px;margin-bottom:20px;position:relative;overflow:hidden;}
+.sources-section::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,160,.06) 0%,transparent 70%);pointer-events:none;}
+.sources-header{display:flex;align-items:center;gap:10px;margin-bottom:5px;}
+.sources-badge{font-family:'DM Mono',monospace;font-size:.57rem;letter-spacing:.1em;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);color:var(--accent);padding:2px 8px;border-radius:20px;font-weight:600;text-transform:uppercase;}
+.sources-title{font-size:.82rem;font-weight:700;color:var(--text);}
+.sources-sub{font-size:.69rem;color:var(--muted);line-height:1.6;margin-bottom:14px;max-width:640px;}
+.sources-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.source-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:13px;transition:border-color .2s;}
+.source-card:hover{border-color:rgba(0,229,160,.35);}
+.source-icon{font-size:1.1rem;margin-bottom:7px;display:block;}
+.source-name{font-size:.75rem;font-weight:700;color:var(--text);margin-bottom:3px;}
+.source-desc{font-size:.64rem;color:var(--muted);line-height:1.55;}
+.source-tag{display:inline-block;margin-top:6px;font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.05em;padding:1px 6px;border-radius:20px;background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);color:var(--accent);}
+
+/* ── Scheduled Reports Section ── */
+.reports-section{background:linear-gradient(135deg,rgba(0,229,160,.04) 0%,rgba(0,184,255,.04) 100%);border:1px solid rgba(0,184,255,.25);border-radius:10px;padding:18px;margin-bottom:20px;}
+.reports-inner{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;}
+.reports-schedules{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.report-pill{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:.64rem;font-weight:600;color:var(--muted);}
+.report-pill .rp-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.reports-stat-box{background:var(--surface);border:1px solid rgba(0,184,255,.2);border-radius:10px;padding:14px 18px;text-align:center;min-width:130px;}
+.rstat-label{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-family:'DM Mono',monospace;}
+.rstat-val{font-size:1.5rem;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent2);}
+.rstat-sub{font-size:.58rem;color:var(--muted);margin-top:3px;}
+
+/* ── ROLES SECTION ── */
+.roles-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:20px;}
+.roles-intro{font-size:.71rem;color:var(--muted);line-height:1.65;margin-bottom:16px;font-family:'Sora',sans-serif;}
+.roles-matrix{width:100%;border-collapse:collapse;margin-bottom:16px;}
+.roles-matrix th{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);font-family:'Sora',sans-serif;}
+.roles-matrix th:not(:first-child){text-align:center;}
+.roles-matrix td{font-size:.69rem;padding:7px 10px;border-bottom:1px solid rgba(30,45,66,.5);color:var(--muted);font-family:'Sora',sans-serif;}
+.roles-matrix tr:last-child td{border-bottom:none;}
+.roles-matrix td:first-child{color:var(--text);font-weight:600;}
+.roles-matrix td:not(:first-child){text-align:center;}
+.perm-yes{color:var(--accent);font-size:.8rem;font-weight:700;}
+.perm-no{color:rgba(107,127,163,.35);font-size:.8rem;}
+.role-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:20px;font-size:.61rem;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:.04em;}
+.role-badge.sa{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.25);color:var(--danger);}
+.role-badge.admin{background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.25);color:var(--purple);}
+.role-badge.agent{background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.25);color:var(--accent2);}
+.role-badge.viewer{background:rgba(107,127,163,.1);border:1px solid rgba(107,127,163,.25);color:var(--muted);}
+.roles-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.rules-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px;}
+.rules-block-title{font-size:.68rem;font-weight:700;color:var(--text);margin-bottom:9px;display:flex;align-items:center;gap:7px;font-family:'Sora',sans-serif;}
+.rules-row{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(30,45,66,.4);font-size:.68rem;font-family:'Sora',sans-serif;}
+.rules-row:last-child{border-bottom:none;padding-bottom:0;}
+.rules-op{font-family:'DM Mono',monospace;font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:4px;flex-shrink:0;margin-top:2px;letter-spacing:.04em;}
+.rules-op.read{background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.2);color:var(--accent2);}
+.rules-op.create{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);color:var(--accent);}
+.rules-op.update{background:rgba(255,183,48,.1);border:1px solid rgba(255,183,48,.2);color:var(--warn);}
+.rules-op.delete{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.2);color:var(--danger);}
+.rules-desc{color:var(--muted);line-height:1.6;flex:1;font-family:'Sora',sans-serif;}
+.rules-desc strong{color:var(--text);}
+.rules-code{font-family:'DM Mono',monospace;font-size:.62rem;padding:1px 5px;border-radius:3px;}
+.rules-code.green{color:var(--accent);background:rgba(0,229,160,.08);}
+.rules-code.red{color:var(--danger);background:rgba(255,77,109,.08);}
+.rules-code.warn{color:var(--warn);background:rgba(255,183,48,.08);}
+.rules-code.purple{color:var(--purple);background:rgba(192,132,252,.08);}
+.soft-delete-box{background:rgba(192,132,252,.05);border:1px solid rgba(192,132,252,.2);border-radius:8px;padding:14px;margin-top:4px;}
+.soft-delete-title{font-size:.69rem;font-weight:700;color:var(--purple);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-family:'Sora',sans-serif;}
+.soft-delete-steps{display:flex;flex-direction:column;gap:8px;}
+.soft-delete-step{display:flex;gap:10px;align-items:flex-start;font-size:.68rem;color:var(--muted);line-height:1.55;font-family:'Sora',sans-serif;}
+.step-num{width:20px;height:20px;border-radius:50%;background:rgba(192,132,252,.15);border:1px solid rgba(192,132,252,.3);color:var(--purple);font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:'DM Mono',monospace;}
+.soft-delete-step strong{color:var(--text);}
+
+.back-link{
+  display:block;              /* 👈 important */
+  width:max-content;          /* keep button size tight */
+  margin:0 0 16px auto;       /* 👈 pushes it to the right */
+
+  align-items:center;
+  gap:6px;
+  font-size:.72rem;
+  font-weight:600;
+  color:var(--accent2);
+  text-decoration:none;
+  padding:6px 10px;
+  border-radius:6px;
+  background:rgba(0,184,255,0.08);
+  border:1px solid rgba(0,184,255,0.2);
+  transition:all .2s ease;
+  
+  position:relative;
+  z-index:2;
+}
+
+.back-link:hover{
+  background:rgba(0,184,255,0.18);
+  color:#fff;
+  transform:translateX(-2px);
+}
+
+.hero::before,
+.hero::after{
+  pointer-events:none;
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-top">
+    <img class="logo-img" src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk"/>
+    <span class="logo-badge">AI Powered</span>
+    <div class="hero-divider"></div>
+	
+    <span class="product-tag">Lead Management Platform</span>	
+  </div>
+  <div><a href="index.html" class="back-link">← Back to Home</a></div>
+  <div class="hero-title">Smarter Lead Management<br>for <span class="g">Growing Businesses</span></div>
+  <div class="hero-sub">evoAIDesk is a cloud-based CRM and lead management platform purpose-built for small and growing businesses. Track every lead, automate outreach, monitor your pipeline, and close more deals — all from one clean dashboard.</div>
+  <div class="hero-pills">
+    <span class="pill green"><span class="dot"></span>Zero Infrastructure</span>
+    <span class="pill blue"><span class="dot"></span>Always Up-to-Date</span>
+    <span class="pill purple"><span class="dot"></span>n8n Automation</span>
+    <span class="pill orange"><span class="dot"></span>Multi-user Teams</span>
+    <span class="pill red"><span class="dot"></span>CSV Import / Export</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row" style="grid-template-columns:repeat(6,1fr);">
+  <div class="stat"><div class="stat-label">Pipeline Stages</div><div class="stat-val c-green">8</div><div class="stat-sub">New → Won / Lost</div></div>
+  <div class="stat"><div class="stat-label">Lead Score</div><div class="stat-val c-red">100</div><div class="stat-sub">Auto-computed</div></div>
+  <div class="stat"><div class="stat-label">Views</div><div class="stat-val c-blue">3</div><div class="stat-sub">Table · Board · List</div></div>
+  <div class="stat"><div class="stat-label">Automations</div><div class="stat-val c-purple">6+</div><div class="stat-sub">One-click actions</div></div>
+  <div class="stat"><div class="stat-label">Reports</div><div class="stat-val c-orange">3</div><div class="stat-sub">Daily · Weekly · Summary</div></div>
+  <div class="stat"><div class="stat-label">Lead Sources</div><div class="stat-val c-green">3</div><div class="stat-sub">Web · LinkedIn · Chat</div></div>
+</div>
+
+<!-- FEATURES -->
+<div class="section-label">Core Features</div>
+<div class="features-grid">
+  <div class="feat-card">
+    <div class="feat-icon teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+    <div class="feat-title">Full Lead Database</div>
+    <div class="feat-desc">Capture name, email, phone, LinkedIn, company, job title, industry, source, and notes. Every lead stored securely in the cloud with real-time sync across your team.</div>
+    <span class="feat-tag smb">Essential for SMBs</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon blue"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+    <div class="feat-title">One-Click Automation</div>
+    <div class="feat-desc">Send intro emails, proposals, follow-up reminders, WhatsApp messages, and Slack alerts with a single click — your outreach runs automatically in the background.</div>
+    <span class="feat-tag auto">Saves hours weekly</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon purple"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <div class="feat-title">Automatic Lead Scoring</div>
+    <div class="feat-desc">Every lead is scored 0–100 based on contact completeness, deal value, and pipeline stage. Instantly identify HOT, WARM, or COLD leads.</div>
+    <span class="feat-tag insight">Prioritise instantly</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon orange"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+    <div class="feat-title">Drag & Drop Kanban Board</div>
+    <div class="feat-desc">Visualise your pipeline as a Kanban board. Drag cards between stages to update status instantly. See deal value totals per column at a glance.</div>
+    <span class="feat-tag smb">Visual pipeline</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <div class="feat-title">Team Assignment & Tracking</div>
+    <div class="feat-desc">Assign leads by name and email. One-click "Assign to Me" shortcut. Filter by My Leads to see your own queue. Assignment timestamps recorded automatically.</div>
+    <span class="feat-tag auto">Team accountability</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon blue"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    <div class="feat-title">Overdue Follow-up Alerts</div>
+    <div class="feat-desc">Set follow-up dates on any lead. The Overdue filter surfaces all leads with missed dates instantly. Visual overdue tags appear in table and Kanban views.</div>
+    <span class="feat-tag smb">Never miss a lead</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon purple"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+    <div class="feat-title">CSV Import & Export</div>
+    <div class="feat-desc">Import leads from any CSV file — column headers matched automatically. Export the current view, selected leads, or your entire database in one click.</div>
+    <span class="feat-tag auto">Migrate easily</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon orange"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+    <div class="feat-title">Scheduled Reports & Inbox Delivery</div>
+    <div class="feat-desc">Daily, Weekly, and Summary reports auto-delivered to your inbox — no login required. Per-lead Activity Reports and Stage Pipeline breakdowns in one click, in-app.</div>
+    <span class="feat-tag insight">Data-driven decisions</span>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon teal"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div class="feat-title">Activity Timeline</div>
+    <div class="feat-desc">Full per-lead activity log — notes, emails, calls, status changes, and automation events recorded with user and timestamp. Add notes directly from the lead panel.</div>
+    <span class="feat-tag smb">Full audit trail</span>
+  </div>
+</div>
+
+<!-- LEAD INPUT SOURCES -->
+<div class="section-label">Lead Input Sources</div>
+<div class="sources-section">
+  <div class="sources-header">
+    <span class="sources-badge">Multi-Channel</span>
+    <span class="sources-title">All Your Lead Sources. One Unified Inbox.</span>
+  </div>
+  <div class="sources-sub">evoAIDesk automatically captures and consolidates leads from every channel — web forms, LinkedIn, and AI chatbots — eliminating manual copy-pasting and ensuring zero leads are missed.</div>
+  <div class="sources-grid">
+    <div class="source-card">
+      <span class="source-icon">🌐</span>
+      <div class="source-name">Web Form Integration</div>
+      <div class="source-desc">Connect any website contact or enquiry form directly to evoAIDesk. Submissions flow in instantly — auto-tagged with source, date, and status — ready to action from the moment they arrive.</div>
+      <span class="source-tag">Zero copy-paste</span>
+    </div>
+    <div class="source-card">
+      <span class="source-icon">🔗</span>
+      <div class="source-name">LinkedIn Lead Gen Forms</div>
+      <div class="source-desc">Sync LinkedIn Lead Gen Form submissions straight into your pipeline. Prospect details are captured at the point of intent and land in evoAIDesk fully enriched — name, company, email, and more.</div>
+      <span class="source-tag">Direct LinkedIn sync</span>
+    </div>
+    <div class="source-card">
+      <span class="source-icon">🤖</span>
+      <div class="source-name">AI Chatbot Capture</div>
+      <div class="source-desc">Turn chatbot conversations into qualified leads automatically. Captured in real time, auto-scored, and assigned to the right team member — without any manual handoff.</div>
+      <span class="source-tag">Real-time capture</span>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULED REPORTS -->
+<div class="section-label">Scheduled Reports & Inbox Delivery</div>
+<div class="reports-section">
+  <div class="reports-inner">
+    <div>
+      <div class="sources-header" style="margin-bottom:5px;">
+        <span class="sources-badge" style="background:rgba(0,184,255,.1);border-color:rgba(0,184,255,.25);color:var(--accent2);">Automated</span>
+        <span class="sources-title">Performance Reports, Delivered to Your Inbox</span>
+      </div>
+      <div class="sources-sub" style="margin-bottom:10px;">Stay on top of your pipeline without logging in every day. evoAIDesk sends structured reports on a schedule you define — straight to your team's inbox. Covers lead counts, conversion rates, pipeline stage health, overdue follow-ups, and top performers.</div>
+      <div class="reports-schedules">
+        <span class="report-pill"><span class="rp-dot"></span>Daily digest</span>
+        <span class="report-pill"><span class="rp-dot"></span>Weekly summary</span>
+        <span class="report-pill"><span class="rp-dot"></span>Custom schedule</span>
+        <span class="report-pill"><span class="rp-dot"></span>Team-wide delivery</span>
+        <span class="report-pill"><span class="rp-dot"></span>Pipeline stage breakdown</span>
+        <span class="report-pill"><span class="rp-dot"></span>Per-lead activity report</span>
+      </div>
+    </div>
+    <div class="reports-stat-box">
+      <div class="rstat-label">Reports sent</div>
+      <div class="rstat-val">3×</div>
+      <div class="rstat-sub">Daily · Weekly · Summary</div>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE + SCORING -->
+<div class="section-label">Pipeline & Lead Scoring</div>
+<div class="pipeline-row">
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(232,240,254,.1);border:1px solid rgba(232,240,254,.3);"><span style="color:#e8f0fe;font-size:.5rem;font-weight:700;">N</span></div><div class="pipe-stage-name" style="color:#e8f0fe;">New</div></div>
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(255,183,48,.12);border:1px solid rgba(255,183,48,.3);"><span style="color:var(--warn);font-size:.5rem;font-weight:700;">C</span></div><div class="pipe-stage-name" style="color:var(--warn);">Contacted</div></div>
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(176,190,197,.1);border:1px solid rgba(176,190,197,.25);"><span style="color:#b0bec5;font-size:.45rem;font-weight:700;">DC</span></div><div class="pipe-stage-name" style="color:#b0bec5;font-size:.54rem;">Discovery</div></div>
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(100,180,255,.1);border:1px solid rgba(100,180,255,.25);"><span style="color:#64b4ff;font-size:.5rem;font-weight:700;">Q</span></div><div class="pipe-stage-name" style="color:#64b4ff;">Qualified</div></div>
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(130,60,220,.15);border:1px solid rgba(192,132,252,.3);"><span style="color:var(--purple);font-size:.42rem;font-weight:700;">PS</span></div><div class="pipe-stage-name" style="color:var(--purple);font-size:.54rem;">Proposal</div></div>
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(160,174,192,.1);border:1px solid rgba(160,174,192,.25);"><span style="color:#a0aec0;font-size:.42rem;font-weight:700;">NG</span></div><div class="pipe-stage-name" style="color:#a0aec0;font-size:.54rem;">Negotiation</div></div>
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(0,200,100,.12);border:1px solid rgba(0,200,100,.3);"><span style="color:#00c864;font-size:.5rem;font-weight:700;">W</span></div><div class="pipe-stage-name" style="color:#00c864;">Won</div></div>
+  <div class="pipe-stage"><div class="pipe-stage-dot" style="background:rgba(255,77,77,.1);border:1px solid rgba(255,77,77,.3);"><span style="color:#ff4d4d;font-size:.5rem;font-weight:700;">L</span></div><div class="pipe-stage-name" style="color:#ff4d4d;">Lost</div></div>
+</div>
+<div class="two-col">
+  <div class="info-card">
+    <div class="info-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span style="color:var(--accent);">Lead Score Tiers</span></div>
+    <div class="score-section">
+      <div class="score-tier hot"><span class="score-dot"></span><span class="score-label">HOT</span><span class="score-range">60 – 100</span><span class="score-desc">High-intent — prioritise immediately</span></div>
+      <div class="score-tier warm"><span class="score-dot"></span><span class="score-label">WARM</span><span class="score-range">35 – 59</span><span class="score-desc">Showing interest — nurture with follow-ups</span></div>
+      <div class="score-tier cold"><span class="score-dot"></span><span class="score-label">COLD</span><span class="score-range">0 – 34</span><span class="score-desc">Early stage — add details to improve score</span></div>
+    </div>
+    <div style="margin-top:11px;padding:9px;background:var(--surface2);border-radius:7px;border:1px solid var(--border);">
+      <div style="font-size:.6rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Scoring factors</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;">
+        <div style="font-size:.66rem;color:var(--muted);">Email <span class="mono" style="color:var(--accent);margin-left:3px;">+10</span></div>
+        <div style="font-size:.66rem;color:var(--muted);">Phone <span class="mono" style="color:var(--accent);margin-left:3px;">+15</span></div>
+        <div style="font-size:.66rem;color:var(--muted);">Company <span class="mono" style="color:var(--accent);margin-left:3px;">+10</span></div>
+        <div style="font-size:.66rem;color:var(--muted);">LinkedIn <span class="mono" style="color:var(--accent);margin-left:3px;">+10</span></div>
+        <div style="font-size:.66rem;color:var(--muted);">Service <span class="mono" style="color:var(--accent);margin-left:3px;">+10</span></div>
+        <div style="font-size:.66rem;color:var(--muted);">Deal value <span class="mono" style="color:var(--accent);margin-left:3px;">+0–20</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="info-card">
+    <div class="info-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="color:var(--accent2);">Stage Points</span></div>
+    <div class="stage-list">
+      <div class="stage-row"><span class="stage-dot" style="background:#e8f0fe;"></span><span class="stage-name">New</span><div class="stage-bar"><div class="stage-fill" style="width:5%;background:#e8f0fe;"></div></div><span class="stage-pts">+5</span></div>
+      <div class="stage-row"><span class="stage-dot" style="background:var(--warn);"></span><span class="stage-name">Contacted</span><div class="stage-bar"><div class="stage-fill" style="width:15%;background:var(--warn);"></div></div><span class="stage-pts">+15</span></div>
+      <div class="stage-row"><span class="stage-dot" style="background:#b0bec5;"></span><span class="stage-name">Discovery Call</span><div class="stage-bar"><div class="stage-fill" style="width:25%;background:#b0bec5;"></div></div><span class="stage-pts">+25</span></div>
+      <div class="stage-row"><span class="stage-dot" style="background:#64b4ff;"></span><span class="stage-name">Qualified</span><div class="stage-bar"><div class="stage-fill" style="width:40%;background:#64b4ff;"></div></div><span class="stage-pts">+40</span></div>
+      <div class="stage-row"><span class="stage-dot" style="background:var(--purple);"></span><span class="stage-name">Proposal Sent</span><div class="stage-bar"><div class="stage-fill" style="width:55%;background:var(--purple);"></div></div><span class="stage-pts">+55</span></div>
+      <div class="stage-row"><span class="stage-dot" style="background:#a0aec0;"></span><span class="stage-name">Negotiation</span><div class="stage-bar"><div class="stage-fill" style="width:70%;background:#a0aec0;"></div></div><span class="stage-pts">+70</span></div>
+      <div class="stage-row"><span class="stage-dot" style="background:#00c864;"></span><span class="stage-name">Won</span><div class="stage-bar"><div class="stage-fill" style="width:100%;background:#00c864;"></div></div><span class="stage-pts">+100</span></div>
+      <div class="stage-row"><span class="stage-dot" style="background:#ff4d4d;"></span><span class="stage-name">Lost</span><div class="stage-bar"><div class="stage-fill" style="width:2%;background:#ff4d4d;"></div></div><span class="stage-pts">+0</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTOMATIONS -->
+<div class="section-label">Automation Actions</div>
+<div class="auto-section">
+  <div style="font-size:.7rem;color:var(--muted);line-height:1.6;">Trigger automated actions from any lead's detail panel with a single click. Each action runs in the background and keeps your lead's activity timeline updated automatically.</div>
+  <div class="auto-grid">
+    <div class="auto-btn"><span class="auto-btn-icon">📧</span><span class="auto-btn-label">Send Intro Email</span><span style="font-size:.64rem;color:var(--muted);">First-touch outreach</span><span class="auto-btn-badge">Email</span></div>
+    <div class="auto-btn"><span class="auto-btn-icon">📄</span><span class="auto-btn-label">Send Proposal</span><span style="font-size:.64rem;color:var(--muted);">Proposal delivery</span><span class="auto-btn-badge">Email</span></div>
+    <div class="auto-btn"><span class="auto-btn-icon">📅</span><span class="auto-btn-label">Schedule Follow-Up</span><span style="font-size:.64rem;color:var(--muted);">Reminder automation</span><span class="auto-btn-badge">Email</span></div>
+    <div class="auto-btn"><span class="auto-btn-icon">🔄</span><span class="auto-btn-label">Remind in 3 Days</span><span style="font-size:.64rem;color:var(--muted);">Nurture sequence</span><span class="auto-btn-badge">Email</span></div>
+    <div class="auto-btn"><span class="auto-btn-icon">💬</span><span class="auto-btn-label">Send WhatsApp</span><span style="font-size:.64rem;color:var(--muted);">WhatsApp outreach</span><span class="auto-btn-badge">WhatsApp</span></div>
+    <div class="auto-btn"><span class="auto-btn-icon">🔔</span><span class="auto-btn-label">Notify Slack</span><span style="font-size:.64rem;color:var(--muted);">Alert your team</span><span class="auto-btn-badge">Slack</span></div>
+    <div class="auto-btn"><span class="auto-btn-icon">📊</span><span class="auto-btn-label">Daily Report</span><span style="font-size:.64rem;color:var(--muted);">Auto-generated digest</span><span class="auto-btn-badge">Report</span></div>
+    <div class="auto-btn"><span class="auto-btn-icon">📈</span><span class="auto-btn-label">Weekly Report</span><span style="font-size:.64rem;color:var(--muted);">Pipeline summary</span><span class="auto-btn-badge">Report</span></div>
+  </div>
+</div>
+
+<!-- VIEWS -->
+<div class="section-label">Views & Navigation</div>
+<div class="views-row">
+  <div class="view-card">
+    <div class="view-name"><div class="view-icon-wrap" style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg></div>Table View</div>
+    <div class="view-desc">15 leads per page with server-side filtering by status, service, and industry. Bulk select, status change, and export. Jump to any page number directly.</div>
+  </div>
+  <div class="view-card">
+    <div class="view-name"><div class="view-icon-wrap" style="background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="18" rx="1"/><rect x="17" y="3" width="5" height="18" rx="1"/></svg></div>Board View (Kanban)</div>
+    <div class="view-desc">Drag-and-drop Kanban across all 8 stages. Drag a card to update its status instantly. Each column shows lead count and total deal value. Up to 200 leads per stage.</div>
+  </div>
+  <div class="view-card">
+    <div class="view-name"><div class="view-icon-wrap" style="background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg></div>List View</div>
+    <div class="view-desc">Compact layout for contact-focused browsing. Shows name, company, assignee, deal value, lead score badge, and status in one row. Click any row to open the lead panel.</div>
+  </div>
+</div>
+
+
+<!-- ROLES & SECURITY -->
+<div class="section-label">Roles &amp; Permissions</div>
+<div class="roles-section">
+  <div class="roles-intro">Every user in evoAIDesk is assigned one of three roles. Access is enforced at the server level — not just the UI — so permissions are always secure and cannot be bypassed.</div>
+
+  <!-- Role badges legend -->
+  <div class="roles-legend">
+    <span class="role-badge admin">admin</span>
+    <span class="role-badge" style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);color:var(--accent);">manager</span>
+    <span class="role-badge agent">agent</span>
+  </div>
+
+  <!-- Permissions matrix -->
+  <table class="roles-matrix">
+    <thead>
+      <tr>
+        <th>Action</th>
+        <th><span class="role-badge admin" style="font-size:.55rem;">admin</span></th>
+        <th><span class="role-badge" style="font-size:.55rem;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);color:var(--accent);">manager</span></th>
+        <th><span class="role-badge agent" style="font-size:.55rem;">agent</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>View all leads</td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-yes">✓</span></td>
+      </tr>
+      <tr>
+        <td>Add activity notes</td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-yes">✓</span></td>
+      </tr>
+      <tr>
+        <td>Create new leads</td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-no">✗</span></td>
+      </tr>
+      <tr>
+        <td>Edit &amp; update leads</td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-no">✗</span></td>
+      </tr>
+      <tr>
+        <td>Move to Trash &amp; Restore</td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-no">✗</span></td>
+      </tr>
+      <tr>
+        <td>Permanently delete leads</td>
+        <td><span class="perm-yes">✓</span></td>
+        <td><span class="perm-no">✗</span></td>
+        <td><span class="perm-no">✗</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Firestore rules breakdown -->
+  <div class="rules-block">
+    <div class="rules-block-title">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      How permissions work
+    </div>
+    <div class="rules-row">
+      <span class="rules-op read">READ</span>
+      <div class="rules-desc">All roles can view leads and the activity timeline, but only within <strong>their own workspace</strong>. Data is never visible to other organisations.</div>
+    </div>
+    <div class="rules-row">
+      <span class="rules-op create">CREATE</span>
+      <div class="rules-desc"><strong>Admin</strong> and <strong>Manager</strong> can add new leads. Agents have read-only access and must ask an admin or manager to create leads on their behalf.</div>
+    </div>
+    <div class="rules-row">
+      <span class="rules-op update">UPDATE</span>
+      <div class="rules-desc"><strong>Admin</strong> and <strong>Manager</strong> can edit any lead field — status, assignment, follow-up date — and soft-delete or restore leads via the Trash.</div>
+    </div>
+    <div class="rules-row">
+      <span class="rules-op delete">DELETE</span>
+      <div class="rules-desc"><strong>Admin only.</strong> Permanently removes a lead. This is irreversible. Managers can only soft-delete (move to Trash), not permanently erase.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIG + CONTACT -->
+<div class="section-label">Configuration & Contact</div>
+<div class="config-contact-row">
+  <div class="config-card highlight">
+    <div class="config-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      <span style="color:var(--accent);">Configurable Settings</span>
+    </div>
+    <div class="config-item">
+      <div class="config-item-icon" style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="config-item-text">
+        <div class="ci-title">Timezone</div>
+        <div class="ci-desc">All dates and timestamps — follow-ups, created dates, activity logs — display in your local business timezone. Configured per tenant so distributed teams stay aligned.</div>
+      </div>
+    </div>
+    <div class="config-item">
+      <div class="config-item-icon" style="background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.2);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="config-item-text">
+        <div class="ci-title">Currency</div>
+        <div class="ci-desc">Deal values and pipeline totals display in your local currency — INR, USD, GBP, EUR, AED, CAD, and more. Includes smart formatting (₹1.2L, $12K, etc.).</div>
+      </div>
+    </div>
+    <div class="config-item">
+      <div class="config-item-icon" style="background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.2);">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div class="config-item-text">
+        <div class="ci-title">Business Sender Address</div>
+        <div class="ci-desc">Personalise automated emails so they come from <em style="color:var(--text);">your</em> business address (e.g. hello@yourbusiness.com) — not a generic sender. Fully configurable via Google Email Client settings per tenant for a professional sender identity on every automation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact-card">
+    <div>
+      <div class="contact-badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Get in touch
+      </div>
+      <div class="contact-headline">Ready to see evoAIDesk in action?</div>
+      <div class="contact-sub">Our team can configure evoAIDesk for your business — custom timezone, currency, sender email, automation workflows, and branded reports. Reach out for a personalised demo or to get your instance set up.</div>
+      <a class="contact-email-btn" href="mailto:info@evoaiglobal.ai">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        info@evoaiglobal.ai
+      </a>
+    </div>
+    <div>
+      <div class="contact-divider"></div>
+      <div class="contact-also"><strong>We also help with:</strong> custom automation workflows. Please get in touch with evoAI Team for further discussions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY SMBs -->
+<div class="section-label">Why Small Businesses Love It</div>
+<div class="benefits-grid">
+  <div class="benefit">
+    <div class="benefit-icon" style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div class="benefit-text"><div class="b-title">No Lead Falls Through the Cracks</div><div class="b-desc">Overdue follow-up alerts and status tracking ensure every lead gets timely attention, even in a busy solo or small-team setup.</div></div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon" style="background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <div class="benefit-text"><div class="b-title">Know Who to Call First</div><div class="b-desc">Lead scoring tells you which prospects are hottest. Stop guessing — let the score guide where you spend your limited selling time.</div></div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon" style="background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+    <div class="benefit-text"><div class="b-title">Automate Repetitive Outreach</div><div class="b-desc">Send intro emails, proposals, and WhatsApp messages with one click. Your team focuses on closing — not copy-pasting the same messages repeatedly.</div></div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon" style="background:rgba(255,183,48,.1);border:1px solid rgba(255,183,48,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+    <div class="benefit-text"><div class="b-title">Built for Small Teams</div><div class="b-desc">Assign leads to team members, track who owns what, and use "My Leads" to see your personal queue. Everyone stays aligned without a complex CRM.</div></div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon" style="background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+    <div class="benefit-text"><div class="b-title">Easy Data Migration</div><div class="b-desc">Import existing leads from any CSV in seconds. Column headers are auto-detected — no complex mapping or IT help needed to get started.</div></div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon" style="background:rgba(0,184,255,.1);border:1px solid rgba(0,184,255,.2);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+    <div class="benefit-text"><div class="b-title">Instant Business Intelligence</div><div class="b-desc">Daily, weekly, and summary reports give you pipeline visibility without hiring a data analyst. Make informed decisions in minutes.</div></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div>
+    <div class="footer-brand"><span class="evo">evo</span><span class="ai">AI</span><span class="rest">Desk</span> &nbsp;·&nbsp; <span style="font-weight:400;color:var(--muted);">For Small & Medium Business</span></div>
+    <div style="font-size:.63rem;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace;">Secure · Real-time · Automation Ready</div>
+  </div>
+  <div style="text-align:right;">
+    <div class="powered">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Powered by <a href="https://evoaiglobal.ai" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;">evoaiglobal.ai</a>
+    </div>
+    <div style="font-size:.6rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;">© 2026 evoAI Global. All rights reserved.</div>
+  </div>
+</div>
+
+</body>
+</html>

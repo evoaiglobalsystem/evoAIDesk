@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>evoAI Desk — Tenant Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/x-icon" href="https://evoaiglobal.ai/images/favicon.ico">
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import {
+    getFirestore, collection, doc,
+    setDoc, getDoc, getDocs, deleteDoc,
+    query, orderBy, where, serverTimestamp, Timestamp
+  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkwOQZ15O8-_GB9LYNKaAUPe9NYgGUMw4",
+    authDomain: "evoaidesk.firebaseapp.com",
+    projectId: "evoaidesk",
+    storageBucket: "evoaidesk.firebasestorage.app",
+    messagingSenderId: "904271339352",
+    appId: "1:904271339352:web:06c777dd45b9051d8d8f2d",
+    measurementId: "G-VGZHC96EYC"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  window._auth = auth;
+  window._db   = db;
+  window._serverTimestamp = serverTimestamp;
+  window._doc  = doc;
+  window._setDoc = setDoc;
+  window._getDoc = getDoc;
+  window._getDocs = getDocs;
+  window._deleteDoc = deleteDoc;
+  window._collection = collection;
+  window._query = query;
+  window._orderBy = orderBy;
+  window._where = where;
+
+  window.doSignOut = async () => {
+    await signOut(auth);
+    window.location.replace("login.html");
+  };
+
+  onAuthStateChanged(auth, user => {
+    if (!user) { window.location.replace("login.html"); return; }
+    document.getElementById('authLoading').style.display = 'none';
+    document.getElementById('appShell').style.display    = 'contents';
+    const name     = user.displayName || user.email.split('@')[0];
+    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('userInitials').textContent = initials;
+    document.getElementById('userName').textContent     = name;
+    document.getElementById('userEmail').textContent    = user.email;
+    window._currentUser = { name, email: user.email, initials };
+    loadTenants();
+    loadUsers();
+  });
+</script>
+
+<style>
+  :root {
+    --bg:      #080c10;
+    --surface: #0e1420;
+    --surface2:#141c2a;
+    --border:  #1e2d42;
+    --accent:  #00e5a0;
+    --accent2: #00b8ff;
+    --danger:  #ff4d6d;
+    --warn:    #ffb730;
+    --text:    #e8f0fe;
+    --muted:   #6b7fa3;
+    --font:    'Sora', sans-serif;
+    --mono:    'DM Mono', monospace;
+    --nav-h:   60px;
+  }
+
+  html { height: 100%; overflow: hidden; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; overflow: hidden; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* AUTH LOADING */
+  #authLoading {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  }
+  #authLoading img { height: 38px; opacity: .85; }
+  .auth-spinner {
+    width: 22px; height: 22px;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin .7s linear infinite;
+  }
+  #authLoading p { font-size: .78rem; color: var(--muted); font-family: var(--mono); letter-spacing: .06em; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--nav-h);
+    background: rgba(8,12,16,.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 22px; gap: 14px;
+  }
+  .nav-logo { display: flex; align-items: center; text-decoration: none; }
+  .nav-badge {
+    font-size: .78rem; font-weight: 700; letter-spacing: .01em;
+    color: var(--text); background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 10px; text-transform: none;
+  }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .pill-btn {
+    height: 32px; padding: 0 14px; border-radius: 8px; border: none;
+    font-family: var(--font); font-size: .76rem; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s;
+  }
+  .pill-btn.outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .pill-btn.outline:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
+  .pill-btn.primary { background: var(--accent); color: #080c10; font-weight: 700; }
+  .pill-btn.primary:hover { opacity: .88; }
+  .user-chip { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+  .user-avatar {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: linear-gradient(135deg,var(--accent),var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; font-weight: 700; color: #080c10; font-family: var(--mono);
+  }
+  .user-info-name  { font-size: .73rem; font-weight: 600; line-height: 1.2; }
+  .user-info-email { font-size: .63rem; color: var(--muted); }
+  .signout-btn {
+    height: 32px; padding: 0 12px; border-radius: 8px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--font); font-size: .74rem;
+    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s;
+  }
+  .signout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* SHELL */
+  #appShell { display: contents; }
+  .shell {
+    display: grid; grid-template-columns: 230px 1fr;
+    height: calc(100vh - var(--nav-h)); margin-top: var(--nav-h); overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  aside {
+    background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative;
+  }
+  .aside-scroll { flex: 1; overflow-y: auto; padding: 24px 0 8px; }
+  .aside-scroll::-webkit-scrollbar { width: 4px; }
+  .aside-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .aside-section { padding: 0 16px 4px; }
+  .aside-label { font-size: .62rem; font-weight: 600; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; padding: 14px 0 6px; }
+  .aside-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 11px; border-radius: 7px;
+    font-size: .81rem; font-weight: 500; cursor: pointer;
+    color: var(--muted); transition: all .14s; margin-bottom: 2px;
+    border: 1px solid transparent; text-decoration: none;
+  }
+  .aside-item:hover { background: var(--surface2); color: var(--text); }
+  .aside-item.active { background: rgba(0,229,160,.08); border-color: rgba(0,229,160,.2); color: var(--accent); }
+  .aside-count { margin-left: auto; font-family: var(--mono); font-size: .65rem; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 1px 7px; border-radius: 20px; }
+  .aside-user-footer { flex-shrink: 0; padding: 14px 16px; border-top: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 10px; }
+  .aside-user-footer .user-avatar { width: 30px; height: 30px; border-radius: 7px; font-size: .7rem; }
+  .aside-user-name  { font-size: .76rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .aside-user-email { font-size: .65rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* MAIN */
+  main { padding: 30px 34px; overflow-y: auto; height: 100%; }
+
+  /* TABS */
+  .tab-bar {
+    display: flex; align-items: center; gap: 4px;
+    border-bottom: 1px solid var(--border); margin-bottom: 28px;
+  }
+  .tab-btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 10px 16px; border-radius: 8px 8px 0 0;
+    font-size: .82rem; font-weight: 600; cursor: pointer;
+    color: var(--muted); border: none; background: transparent;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all .15s; font-family: var(--font);
+  }
+  .tab-btn:hover { color: var(--text); background: rgba(255,255,255,.03); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(0,229,160,.04); }
+  .tab-btn .tab-count {
+    font-family: var(--mono); font-size: .62rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); padding: 1px 7px; border-radius: 20px;
+  }
+  .tab-btn.active .tab-count { background: rgba(0,229,160,.12); border-color: rgba(0,229,160,.25); color: var(--accent); }
+
+  /* TAB PANELS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* PAGE HEADER */
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  .page-title { font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; }
+  .page-sub   { font-size: .79rem; color: var(--muted); margin-top: 4px; }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; transition: border-color .2s; }
+  .stat-card:hover { border-color: rgba(0,229,160,.25); }
+  .stat-label { font-size: .7rem; color: var(--muted); font-weight: 500; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 7px; }
+  .stat-value { font-size: 1.65rem; font-weight: 700; font-family: var(--mono); color: var(--accent); }
+  .stat-sub   { font-size: .68rem; color: var(--muted); margin-top: 4px; }
+
+  /* TABLE */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; }
+  .table-head-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+  .table-head-bar h3 { font-size: .85rem; font-weight: 700; }
+  .table-head-bar p  { font-size: .7rem; color: var(--muted); margin-top: 2px; }
+  .table-head-bar-right { display: flex; align-items: center; gap: 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); }
+  th { text-align: left; padding: 10px 14px; font-size: .65rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(30,45,66,.6); transition: background .12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,.025); }
+  td { padding: 11px 14px; font-size: .81rem; vertical-align: middle; }
+
+  /* SEARCH BAR */
+  .search-wrap { position: relative; }
+  .search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .search-input {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: .78rem;
+    border-radius: 7px; padding: 6px 11px 6px 30px; outline: none;
+    transition: border-color .18s; width: 200px;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .67rem; font-weight: 600; letter-spacing: .04em; white-space: nowrap; }
+  .badge-active    { background: rgba(0,229,160,.12); color: var(--accent); border: 1px solid rgba(0,229,160,.25); }
+  .badge-suspended { background: rgba(255,77,109,.12); color: var(--danger); border: 1px solid rgba(255,77,109,.25); }
+  .badge-free       { background: rgba(107,127,163,.1); color: var(--muted); border: 1px solid var(--border); }
+  .badge-pro        { background: rgba(0,184,255,.12); color: var(--accent2); border: 1px solid rgba(0,184,255,.25); }
+  .badge-enterprise { background: rgba(192,132,252,.14); color: #c084fc; border: 1px solid rgba(192,132,252,.28); }
+  .badge-admin   { background: rgba(255,183,48,.1); color: var(--warn); border: 1px solid rgba(255,183,48,.25); }
+  .badge-manager { background: rgba(0,184,255,.1); color: var(--accent2); border: 1px solid rgba(0,184,255,.22); }
+  .badge-agent   { background: rgba(107,127,163,.1); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ROW ACTIONS */
+  .row-actions { display: flex; gap: 5px; }
+  .icon-btn {
+    min-width: 30px; height: 28px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all .14s;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
+  .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,77,109,.06); }
+
+  /* MONO TEXT */
+  .mono { font-family: var(--mono); font-size: .76rem; color: var(--muted); }
+  .slug-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(0,229,160,.07); border: 1px solid rgba(0,229,160,.18);
+    border-radius: 5px; padding: 2px 8px; font-family: var(--mono); font-size: .7rem; color: var(--accent);
+  }
+  .tenant-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(0,184,255,.07); border: 1px solid rgba(0,184,255,.18);
+    border-radius: 5px; padding: 2px 8px; font-family: var(--mono); font-size: .7rem; color: var(--accent2);
+  }
+
+  /* USER AVATAR IN TABLE */
+  .user-row-avatar {
+    width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .62rem; font-weight: 700; color: #080c10; font-family: var(--mono);
+  }
+  .user-row-info { display: flex; align-items: center; gap: 9px; }
+
+  /* EMPTY STATE */
+  .empty-state { padding: 52px 20px; text-align: center; color: var(--muted); }
+  .empty-state svg { margin-bottom: 12px; opacity: .3; }
+  .empty-state p { font-size: .85rem; }
+  .empty-state .empty-sub { font-size: .74rem; margin-top: 4px; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: .82rem; font-weight: 500;
+    padding: 11px 20px; border-radius: 10px; z-index: 9999;
+    display: flex; align-items: center; gap: 9px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+    opacity: 0; pointer-events: none; white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  #toast.success { border-color: rgba(0,229,160,.3); }
+  #toast.success .toast-dot { background: var(--accent); }
+  #toast.error   { border-color: rgba(255,77,109,.3); }
+  #toast.error   .toast-dot { background: var(--danger); }
+  .toast-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* MODAL */
+  .overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(4,8,14,.82); backdrop-filter: blur(6px); align-items: center; justify-content: center; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 40px 100px rgba(0,0,0,.6); animation: slideUp .22s ease; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: .95rem; font-weight: 700; }
+  .modal-close { min-width: 30px; height: 28px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .14s; }
+  .modal-close:hover { border-color: var(--danger); color: var(--danger); }
+  .modal-body { padding: 22px; }
+  .modal-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 14px 22px; border-top: 1px solid var(--border); }
+
+  /* FORM */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-section-title {
+    grid-column: 1 / -1;
+    font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 4px;
+  }
+  .field label {
+    display: block; font-size: .7rem; font-weight: 600; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
+  }
+  .field label .req { color: var(--accent); margin-left: 2px; }
+  .field input, .field select { width: 100%; padding: 9px 11px; }
+  input[type="text"], input[type="email"], input[type="password"], select {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: .82rem;
+    border-radius: 7px; outline: none; transition: border-color .18s;
+  }
+  input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, select:focus { border-color: var(--accent); }
+  select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+  select option { background: var(--surface2); }
+  .field-hint { font-size: .68rem; color: var(--muted); margin-top: 5px; font-family: var(--mono); }
+  .field-hint.accent { color: var(--accent); }
+
+  /* PASSWORD FIELD WRAPPER */
+  .pw-wrap { position: relative; }
+  .pw-wrap input { padding-right: 38px; }
+  .pw-toggle {
+    position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    display: flex; align-items: center; padding: 0; transition: color .14s;
+  }
+  .pw-toggle:hover { color: var(--accent); }
+
+  /* SLUG PREVIEW */
+  .slug-preview {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 9px 11px; margin-top: 6px;
+    font-family: var(--mono); font-size: .76rem; color: var(--muted);
+  }
+  .slug-preview .slug-val { color: var(--accent); font-weight: 500; }
+
+  /* FORM FOOTER */
+  .form-footer { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border); }
+  .btn {
+    height: 36px; padding: 0 18px; border-radius: 8px; border: none;
+    font-family: var(--font); font-size: .8rem; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all .15s;
+  }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
+  .btn-primary { background: var(--accent); color: #080c10; font-weight: 700; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-danger { background: transparent; border: 1px solid rgba(255,77,109,.3); color: var(--danger); }
+  .btn-danger:hover { background: rgba(255,77,109,.08); border-color: var(--danger); }
+
+  /* INFO BANNER */
+  .info-banner {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: rgba(0,184,255,.07); border: 1px solid rgba(0,184,255,.2);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 22px;
+    font-size: .78rem; color: var(--muted); line-height: 1.5;
+  }
+  .info-banner svg { flex-shrink: 0; color: var(--accent2); margin-top: 1px; }
+  .info-banner strong { color: var(--text); }
+
+  /* FILTER PILL */
+  #filterPill {
+    align-items:center; gap:8px; background:rgba(0,229,160,.07);
+    border:1px solid rgba(0,229,160,.2); border-radius:20px;
+    padding:4px 12px 4px 8px; font-size:.72rem; color:var(--accent); font-weight:600;
+  }
+
+  /* CONFIRM MODAL */
+  .confirm-modal { max-width: 400px; }
+  .confirm-body { padding: 22px; font-size: .85rem; color: var(--muted); line-height: 1.6; }
+  .confirm-body strong { color: var(--text); }
+
+  @media (max-width: 960px) {
+    .shell { grid-template-columns: 1fr; }
+    aside  { display: none; }
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+    main { padding: 18px 16px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .full, .form-section-title { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH LOADING -->
+<div id="authLoading">
+  <img src="/images/evoaiDesk.png" alt="evoAI"/>
+  <div class="auth-spinner"></div>
+  <p>Verifying session…</p>
+</div>
+
+<!-- APP SHELL -->
+<div id="appShell" style="display:none">
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <img src="/images/evoaiDesk.png" alt="evoAI" style="height:32px;width:auto;display:block;"/>
+  </a>
+  
+  <div class="nav-right">
+    <div class="user-chip">
+      <div class="user-avatar" id="userInitials">—</div>
+      <div>
+        <div class="user-info-name"  id="userName">—</div>
+        <div class="user-info-email" id="userEmail">—</div>
+      </div>
+    </div>
+    <button class="signout-btn" onclick="doSignOut()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Sign Out
+    </button>
+  </div>
+</nav>
+
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="aside-scroll">
+      <div class="aside-section">
+        <div class="aside-label">Settings</div>
+        <a class="aside-item" href="#" onclick="switchTab('tenants');return false;" id="sideTenantsLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Tenants
+          <span class="aside-count" id="cntTenants">—</span>
+        </a>
+        <a class="aside-item" href="#" onclick="switchTab('users', true);renderUsersTable();return false;" id="sideUsersLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Users
+          <span class="aside-count" id="cntUsers">—</span>
+        </a>
+        <a class="aside-item" href="#" onclick="filterActiveUsers();return false;" id="sideActiveUsersLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Active Users
+          <span class="aside-count" id="cntActiveUsers">—</span>
+        </a>
+        <a class="aside-item" href="#" onclick="filterSuspendedUsers();return false;" id="sideSuspendedUsersLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          Suspended Users
+          <span class="aside-count" id="cntSuspendedUsers">—</span>
+        </a>
+      </div>
+
+      <div class="aside-section">
+        <div class="aside-label">Quick Stats</div>
+        <a class="aside-item" href="#" id="filterActive" onclick="setFilter('active');return false;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Active Tenants <span class="aside-count" id="cntActive">—</span>
+        </a>
+        <a class="aside-item" href="#" id="filterSuspended" onclick="setFilter('suspended');return false;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          Suspended <span class="aside-count" id="cntSuspended">—</span>
+        </a>
+      </div>
+    </div>
+    <div class="aside-user-footer">
+      <div class="user-avatar" id="sideInitials">—</div>
+      <div style="overflow:hidden;">
+        <div class="aside-user-name"  id="sideUserName">—</div>
+        <div class="aside-user-email" id="sideUserEmail">—</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabBtnTenants" onclick="switchTab('tenants')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Tenants
+        <span class="tab-count" id="tabCntTenants">—</span>
+      </button>
+      <button class="tab-btn" id="tabBtnUsers" onclick="switchTab('users')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+        <span class="tab-count" id="tabCntUsers">—</span>
+      </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════ TENANTS TAB ═══════════════ -->
+    <div class="tab-panel active" id="panelTenants">
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Tenants</div>
+          <div class="page-sub">Manage client workspaces — each tenant maps to a unique business.</div>
+        </div>
+        <button class="pill-btn primary" onclick="openCreateTenantModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Tenant
+        </button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Tenants</div>
+          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-sub">All registered clients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active</div>
+          <div class="stat-value" id="statActive">—</div>
+          <div class="stat-sub">Live workspaces</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pro / Enterprise</div>
+          <div class="stat-value" id="statPaid">—</div>
+          <div class="stat-sub">Paying clients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Suspended</div>
+          <div class="stat-value" style="color:var(--danger);" id="statSuspended">—</div>
+          <div class="stat-sub">Inactive tenants</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head-bar">
+          <div>
+            <h3>All Tenants</h3>
+            <p>Each row is a Firestore document at <span style="font-family:var(--mono);color:var(--accent);font-size:.68rem;">/tenants/{slug}</span></p>
+          </div>
+          <div class="table-head-bar-right">
+            <div id="filterPill" style="display:none; align-items:center; gap:8px; background:rgba(0,229,160,.07); border:1px solid rgba(0,229,160,.2); border-radius:20px; padding:4px 12px 4px 8px; font-size:.72rem; color:var(--accent); font-weight:600;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              <span id="filterPillLabel">Active</span>
+              <button onclick="setFilter('all')" style="background:none;border:none;cursor:pointer;color:var(--muted);display:flex;align-items:center;padding:0;margin-left:2px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tenant Name</th>
+              <th>Slug (Doc ID)</th>
+              <th>Plan</th>
+              <th>Status</th>
+              <th>Users</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tenantsTableBody">
+            <tr><td colspan="7"><div class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              <p>No tenants yet</p><p class="empty-sub">Click "New Tenant" to create your first workspace.</p>
+            </div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /panelTenants -->
+
+    <!-- ═══════════════════════════════════════ USERS TAB ════════════════ -->
+    <div class="tab-panel" id="panelUsers">
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Users</div>
+          <div class="page-sub">Manage users in workspaces — each user maps to a unique tenant.</div>
+        </div>
+        <button class="pill-btn primary" onclick="openCreateUserModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add User
+        </button>
+      </div>
+
+      <!-- User stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="uStatTotal">—</div>
+          <div class="stat-sub">Across all tenants</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active</div>
+          <div class="stat-value" id="uStatActive">—</div>
+          <div class="stat-sub">Active accounts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Admins</div>
+          <div class="stat-value" id="uStatAdmins">—</div>
+          <div class="stat-sub">Admin role users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tenants Covered</div>
+          <div class="stat-value" id="uStatTenants">—</div>
+          <div class="stat-sub">Unique tenants assigned</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head-bar">
+          <div>
+            <h3>All Users</h3>
+            <p>Filter by tenant or search by email / google_id</p>
+          </div>
+          <div class="table-head-bar-right" style="gap:8px;">
+            <!-- Tenant filter -->
+            <select id="userTenantFilter" onchange="renderUsersTable()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Tenants</option>
+            </select>
+            <!-- Search -->
+            <div class="search-wrap">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" type="text" id="userSearch" placeholder="Search name or email…" oninput="renderUsersTable()"/>
+            </div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>User / ID</th>
+              <th>Google ID / Email</th>
+              <th>Role</th>
+              <th>Tenant</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="7"><div class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <p>No users yet</p><p class="empty-sub">Click "Add User" to create the first user.</p>
+            </div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /panelUsers -->
+
+  </main>
+</div>
+</div><!-- /#appShell -->
+
+<!-- TOAST -->
+<div id="toast"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+
+<!-- ══════════════════════════════ TENANT MODAL ══════════════════════════ -->
+<div class="overlay" id="tenantModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTenantTitle">New Tenant</div>
+      <button class="modal-close" onclick="closeTenantModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="info-banner">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>The <strong>slug</strong> becomes the Firestore document ID and is used to identify the client across all collections.</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-section-title">Tenant Details</div>
+        <div class="field full">
+          <label>Company / Client Name <span class="req">*</span></label>
+          <input type="text" id="fName" placeholder="e.g. Acme Corp" oninput="autoSlug()" autocomplete="off"/>
+        </div>
+        <div class="field full">
+          <label>Slug (Unique ID) <span class="req">*</span></label>
+          <input type="text" id="fSlug" placeholder="e.g. acme-corp" oninput="onSlugInput()" autocomplete="off"/>
+          <div class="slug-preview" id="slugPreview">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+            <span>/tenants/</span><span class="slug-val" id="slugVal">…</span>
+          </div>
+          <div class="field-hint">Lowercase letters, numbers and hyphens only. Cannot be changed later.</div>
+        </div>
+        <div class="field">
+          <label>Plan</label>
+          <select id="fPlan">
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="enterprise">Enterprise</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="fStatus">
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+
+        <div class="form-section-title">Contact &amp; Locale</div>
+        <div class="field">
+          <label>Timezone</label>
+          <select id="fTimezone">
+            <option value="">— Select timezone —</option>
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">America/New_York (EST/EDT)</option>
+            <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+            <option value="America/Denver">America/Denver (MST/MDT)</option>
+            <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+            <option value="America/Sao_Paulo">America/Sao_Paulo (BRT)</option>
+            <option value="Europe/London">Europe/London (GMT/BST)</option>
+            <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+            <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+            <option value="Europe/Moscow">Europe/Moscow (MSK)</option>
+            <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+            <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+            <option value="Asia/Singapore">Asia/Singapore (SGT)</option>
+            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+            <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+            <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+            <option value="Pacific/Auckland">Pacific/Auckland (NZST/NZDT)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Currency</label>
+          <select id="fCurrency">
+            <option value="">— Select currency —</option>
+            <option value="USD">USD — US Dollar</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="INR">INR — Indian Rupee</option>
+            <option value="AED">AED — UAE Dirham</option>
+            <option value="AUD">AUD — Australian Dollar</option>
+            <option value="CAD">CAD — Canadian Dollar</option>
+            <option value="SGD">SGD — Singapore Dollar</option>
+            <option value="JPY">JPY — Japanese Yen</option>
+            <option value="CNY">CNY — Chinese Yuan</option>
+            <option value="BRL">BRL — Brazilian Real</option>
+            <option value="MXN">MXN — Mexican Peso</option>
+            <option value="ZAR">ZAR — South African Rand</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Contact Email</label>
+          <input type="email" id="fContactEmail" placeholder="e.g. contact@company.ai" autocomplete="off"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">tenant_contact_email</span> in Firestore</div>
+        </div>
+        <div class="field">
+          <label>Contact Phone</label>
+          <input type="text" id="fContactPhone" placeholder="e.g. +1 555 000 0000" autocomplete="off"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">tenant_contact_phone</span></div>
+        </div>
+        <div class="field">
+          <label>Location</label>
+          <input type="text" id="fLocation" placeholder="e.g. New York, USA" autocomplete="off"/>
+          <div class="field-hint">City / Country of the tenant</div>
+        </div>
+
+        <!-- ── NEW: Email / SMTP section ── -->
+        <div class="form-section-title">Email &amp; SMTP</div>
+        <div class="field full">
+          <label>From Email</label>
+          <input type="email" id="fFromEmail" placeholder="e.g. noreply@company.ai" autocomplete="off"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">from_email</span> — used as the sender address for outgoing emails</div>
+        </div>
+        <div class="field full">
+          <label>SMTP App Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="fSmtpAppPassword" placeholder="e.g. xxxx xxxx xxxx xxxx" autocomplete="new-password"/>
+            <button type="button" class="pw-toggle" onclick="toggleSmtpPw(this)" title="Show / hide password">
+              <svg id="smtpEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">smtp_app_password</span> — use a Google / provider app password, not your account password</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeTenantModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveTenantBtn" onclick="saveTenant()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Tenant
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ USER MODAL ════════════════════════════ -->
+<div class="overlay" id="userModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalUserTitle">Add User</div>
+      <button class="modal-close" onclick="closeUserModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="info-banner">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>The user document is stored at <span style="font-family:var(--mono);color:var(--accent);font-size:.82em;">/users/{uid}</span>. <strong>google_id</strong> is the Firebase Auth UID or email used to identify the user.</div>
+      </div>
+      <div class="form-grid">
+        <div class="form-section-title">User Details</div>
+        <div class="field full">
+          <label>Google ID / Email <span class="req">*</span></label>
+          <input type="email" id="uGoogleId" placeholder="e.g. user@company.ai" autocomplete="off" oninput="autoFillName()"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">google_id</span> field in Firestore</div>
+        </div>
+        <div class="field full">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="uName" placeholder="Auto-filled from email, editable" autocomplete="off" oninput="this.dataset.manuallyEdited='1'"/>
+          <div class="field-hint">Derived from email prefix — you can edit it manually</div>
+        </div>
+        <div class="field">
+          <label>Role <span class="req">*</span></label>
+          <select id="uRole">
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="agent">Agent</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="uStatus">
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Tenant <span class="req">*</span></label>
+          <select id="uTenantId">
+            <option value="">— Select a tenant —</option>
+          </select>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">tenant_id</span> field in Firestore</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeUserModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveUserBtn" onclick="saveUser()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save User
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ CONFIRM MODAL ═════════════════════════ -->
+<div class="overlay" id="confirmModal">
+  <div class="modal confirm-modal">
+    <div class="modal-head">
+      <div class="modal-title" id="confirmTitle">Confirm Action</div>
+      <button class="modal-close" onclick="closeConfirm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="confirm-body" id="confirmBody">Are you sure?</div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── STATE ── */
+  let _tenants  = [];
+  let _users    = [];
+  let _editTenantSlug = null;
+  let _userStatusFilter = 'all';
+  let _filter   = 'all';
+  let _activeTab = 'tenants';
+
+  /* ══════════════ SMTP PASSWORD TOGGLE ══════════════ */
+  function toggleSmtpPw(btn) {
+    const input = document.getElementById('fSmtpAppPassword');
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    btn.querySelector('svg').innerHTML = isHidden
+      ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
+      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  }
+
+  /* ══════════════ TAB SWITCHING ══════════════ */
+  function switchTab(tab, resetUserFilter) {
+    _activeTab = tab;
+    if (resetUserFilter || tab !== 'users') {
+      _userStatusFilter = 'all';
+    }
+    updateSidebarUserHighlights();
+    document.getElementById('panelTenants').classList.toggle('active', tab === 'tenants');
+    document.getElementById('panelUsers').classList.toggle('active', tab === 'users');
+    document.getElementById('tabBtnTenants').classList.toggle('active', tab === 'tenants');
+    document.getElementById('tabBtnUsers').classList.toggle('active', tab === 'users');
+    document.getElementById('sideTenantsLink').classList.toggle('active', tab === 'tenants');
+  }
+
+  function updateSidebarUserHighlights() {
+    document.getElementById('sideUsersLink').classList.toggle('active', _activeTab === 'users' && _userStatusFilter === 'all');
+    document.getElementById('sideActiveUsersLink').classList.toggle('active', _activeTab === 'users' && _userStatusFilter === 'active');
+    document.getElementById('sideSuspendedUsersLink').classList.toggle('active', _activeTab === 'users' && _userStatusFilter === 'suspended');
+  }
+
+  /* ══════════════ FILTER (tenants) ══════════════ */
+  function setFilter(f) {
+    _filter = f;
+    document.getElementById('filterActive').classList.toggle('active', f === 'active');
+    document.getElementById('filterSuspended').classList.toggle('active', f === 'suspended');
+    const pill = document.getElementById('filterPill');
+    if (f === 'all') {
+      pill.style.display = 'none';
+    } else {
+      pill.style.display = 'flex';
+      document.getElementById('filterPillLabel').textContent = f.charAt(0).toUpperCase() + f.slice(1);
+      pill.style.borderColor = f === 'active' ? 'rgba(0,229,160,.2)' : 'rgba(255,77,109,.2)';
+      pill.style.background  = f === 'active' ? 'rgba(0,229,160,.07)' : 'rgba(255,77,109,.07)';
+      pill.style.color       = f === 'active' ? 'var(--accent)' : 'var(--danger)';
+    }
+    if (_activeTab !== 'tenants') switchTab('tenants');
+    renderTenantsTable();
+  }
+
+  /* ══════════════ SLUG HELPERS ══════════════ */
+  function toSlug(str) {
+    return str.toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
+  }
+  function autoSlug() {
+    if (!_editTenantSlug) {
+      const slug = toSlug(document.getElementById('fName').value);
+      document.getElementById('fSlug').value = slug;
+      document.getElementById('slugVal').textContent = slug || '…';
+    }
+  }
+  function onSlugInput() {
+    const slug = toSlug(document.getElementById('fSlug').value);
+    document.getElementById('fSlug').value = slug;
+    document.getElementById('slugVal').textContent = slug || '…';
+  }
+
+  /* ══════════════ TENANT MODAL ══════════════ */
+  function openCreateTenantModal() {
+    _editTenantSlug = null;
+    document.getElementById('modalTenantTitle').textContent = 'New Tenant';
+    document.getElementById('fName').value   = '';
+    document.getElementById('fSlug').value   = '';
+    document.getElementById('fPlan').value   = 'free';
+    document.getElementById('fStatus').value = 'active';
+    document.getElementById('slugVal').textContent = '…';
+    document.getElementById('fSlug').disabled = false;
+    document.getElementById('fTimezone').value     = '';
+    document.getElementById('fCurrency').value     = '';
+    document.getElementById('fContactEmail').value = '';
+    document.getElementById('fContactPhone').value = '';
+    document.getElementById('fLocation').value     = '';
+    document.getElementById('fFromEmail').value       = '';
+    document.getElementById('fSmtpAppPassword').value = '';
+    document.getElementById('fSmtpAppPassword').type  = 'password';
+    document.getElementById('tenantModal').classList.add('open');
+    setTimeout(() => document.getElementById('fName').focus(), 100);
+  }
+
+  function openEditTenantModal(slug) {
+    const t = _tenants.find(x => x.slug === slug);
+    if (!t) return;
+    _editTenantSlug = slug;
+    document.getElementById('modalTenantTitle').textContent = 'Edit Tenant';
+    document.getElementById('fName').value   = t.name;
+    document.getElementById('fSlug').value   = t.slug;
+    document.getElementById('fPlan').value   = t.plan   || 'free';
+    document.getElementById('fStatus').value = t.status || 'active';
+    document.getElementById('slugVal').textContent = t.slug;
+    document.getElementById('fSlug').disabled = true;
+    document.getElementById('fTimezone').value     = t.timezone             || '';
+    document.getElementById('fCurrency').value     = t.currency             || '';
+    document.getElementById('fContactEmail').value = t.tenant_contact_email || '';
+    document.getElementById('fContactPhone').value = t.tenant_contact_phone || '';
+    document.getElementById('fLocation').value     = t.location             || '';
+    document.getElementById('fFromEmail').value       = t.from_email         || '';
+    document.getElementById('fSmtpAppPassword').value = t.smtp_app_password  || '';
+    document.getElementById('fSmtpAppPassword').type  = 'password';
+    document.getElementById('tenantModal').classList.add('open');
+  }
+
+  function closeTenantModal() { document.getElementById('tenantModal').classList.remove('open'); }
+
+  /* ══════════════ SAVE TENANT ══════════════ */
+  async function saveTenant() {
+    const name   = document.getElementById('fName').value.trim();
+    const slug   = document.getElementById('fSlug').value.trim();
+    const plan   = document.getElementById('fPlan').value;
+    const status = document.getElementById('fStatus').value;
+    const timezone             = document.getElementById('fTimezone').value;
+    const currency             = document.getElementById('fCurrency').value;
+    const tenant_contact_email = document.getElementById('fContactEmail').value.trim();
+    const tenant_contact_phone = document.getElementById('fContactPhone').value.trim();
+    const location             = document.getElementById('fLocation').value.trim();
+    const from_email           = document.getElementById('fFromEmail').value.trim();
+    const smtp_app_password    = document.getElementById('fSmtpAppPassword').value;
+
+    if (!name) { toast('Company name is required', 'error'); return; }
+    if (!slug)  { toast('Slug is required', 'error'); return; }
+    if (!/^[a-z0-9-]+$/.test(slug)) { toast('Slug: lowercase letters, numbers and hyphens only', 'error'); return; }
+
+    const btn = document.getElementById('saveTenantBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const db  = window._db;
+      const ref = window._doc(db, 'tenants', slug);
+      if (!_editTenantSlug) {
+        const existing = await window._getDoc(ref);
+        if (existing.exists()) { toast(`Slug "${slug}" already exists`, 'error'); btn.disabled=false; resetSaveTenantBtn(); return; }
+      }
+      const data = {
+        id: slug, name, slug, plan, status,
+        timezone, currency, tenant_contact_email, tenant_contact_phone, location,
+        from_email, smtp_app_password,
+        ..._editTenantSlug
+          ? { updatedAt: window._serverTimestamp() }
+          : { createdAt: window._serverTimestamp(), updatedAt: window._serverTimestamp() }
+      };
+      await window._setDoc(ref, data, { merge: !!_editTenantSlug });
+      toast(_editTenantSlug ? 'Tenant updated' : 'Tenant created', 'success');
+      closeTenantModal();
+      await loadTenants();
+    } catch(e) { console.error(e); toast('Error: ' + e.message, 'error'); }
+    btn.disabled = false; resetSaveTenantBtn();
+  }
+
+  function resetSaveTenantBtn() {
+    document.getElementById('saveTenantBtn').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save Tenant';
+  }
+
+  /* ══════════════ NAME AUTO-FILL ══════════════ */
+  function nameFromEmail(email) {
+    if (!email) return '';
+    const prefix = email.split('@')[0];
+    return prefix
+      .replace(/[._\-]+/g, ' ')
+      .replace(/\d+/g, '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  }
+  function autoFillName() {
+    const emailEl = document.getElementById('uGoogleId');
+    const nameEl  = document.getElementById('uName');
+    if (!nameEl.dataset.manuallyEdited) {
+      nameEl.value = nameFromEmail(emailEl.value.trim());
+    }
+  }
+
+  /* ══════════════ USER MODAL ══════════════ */
+  function populateTenantDropdowns() {
+    const opts = _tenants.map(t => `<option value="${esc(t.slug)}">${esc(t.name)} (${esc(t.slug)})</option>`).join('');
+    const uSel = document.getElementById('uTenantId');
+    uSel.innerHTML = '<option value="">— Select a tenant —</option>' + opts;
+    const fSel = document.getElementById('userTenantFilter');
+    fSel.innerHTML = '<option value="">All Tenants</option>' + opts;
+  }
+
+  function openCreateUserModal() {
+    _editUserId = null;
+    document.getElementById('modalUserTitle').textContent = 'Add User';
+    document.getElementById('uGoogleId').value  = '';
+    const nameEl = document.getElementById('uName');
+    nameEl.value = '';
+    delete nameEl.dataset.manuallyEdited;
+    document.getElementById('uRole').value      = 'agent';
+    document.getElementById('uStatus').value    = 'active';
+    document.getElementById('uTenantId').value  = '';
+    document.getElementById('uGoogleId').disabled = false;
+    nameEl.disabled = false;
+    populateTenantDropdowns();
+    document.getElementById('userModal').classList.add('open');
+    setTimeout(() => document.getElementById('uGoogleId').focus(), 100);
+  }
+  function openEditUserModal(uid) {
+    const u = _users.find(x => x._id === uid);
+    if (!u) return;
+    _editUserId = uid;
+    document.getElementById('modalUserTitle').textContent = 'Edit User';
+    document.getElementById('uGoogleId').value  = u.google_id || '';
+    const nameEl = document.getElementById('uName');
+    nameEl.value = u.name || nameFromEmail(u.google_id || '');
+    nameEl.dataset.manuallyEdited = '1';
+    nameEl.disabled = false;
+    document.getElementById('uRole').value      = u.role      || 'agent';
+    document.getElementById('uStatus').value    = u.status    || 'active';
+    populateTenantDropdowns();
+    document.getElementById('uTenantId').value  = u.tenant_id || '';
+    document.getElementById('uGoogleId').disabled = true;
+    document.getElementById('userModal').classList.add('open');
+  }
+  function closeUserModal() { document.getElementById('userModal').classList.remove('open'); }
+
+  /* ══════════════ SAVE USER ══════════════ */
+  async function saveUser() {
+    const google_id = document.getElementById('uGoogleId').value.trim();
+    const name      = document.getElementById('uName').value.trim() || nameFromEmail(google_id);
+    const role      = document.getElementById('uRole').value;
+    const status    = document.getElementById('uStatus').value;
+    const tenant_id = document.getElementById('uTenantId').value;
+    if (!google_id)  { toast('Google ID / Email is required', 'error'); return; }
+    if (!tenant_id)  { toast('Please select a tenant', 'error'); return; }
+    const btn = document.getElementById('saveUserBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const db = window._db;
+      let ref;
+      if (_editUserId) {
+        ref = window._doc(db, 'users', _editUserId);
+      } else {
+        ref = window._doc(db, 'users', google_id);
+        const existing = await window._getDoc(ref);
+        if (existing.exists()) {
+          toast(`User "${google_id}" already exists`, 'error');
+          btn.disabled = false;
+          document.getElementById('saveUserBtn').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save User';
+          return;
+        }
+      }
+      const data = {
+        google_id, name, role, status, tenant_id,
+        ..._editUserId
+          ? { updatedAt: window._serverTimestamp() }
+          : { createdAt: window._serverTimestamp(), updatedAt: window._serverTimestamp() }
+      };
+      await window._setDoc(ref, data, { merge: !!_editUserId });
+      toast(_editUserId ? 'User updated' : 'User added', 'success');
+      closeUserModal();
+      await loadUsers();
+    } catch(e) { console.error(e); toast('Error: ' + e.message, 'error'); }
+    btn.disabled = false;
+    document.getElementById('saveUserBtn').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save User';
+  }
+
+  /* ══════════════ DELETE USER ══════════════ */
+  function confirmDeleteUser(uid, label) {
+    document.getElementById('confirmTitle').textContent = 'Delete User';
+    document.getElementById('confirmBody').innerHTML = `Remove user <strong>${esc(label)}</strong>? This cannot be undone.`;
+    const btn = document.getElementById('confirmOkBtn');
+    btn.onclick = async () => {
+      try {
+        await window._deleteDoc(window._doc(window._db, 'users', uid));
+        toast('User deleted', 'success');
+        closeConfirm();
+        await loadUsers();
+      } catch(e) { toast('Error: ' + e.message, 'error'); }
+    };
+    document.getElementById('confirmModal').classList.add('open');
+  }
+  function closeConfirm() { document.getElementById('confirmModal').classList.remove('open'); }
+
+  /* ══════════════ LOAD DATA ══════════════ */
+  async function loadTenants() {
+    try {
+      const snap = await window._getDocs(
+        window._query(window._collection(window._db,'tenants'), window._orderBy('createdAt','desc'))
+      );
+      _tenants = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      renderTenantsTable();
+      renderTenantStats();
+      populateTenantDropdowns();
+    } catch(e) { console.error('loadTenants', e); }
+  }
+
+  async function loadUsers() {
+    try {
+      const snap = await window._getDocs(
+        window._query(window._collection(window._db,'users'), window._orderBy('createdAt','desc'))
+      );
+      _users = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      renderUsersTable();
+      renderUserStats();
+      renderTenantsTable();
+    } catch(e) { console.error('loadUsers', e); }
+  }
+
+  /* ══════════════ RENDER TENANTS TABLE ══════════════ */
+  function renderTenantsTable() {
+    const tbody = document.getElementById('tenantsTableBody');
+    const rows  = _filter === 'all' ? _tenants : _tenants.filter(t => t.status === _filter);
+    if (!rows.length) {
+      const msg = _filter === 'all'
+        ? `<p>No tenants yet</p><p class="empty-sub">Click "New Tenant" to create your first workspace.</p>`
+        : `<p>No ${_filter} tenants</p><p class="empty-sub"><a href="#" onclick="setFilter('all');return false;" style="color:var(--accent);text-decoration:none;">Clear filter</a> to see all.</p>`;
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>${msg}</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(t => {
+      const created   = fmt(t.createdAt);
+      const planBadge = `<span class="badge badge-${t.plan||'free'}">${cap(t.plan||'free')}</span>`;
+      const stBadge   = `<span class="badge badge-${t.status||'active'}">${cap(t.status||'active')}</span>`;
+      const userCount = _users.filter(u => u.tenant_id === t.slug).length;
+      return `<tr>
+        <td><strong>${esc(t.name||'—')}</strong></td>
+        <td><span class="slug-chip">${esc(t.slug||t._id||'—')}</span></td>
+        <td>${planBadge}</td>
+        <td>${stBadge}</td>
+        <td>
+          <button onclick="filterUsersByTenant('${esc(t.slug)}')" style="background:rgba(0,184,255,.07);border:1px solid rgba(0,184,255,.18);border-radius:5px;padding:2px 9px;font-family:var(--mono);font-size:.7rem;color:var(--accent2);cursor:pointer;">
+            ${userCount} user${userCount!==1?'s':''}
+          </button>
+        </td>
+        <td><span class="mono">${created}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" title="Edit" onclick="openEditTenantModal('${esc(t.slug||t._id)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="icon-btn" title="Add User to Tenant" onclick="openCreateUserForTenant('${esc(t.slug)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openCreateUserForTenant(slug) {
+    openCreateUserModal();
+    setTimeout(() => { document.getElementById('uTenantId').value = slug; }, 80);
+    switchTab('users');
+    setTimeout(() => { document.getElementById('userModal').classList.add('open'); }, 90);
+  }
+
+  function filterUsersByTenant(slug) {
+    _userStatusFilter = 'all';
+    switchTab('users', true);
+    setTimeout(() => {
+      document.getElementById('userTenantFilter').value = slug;
+      renderUsersTable();
+    }, 50);
+  }
+
+  /* ══════════════ RENDER USERS TABLE ══════════════ */
+  function renderUsersTable() {
+    const tbody      = document.getElementById('usersTableBody');
+    const tenantFilt = document.getElementById('userTenantFilter').value;
+    const search     = (document.getElementById('userSearch').value || '').toLowerCase();
+    let rows = _users;
+    if (_userStatusFilter === 'active')    rows = rows.filter(u => u.status === 'active');
+    if (_userStatusFilter === 'suspended') rows = rows.filter(u => u.status === 'suspended');
+    if (tenantFilt) rows = rows.filter(u => u.tenant_id === tenantFilt);
+    if (search)     rows = rows.filter(u =>
+      (u.google_id||'').toLowerCase().includes(search) ||
+      (u._id||'').toLowerCase().includes(search) ||
+      (u.name||'').toLowerCase().includes(search)
+    );
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <p>No users found</p><p class="empty-sub">Try clearing the filters or add a new user.</p>
+      </div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(u => {
+      const displayName = u.name || nameFromEmail(u.google_id || '') || '—';
+      const initials    = displayName.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) || '?';
+      const created     = fmt(u.createdAt);
+      const roleBadge   = `<span class="badge badge-${u.role||'agent'}">${cap(u.role||'agent')}</span>`;
+      const stBadge     = `<span class="badge badge-${u.status||'active'}">${cap(u.status||'active')}</span>`;
+      const tenant      = _tenants.find(t => t.slug === u.tenant_id);
+      const tName       = tenant ? tenant.name : (u.tenant_id || '—');
+      return `<tr>
+        <td>
+          <div class="user-row-info">
+            <div class="user-row-avatar">${initials}</div>
+            <div>
+              <div style="font-size:.8rem;font-weight:600;color:var(--text);">${esc(displayName)}</div>
+              <div class="mono" style="font-size:.68rem;">${esc(u._id)}</div>
+            </div>
+          </div>
+        </td>
+        <td><span style="font-size:.82rem;">${esc(u.google_id||'—')}</span></td>
+        <td>${roleBadge}</td>
+        <td><span class="tenant-chip">${esc(tName)}</span></td>
+        <td>${stBadge}</td>
+        <td><span class="mono">${created}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" title="Edit" onclick="openEditUserModal('${esc(u._id)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="icon-btn danger" title="Delete" onclick="confirmDeleteUser('${esc(u._id)}','${esc(displayName)}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ══════════════ STATS ══════════════ */
+  function renderTenantStats() {
+    const total     = _tenants.length;
+    const active    = _tenants.filter(t => t.status === 'active').length;
+    const suspended = _tenants.filter(t => t.status === 'suspended').length;
+    const paid      = _tenants.filter(t => t.plan === 'pro' || t.plan === 'enterprise').length;
+    document.getElementById('statTotal').textContent     = total;
+    document.getElementById('statActive').textContent    = active;
+    document.getElementById('statPaid').textContent      = paid;
+    document.getElementById('statSuspended').textContent = suspended;
+    document.getElementById('cntTenants').textContent    = total;
+    document.getElementById('tabCntTenants').textContent = total;
+    document.getElementById('cntActive').textContent     = active;
+    document.getElementById('cntSuspended').textContent  = suspended;
+    const u = window._currentUser;
+    if (u) {
+      document.getElementById('sideInitials').textContent  = u.initials;
+      document.getElementById('sideUserName').textContent  = u.name;
+      document.getElementById('sideUserEmail').textContent = u.email;
+    }
+  }
+
+  function renderUserStats() {
+    const total    = _users.length;
+    const active   = _users.filter(u => u.status === 'active').length;
+    const admins   = _users.filter(u => u.role === 'admin').length;
+    const tenants  = new Set(_users.map(u => u.tenant_id).filter(Boolean)).size;
+    const suspended = _users.filter(u => u.status === 'suspended').length;
+    document.getElementById('uStatTotal').textContent   = total;
+    document.getElementById('uStatActive').textContent  = active;
+    document.getElementById('uStatAdmins').textContent  = admins;
+    document.getElementById('uStatTenants').textContent = tenants;
+    document.getElementById('cntUsers').textContent     = total;
+    document.getElementById('tabCntUsers').textContent  = total;
+    document.getElementById('cntSuspendedUsers').textContent = suspended;
+    document.getElementById('cntActiveUsers').textContent    = active;
+  }
+
+  /* ══════════════ USER STATUS FILTERS ══════════════ */
+  function filterActiveUsers() {
+    _userStatusFilter = 'active';
+    _activeTab = 'users';
+    document.getElementById('panelTenants').classList.remove('active');
+    document.getElementById('panelUsers').classList.add('active');
+    document.getElementById('tabBtnTenants').classList.remove('active');
+    document.getElementById('tabBtnUsers').classList.add('active');
+    document.getElementById('sideTenantsLink').classList.remove('active');
+    updateSidebarUserHighlights();
+    renderUsersTable();
+  }
+
+  function filterSuspendedUsers() {
+    _userStatusFilter = 'suspended';
+    _activeTab = 'users';
+    document.getElementById('panelTenants').classList.remove('active');
+    document.getElementById('panelUsers').classList.add('active');
+    document.getElementById('tabBtnTenants').classList.remove('active');
+    document.getElementById('tabBtnUsers').classList.add('active');
+    document.getElementById('sideTenantsLink').classList.remove('active');
+    updateSidebarUserHighlights();
+    renderUsersTable();
+  }
+
+  /* ══════════════ HELPERS ══════════════ */
+  function fmt(ts) {
+    return ts?.toDate ? ts.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  }
+  function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  let _toastTimer;
+  function toast(msg, type='success') {
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.className = 'show ' + type;
+    el.querySelector('.toast-dot').style.background = type==='success'?'var(--accent)':'var(--danger)';
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { el.className=''; }, 3000);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeTenantModal(); closeUserModal(); closeConfirm(); }
+  });
+</script>
+</body>
+</html>
