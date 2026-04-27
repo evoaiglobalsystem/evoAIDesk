@@ -119,7 +119,7 @@
       email:           d.email           || '',
       phone:           d.phone           || '',
       linkedin:        d.linkedin        || '',
-      company:         d.companyName     || d.company   || '',
+      company:         d.company   		 || '',
       jobtitle:        d.jobTitle        || d.jobtitle  || '',
       industry:        d.industry        || '',
       service:         d.service         || '',
@@ -151,7 +151,7 @@
       email:               lead.email           || '',
       phone:               lead.phone           || '',
       linkedin:            lead.linkedin        || '',
-      companyName:         lead.company         || '',
+      company:         	   lead.company         || '',
       jobTitle:            lead.jobtitle        || '',
       industry:            lead.industry        || '',
       service:             lead.service         || '',
@@ -1157,6 +1157,9 @@
   .view-tabs { display: flex; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; margin-bottom: 18px; }
   .view-tab { flex: 1; text-align: center; padding: 6px 10px; border-radius: 6px; border: none; background: transparent; color: var(--muted); font-family: var(--font); font-size: .75rem; font-weight: 600; cursor: pointer; transition: all .15s; }
   .view-tab.active { background: var(--surface); color: var(--accent); }
+  .view-tab--new { position: relative; }
+  .view-tab--new::after { content: 'NEW'; font-size: 8px; font-weight: 700; color: #c084fc; background: rgba(192,132,252,.12); border: 1px solid rgba(192,132,252,.3); border-radius: 4px; padding: 1px 4px; margin-left: 5px; vertical-align: middle; line-height: 1; display: inline-block; }
+  .view-tab--new.active { color: #c084fc; }
 
   /* ── NEXT ACTION CHIP ── */
   .next-action-chip { display: inline-flex; align-items: center; gap: 5px; background: rgba(0,229,160,.07); border: 1px solid rgba(0,229,160,.2); color: var(--accent); border-radius: 6px; padding: 4px 10px; font-size: .72rem; font-weight: 600; }
@@ -1463,7 +1466,7 @@
 
 <!-- AUTH LOADING -->
 <div id="authLoading">
-  <img src="/images/evoaidesk.png" alt="evoAIDesk"/>
+  <img src="/images/evoaiDesk.png" alt="evoAIDesk"/>
   <div class="auth-spinner"></div>
   <p>Verifying session…</p>
 </div>
@@ -1490,7 +1493,7 @@
 <!-- NAV -->
 <nav>
   <a class="nav-logo" href="#">
-    <img src="/images/evoaidesk.png" alt="evoAI" style="height:32px;width:auto;display:block;"/>
+    <img src="/images/evoaiDesk.png" alt="evoAI" style="height:32px;width:auto;display:block;"/>
   </a>
   
   <div class="nav-right">
@@ -1634,6 +1637,11 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Summary Report
         </button>
+		<button class="dash-rep-btn" id="dashRepBtnSummary" onclick="openDashReport('companysummary', this)">
+          <span class="rep-dot"></span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Company Level Report
+        </button>
       </div>
     </div>
 
@@ -1676,6 +1684,13 @@
               <div>
                 <div style="font-weight:600;">Summary Report</div>
                 <div style="font-size:.68rem;color:var(--muted);margin-top:1px;">Full pipeline overview &amp; insights</div>
+              </div>
+            </button>
+			<button class="export-drop-item" onclick="openDashReport('companysummary', null); closeReportDropdown();">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-top:2px;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div>
+                <div style="font-weight:600;">Company Summary Report</div>
+                <div style="font-size:.68rem;color:var(--muted);margin-top:1px;">Full company overview &amp; insights</div>
               </div>
             </button>
           </div>
@@ -2083,6 +2098,7 @@
         <button class="view-tab"        onclick="switchViewTab('timeline',this)">Timeline</button>
         <button class="view-tab"        onclick="switchViewTab('automations',this)">Automations</button>
         <button class="view-tab"        onclick="switchViewTab('report',this)">Activity Report</button>
+        <button class="view-tab view-tab--new" onclick="switchViewTab('company',this)">Company Intel</button>
       </div>
 
       <div id="vtab-details"><div id="viewBody"></div></div>
@@ -2144,6 +2160,20 @@
           <div class="report-frame-placeholder" id="reportPlaceholder">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             Select a report above to load it
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COMPANY INTEL TAB ── -->
+      <div id="vtab-company" style="display:none;">
+        <div class="auto-title" style="margin-bottom:12px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          Company Intelligence
+        </div>
+        <div class="report-frame-wrap" id="companyIntelWrap">
+          <div class="report-frame-placeholder" id="companyIntelPlaceholder">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            Company summary will load here
           </div>
         </div>
       </div>
@@ -2267,6 +2297,8 @@
         <button class="dash-rep-tab active" id="dashRepTabDaily"   onclick="openDashReport('daily',   document.getElementById('dashRepBtnDaily'))">Daily</button>
         <button class="dash-rep-tab"        id="dashRepTabWeekly"  onclick="openDashReport('weekly',  document.getElementById('dashRepBtnWeekly'))">Weekly</button>
         <button class="dash-rep-tab"        id="dashRepTabSummary" onclick="openDashReport('summary', document.getElementById('dashRepBtnSummary'))">Summary</button>
+		<button class="dash-rep-tab"        id="dashRepTabSummary" onclick="openDashReport('companysummary', document.getElementById('dashRepBtnSummary'))">Company Summary</button>
+		
       </div>
       <button class="pill-btn outline" onclick="closeDashReport()">Close</button>
     </div>
@@ -3547,6 +3579,10 @@ async function viewLead(leadId, docId, preloadedLead = null) {
   ['reportBtnDaily','reportBtnPipeline'].forEach(id => { const b = document.getElementById(id); if(b) b.classList.remove('active','loading'); });
   const rpWrap = document.getElementById('reportFrameWrap');
   if(rpWrap) rpWrap.innerHTML = `<div class="report-frame-placeholder" id="reportPlaceholder"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Select a report above to load it</div>`;
+  // Reset Company Intel tab for new lead
+  _companyIntelLoaded = false;
+  const ciWrap = document.getElementById('companyIntelWrap');
+  if(ciWrap) ciWrap.innerHTML = `<div class="report-frame-placeholder" id="companyIntelPlaceholder"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Company summary will load here</div>`;
   document.getElementById('viewOverlay').classList.add('open');
 }
 
@@ -3647,33 +3683,25 @@ async function triggerN8n(actionId, lead, btnEl) {
 
   
   try {
-    // no-cors mode: browser blocks custom headers like Content-Type
-    // Use a URLSearchParams body (sent as text/plain) so n8n receives parseable data
-    // OR use a Blob with type application/json which bypasses the no-cors header restriction
-    const payload = JSON.stringify({
-      leadId: lead.leadId, name: lead.name, email: lead.email,
-      phone: lead.phone, company: lead.company, status: lead.status,
-      service: lead.service, actId: actionId, followup_date: lead.followup,
-      assignedTo: lead.assignedTo, assignedToEmail: lead.assignedToEmail,
-      evoUserName: evo_username, evoUserEmail: evo_useremail, tenantId: lead.tenantId,
-      triggeredAt: new Date().toISOString(),
-    });
-    await fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: new Blob([payload], { type: 'application/json' }),
-    });
-    // no-cors always returns opaque response — assume success if no exception thrown
+     await fetch(url, {method:'POST',mode: 'no-cors',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning': 'true'},
+      body:JSON.stringify({
+        leadId: lead.leadId, name: lead.name, email: lead.email,
+        phone: lead.phone, company: lead.company, status: lead.status,
+        service: lead.service, actId: actionId, followup_date: lead.followup,
+        assignedTo: lead.assignedTo, assignedToEmail: lead.assignedToEmail,
+		evoUserName: evo_username, evoUserEmail: evo_useremail, tenantId: lead.tenantId,
+        triggeredAt: new Date().toISOString(),
+      })});
     btnEl.classList.remove('running'); btnEl.classList.add('done'); btnEl.textContent = '✓ Triggered';
-    toast(`Automation: ${actionId.replace(/_/g,' ')} triggered successfully`, 'success');
-    if (_viewingDocId) {
-      await window.dbAddActivity(_viewingDocId, { type: 'auto', text: `Automation triggered: ${actionId.replace(/_/g,' ')}`, user: document.getElementById('sideUserName').textContent || 'Team' });
+    toast(`Automation: ${actionId.replace(/_/g,' ')} completed successfully`,'success');
+    if(_viewingDocId) {
+      await window.dbAddActivity(_viewingDocId,{type:'auto',text:`Automation triggered: ${actionId.replace(/_/g,' ')}`,user:document.getElementById('sideUserName').textContent||'Team'});
       await loadActivities(_viewingDocId);
     }
   } catch(e) {
     btnEl.classList.remove('running'); btnEl.textContent = '⚠ Failed';
-    console.error('[n8n] trigger error:', actionId, e);
-    toast('n8n webhook failed — ' + (e.message || 'check URL config'), 'error');
+	console.error('n8n trigger error:', e);
+    toast('n8n webhook failed — check URL config'+ e.message,'error');
   }
 }
 
@@ -3683,6 +3711,7 @@ async function triggerN8n(actionId, lead, btnEl) {
 const N8N_REPORT_WEBHOOKS = {
   full_pipeline:    API.n8n_activity_pipeline,
   stage_pipeline:   API.n8n_activity_pipeline,
+  company_intel:    API.n8n_company_intel_webhook,
 };
 
 async function fetchReport(reportType, btnEl) {
@@ -3757,6 +3786,140 @@ async function fetchReport(reportType, btnEl) {
     btnEl.classList.remove('loading');
     toast('Report webhook failed — check URL config', 'error');
   }
+}
+/* ── Company Intel ── */
+let _companyIntelLoaded = false;   // tracks if intel already loaded for this lead
+
+async function fetchCompanyIntel() {
+  const wrap = document.getElementById('companyIntelWrap');
+  if (!wrap) return;
+
+  // Already loaded for this lead — don't re-fetch
+  if (_companyIntelLoaded) return;
+
+  const lead = window._viewingLead || {};
+  const url  = N8N_REPORT_WEBHOOKS.company_intel;
+
+  // Show loading state
+  wrap.innerHTML = `<div class="report-frame-placeholder">
+    <div class="spinner" style="margin:0 auto 10px"></div>
+    <span>Loading company summary for <strong style="color:var(--text)">${esc(lead.company || 'this company')}</strong>…</span>
+  </div>`;
+
+  if (!url || url.includes('your-n8n')) {
+    // No webhook yet — render a styled placeholder card so the UI looks complete
+    wrap.innerHTML = _companyIntelFallbackCard(lead);
+    _companyIntelLoaded = true;
+    return;
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reportType:      'company_intel',
+        leadId:          lead.leadId          || '',
+        tenantId:        lead.tenantId        || '',
+        name:            lead.name            || '',
+        email:           lead.email           || '',
+        company:         lead.company         || '',
+        status:          lead.status          || '',
+        service:         lead.service         || '',
+        industry:        lead.industry        || '',
+        dealvalue:       lead.dealvalue       || '',
+        assignedTo:      lead.assignedTo      || '',
+        assignedToEmail: lead.assignedToEmail || '',
+        requestedAt:     new Date().toISOString(),
+      }),
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    const html = await resp.text();
+    wrap.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.className = 'report-frame';
+    iframe.sandbox   = 'allow-same-origin allow-scripts';
+    iframe.title     = 'Company Intel';
+    wrap.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open(); doc.write(html); doc.close();
+    iframe.onload = () => {
+      try {
+        const h = iframe.contentDocument.body.scrollHeight;
+        if (h > 0) iframe.style.minHeight = Math.max(200, h + 20) + 'px';
+      } catch(e) {}
+    };
+    _companyIntelLoaded = true;
+    toast('Company Intel loaded', 'success');
+
+  } catch(e) {
+    wrap.innerHTML = `<div class="report-error">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Failed to load Company Intel: ${esc(e.message)} — check <code>API.n8n_company_intel_webhook</code> in config.js.
+    </div>`;
+    toast('Company Intel webhook failed', 'error');
+  }
+}
+
+/* Fallback card rendered when no webhook is configured yet */
+function _companyIntelFallbackCard(lead) {
+  const company = esc(lead.company || '—');
+  const dv = lead.dealvalue ? `${window._tenantCurrency || ''} ${Number(String(lead.dealvalue).replace(/[^0-9.]/g,'')).toLocaleString()}` : '—';
+  const tier = lead.dealvalue
+    ? (Number(String(lead.dealvalue).replace(/[^0-9.]/g,'')) >= 100000 ? 'Platinum' : Number(String(lead.dealvalue).replace(/[^0-9.]/g,'')) >= 50000 ? 'Gold' : 'Silver')
+    : '—';
+  const tierColor = tier === 'Platinum' ? '#c084fc' : tier === 'Gold' ? '#ffb730' : '#00b8ff';
+  return `
+  <div style="padding:6px 2px 0;display:flex;flex-direction:column;gap:14px;">
+    <!-- Header -->
+    <div style="display:flex;align-items:flex-start;gap:14px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏢</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:1rem;font-weight:700;color:var(--text);line-height:1.2;">${company}</div>
+        <div style="font-size:.73rem;color:var(--muted);margin-top:3px;">${esc(lead.industry || '')}${lead.industry && lead.service ? ' · ' : ''}${esc(lead.service || '')}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:1.05rem;font-weight:700;color:var(--accent);">${dv}</div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">Total Deal Value</div>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      ${[
+        {label:'Contact',  value:'1',     sub:'in CRM'},
+        {label:'Tier',     value:tier,    sub:'deal size', color:tierColor},
+        {label:'Status',   value:esc(lead.status||'—'), sub:'current stage'},
+        {label:'Assigned', value:esc((lead.assignedTo||'Unassigned').split(' ')[0]), sub:'owner'},
+      ].map(s=>`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 10px 8px;text-align:center;">
+        <div style="font-size:.88rem;font-weight:700;color:${s.color||'var(--text)'};">${s.value}</div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:3px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">${s.label}</div>
+        <div style="font-size:.63rem;color:var(--muted);margin-top:1px;">${s.sub}</div>
+      </div>`).join('')}
+    </div>
+
+    <!-- Key details -->
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+      <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px;">Lead Details</div>
+      ${[
+        ['Contact',  lead.name  || '—'],
+        ['Email',    lead.email || '—'],
+        ['Source',   lead.source || '—'],
+        ['Follow-up',lead.followup || 'Not scheduled'],
+      ].map(([k,v])=>`<div style="display:flex;align-items:baseline;gap:8px;">
+        <span style="font-size:.71rem;color:var(--muted);min-width:68px;flex-shrink:0;">${k}</span>
+        <span style="font-size:.76rem;color:var(--text);font-weight:500;">${esc(v)}</span>
+      </div>`).join('')}
+    </div>
+
+    <!-- Action line -->
+    <div style="background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span style="font-size:.73rem;color:var(--muted);">Connect your n8n webhook (<code style="color:var(--accent2);">API.n8n_company_intel_webhook</code> in config.js) to load live company-level data here.</span>
+    </div>
+  </div>`;
 }
 /* ── Shared CSV builder ── */
 function buildCSV(leads) {
@@ -3914,13 +4077,15 @@ function bulkExport() {
 const DASH_REPORT_HOOKS = {
   daily:   API.n8n_daily_report_workflow,
   weekly:  API.n8n_weekly_report_workflow,
-  summary: API.n8n_summary_report_workflow
+  summary: API.n8n_summary_report_workflow,
+  companysummary: API.n8n_company_summary_report_workflow,
 };
 
 const DASH_REPORT_META = {
   daily:   { icon: '📅', title: 'Daily Report',   sub: 'Today\'s lead activity & conversions' },
   weekly:  { icon: '📊', title: 'Weekly Report',  sub: 'This week\'s pipeline performance' },
   summary: { icon: '🧩', title: 'Summary Report', sub: 'Full pipeline overview & insights' },
+  companysummary: { icon: '🧩', title: 'Company-Level Pipeline Report', sub: 'Full Company overview & insights' },
 };
 
 let _dashRepCurrentType = null;
@@ -3929,14 +4094,14 @@ async function openDashReport(type, btnEl) {
   _dashRepCurrentType = type;
 
   // Update bar button states
-  ['daily','weekly','summary'].forEach(t => {
+  ['daily','weekly','summary','companysummary'].forEach(t => {
     const b = document.getElementById('dashRepBtn' + t.charAt(0).toUpperCase() + t.slice(1));
     if (b) b.classList.remove('active','loading');
   });
   if (btnEl) { btnEl.classList.add('loading'); }
 
   // Update tab states in modal footer
-  ['Daily','Weekly','Summary'].forEach(t => {
+  ['Daily','Weekly','Summary','Company Summary'].forEach(t => {
     const tab = document.getElementById('dashRepTab' + t);
     if (tab) tab.classList.toggle('active', t.toLowerCase() === type);
   });
@@ -4082,9 +4247,10 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function switchViewTab(tab, btnEl) {
-  ['details','timeline','automations','report'].forEach(t => { document.getElementById('vtab-'+t).style.display = t===tab ? '' : 'none'; });
+  ['details','timeline','automations','report','company'].forEach(t => { document.getElementById('vtab-'+t).style.display = t===tab ? '' : 'none'; });
   document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
   if(btnEl) btnEl.classList.add('active');
+  if(tab === 'company') fetchCompanyIntel();
 }
 function setLoadingState(on) {
   if(!on) return;
