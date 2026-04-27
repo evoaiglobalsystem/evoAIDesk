@@ -1380,9 +1380,12 @@
     .list-header span:nth-child(3), .list-item .list-item-industry { display: none; }
   }
   @media (max-width: 960px) {
-    .shell { grid-template-columns: 1fr; height: auto; overflow: visible; }
-    aside { display: none; }
+    /* Shell: single column, full natural height, no clipping */
+    .shell { grid-template-columns: 1fr; height: auto; min-height: calc(100vh - var(--nav-h)); overflow: visible; }
+    /* Aside is a fixed drawer on mobile — override display:none from original */
+    aside { display: flex !important; }
     .stats-row { grid-template-columns: repeat(2,1fr); }
+    /* Main: natural height, scrolls with page */
     main { padding: 18px 16px; height: auto; overflow-y: visible; }
     .form-grid { grid-template-columns: 1fr; }
     .form-grid .full, .form-section-title { grid-column: 1; }
@@ -1396,6 +1399,11 @@
     .list-item > div:nth-child(5) { grid-column: 1; grid-row: 2; }
     .pagination { flex-direction: column; align-items: flex-start; }
     .jump-wrap { display: none; }
+    /* Board: remove fixed height so columns expand naturally with content */
+    #boardView { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+    .board-col { max-height: none; height: auto; }
+    .board-col-body { max-height: none; overflow-y: visible; }
+    .board-scroll { padding-bottom: 4px; }
   }
 
   /* ── IMPORT PANEL ── */
@@ -1459,6 +1467,174 @@
     background: rgba(0,229,160,.08); border: 1px solid rgba(0,229,160,.25);
     border-radius: 8px; padding: 14px 16px; font-size: .82rem; color: var(--accent);
   }
+
+  /* ── HAMBURGER BUTTON ── */
+  .hamburger-btn {
+    display: none;
+    align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); cursor: pointer; flex-shrink: 0;
+    transition: all .15s;
+  }
+  .hamburger-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── MOBILE SIDEBAR DRAWER ── */
+  @media (max-width: 960px) {
+    .hamburger-btn { display: flex; }
+
+    aside {
+      position: fixed !important;
+      top: 0; left: 0; bottom: 0;
+      z-index: 210;
+      width: 280px !important;
+      transform: translateX(-100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      box-shadow: 4px 0 40px rgba(0,0,0,.6);
+    }
+    aside.mobile-open {
+      transform: translateX(0);
+    }
+  }
+
+  /* ── PHONE BREAKPOINT (≤ 480px) ── */
+  @media (max-width: 480px) {
+    :root { --nav-h: 54px; }
+
+    nav {
+      padding: 0 14px;
+    }
+
+    /* Hide verbose nav items */
+    .signout-btn span,
+    .pill-btn.outline[onclick*="openImportPanel"] span,
+    .pill-btn.outline[onclick*="refreshAll"] {
+      display: none;
+    }
+
+    /* Compact nav buttons */
+    .pill-btn.outline {
+      padding: 6px 10px;
+      font-size: .72rem;
+    }
+    .pill-btn.primary {
+      padding: 6px 12px;
+      font-size: .72rem;
+    }
+
+    /* Hide user chip text on tiny screens, keep avatar */
+    .user-info { display: none; }
+    .user-chip { padding: 5px 8px; }
+
+    /* Refresh button: icon only */
+    .pill-btn.outline[onclick*="refreshAll"] {
+      min-width: 32px; padding: 0 8px;
+    }
+
+    /* Stats: 2-col on phone */
+    .stats-row {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 8px;
+    }
+
+    .stat-card { padding: 12px 12px; }
+    .stat-value { font-size: 1.3rem; }
+
+    /* Main padding */
+    main { padding: 12px 12px; }
+
+    /* Toolbar stacks vertically */
+    .toolbar {
+      flex-direction: column;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .toolbar select,
+    .toolbar .search-wrap {
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* Wider modals */
+    .modal {
+      width: 96vw !important;
+      max-width: 96vw !important;
+      padding: 0;
+      border-radius: 12px;
+    }
+    .modal-head { padding: 14px 16px; }
+    .modal-body { padding: 14px 16px; }
+    .modal-foot { padding: 12px 16px; }
+
+    /* Form grid single col */
+    .form-grid { grid-template-columns: 1fr !important; }
+
+    /* Page header buttons: wrap */
+    .page-header > div {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* View toggle: smaller text */
+    #viewToggle button {
+      padding: 5px 8px !important;
+      font-size: .69rem !important;
+    }
+
+    /* Reports / Export buttons: icon+label */
+    #reportDropWrap .pill-btn,
+    #exportDropWrap .pill-btn {
+      font-size: .69rem;
+      padding: 5px 8px;
+    }
+
+    /* List view: show status badge on mobile row */
+    .list-item > div:nth-child(5) { display: block !important; }
+
+    /* Pagination: compact */
+    .pagination {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .pagination button {
+      min-height: 36px;
+      padding: 0 14px;
+    }
+
+    /* Bulk bar: wrap */
+    .bulk-bar {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* Board: slightly narrower columns */
+    .board-col { width: 200px; }
+
+    /* Timeline list: smaller */
+    .tl-time { font-size: .62rem; }
+    .tl-body { font-size: .78rem; }
+
+    /* Toast: full-width */
+    #toast {
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      max-width: none;
+    }
+
+    /* Aside search: bigger tap target */
+    .aside-item { padding: 11px 11px; }
+  }
+
+  /* ── TOUCH: larger tap targets for interactive elements ── */
+  @media (hover: none) and (pointer: coarse) {
+    .aside-item { min-height: 44px; }
+    .pill-btn { min-height: 38px; }
+    select, input[type="text"] { min-height: 40px; font-size: 16px; } /* prevent zoom on iOS */
+    .modal-close { min-width: 36px; min-height: 36px; }
+    .action-btn { min-width: 32px; min-height: 32px; }
+  }
 </style>
 <script src="config.js"></script>
 </head>
@@ -1492,9 +1668,14 @@
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="#">
-    <img src="/images/evoaiDesk.png" alt="evoAI" style="height:32px;width:auto;display:block;"/>
-  </a>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMobileSidebar()" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <a class="nav-logo" href="#">
+      <img src="/images/evoaiDesk.png" alt="evoAI" style="height:32px;width:auto;display:block;"/>
+    </a>
+  </div>
   
   <div class="nav-right">
     <button class="pill-btn outline" onclick="openImportPanel()" style="display:flex;align-items:center;gap:6px;font-size:.76rem;">
@@ -1524,6 +1705,9 @@
     </button>
   </div>
 </nav>
+
+<!-- MOBILE SIDEBAR OVERLAY -->
+<div id="mobileSidebarOverlay" onclick="closeMobileSidebar()" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);"></div>
 
 <div class="shell">
   <!-- SIDEBAR -->
@@ -2301,7 +2485,7 @@
       <div class="help-tip"><div class="help-tip-icon">🔄</div><div class="help-tip-text"><strong>Board view for pipeline:</strong> Drag cards between columns to instantly update a lead's stage.</div></div>
     </div>
   </div>
-  <div class="help-footer"><span style="color:#1fdb7a;font-weight:700;">evo</span><span style="color:#3b7ff5;font-weight:700;">AI</span><span style="font-weight:700;">Desk</span> · Firebase Edition v3.2 · Assignment Fields</div>
+  <div class="help-footer"><span style="color:#1fdb7a;font-weight:700;">evo</span><span style="color:#3b7ff5;font-weight:700;">AI</span><span style="font-weight:700;">Desk</span></div>
 </div>
 
 
@@ -5130,6 +5314,37 @@ async function runImport() {
   /* Refresh the main table */
   await refreshAll();
 }
+
+/* ── MOBILE SIDEBAR ── */
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileSidebarOverlay');
+  const isOpen  = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    closeMobileSidebar();
+  } else {
+    sidebar.classList.add('mobile-open');
+    overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileSidebarOverlay');
+  sidebar.classList.remove('mobile-open');
+  overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+/* Close mobile sidebar when a nav item is tapped */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.aside-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 960) closeMobileSidebar();
+    });
+  });
+});
 </script>
 </body>
 </html>
