@@ -2539,16 +2539,16 @@
     </div>
     <div class="dash-report-dialog-foot">
       <div class="rep-tabs" id="dashRepTabs">
-		  <button class="dash-rep-tab active" id="dashRepTabDaily"
-			onclick="openDashReport('daily', document.getElementById('dashRepBtnDaily'))">Daily</button>
-		  <button class="dash-rep-tab" id="dashRepTabWeekly"
-			onclick="openDashReport('weekly', document.getElementById('dashRepBtnWeekly'))">Weekly</button>
-		  <button class="dash-rep-tab" id="dashRepTabSummary"
-			onclick="openDashReport('summary', document.getElementById('dashRepBtnSummary'))">Summary</button>
-		  <button class="dash-rep-tab" id="dashRepTabCompanysummary"
-			onclick="openDashReport('companysummary', document.getElementById('dashRepBtnCompanysummary'))">Company Summary</button>
-		  <button class="dash-rep-tab" id="dashRepTabAssignment"
-			onclick="openDashReport('assignment', document.getElementById('dashRepBtnAssignment'))">Assignment</button>
+			<button class="dash-rep-tab" id="dashRepTabDaily"
+			  onclick="openDashReport('daily', this)">Daily</button>
+			<button class="dash-rep-tab" id="dashRepTabWeekly"
+			  onclick="openDashReport('weekly', this)">Weekly</button>
+			<button class="dash-rep-tab" id="dashRepTabSummary"
+			  onclick="openDashReport('summary', this)">Summary</button>
+			<button class="dash-rep-tab" id="dashRepTabCompanysummary"
+			  onclick="openDashReport('companysummary', this)">Company Summary</button>
+			<button class="dash-rep-tab" id="dashRepTabAssignment"
+			  onclick="openDashReport('assignment', this)">Assignment</button>
 	  </div>
       <button class="pill-btn outline" onclick="closeDashReport()">Close</button>
     </div>
