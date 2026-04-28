@@ -4350,9 +4350,9 @@ async function openDashReport(type, btnEl) {
   if (btnEl) { btnEl.classList.add('loading'); }
 
   // Update tab states in modal footer
-  ['Daily','Weekly','Summary','Company Summary','assignment'].forEach(t => {
-    const tab = document.getElementById('dashRepTab' + t);
-    if (tab) tab.classList.toggle('active', t.toLowerCase() === type);
+  ['daily','weekly','summary','companysummary','assignment'].forEach(t => {
+    const tab = document.getElementById('dashRepTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (tab) tab.classList.toggle('active', t === type);
   });
 
   // Set modal header meta
@@ -4385,7 +4385,6 @@ async function openDashReport(type, btnEl) {
 
     if (contentType.includes('application/json')) {
       const json = await resp.json();
-      // Support { html: "..." } or { content: "..." } or plain string
       htmlContent = json.html || json.content || json.data || JSON.stringify(json, null, 2);
     } else {
       htmlContent = await resp.text();
@@ -4397,20 +4396,9 @@ async function openDashReport(type, btnEl) {
     </div>`;
 
     const frame = document.getElementById('dashRepFrame');
-    frame.onload = () => {
-      try {
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        doc.open(); doc.write(htmlContent); doc.close();
-        // Auto-adjust height
-        setTimeout(() => {
-          const h = doc.body ? doc.body.scrollHeight : 400;
-          frame.style.minHeight = Math.max(400, h + 20) + 'px';
-        }, 200);
-      } catch(e) { /* cross-origin fallback already written */ }
-    };
-    // Trigger load
     const doc = frame.contentDocument || frame.contentWindow.document;
     doc.open(); doc.write(htmlContent); doc.close();
+
     setTimeout(() => {
       try {
         const h = doc.body ? doc.body.scrollHeight : 400;
@@ -4418,7 +4406,6 @@ async function openDashReport(type, btnEl) {
       } catch(e) {}
     }, 300);
 
-    // Mark button as active
     if (btnEl) { btnEl.classList.remove('loading'); btnEl.classList.add('active'); }
 
   } catch(err) {
