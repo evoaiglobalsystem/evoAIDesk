@@ -1828,7 +1828,7 @@
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Summary Report
         </button>
-		<button class="dash-rep-btn" id="dashRepBtnSummary" onclick="openDashReport('companysummary', this)">
+		<button class="dash-rep-btn" id="dashRepBtnCompanysummary" onclick="openDashReport('companysummary', this)">
           <span class="rep-dot"></span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           Company Level Report
@@ -2539,14 +2539,17 @@
     </div>
     <div class="dash-report-dialog-foot">
       <div class="rep-tabs" id="dashRepTabs">
-        <button class="dash-rep-tab active" id="dashRepTabDaily"   onclick="openDashReport('daily',   document.getElementById('dashRepBtnDaily'))">Daily</button>
-        <button class="dash-rep-tab"        id="dashRepTabWeekly"  onclick="openDashReport('weekly',  document.getElementById('dashRepBtnWeekly'))">Weekly</button>
-        <button class="dash-rep-tab"        id="dashRepTabSummary" onclick="openDashReport('summary', document.getElementById('dashRepBtnSummary'))">Summary</button>
-		<button class="dash-rep-tab"        id="dashRepTabSummary" onclick="openDashReport('companysummary', document.getElementById('dashRepBtnSummary'))">Company Summary</button>
-		<button class="dash-rep-tab" 		id="dashRepTabAssignment"  onclick="openDashReport('assignment', document.getElementById('dashRepBtnAssignment'))">
-		Assignment
-		</button>		
-      </div>
+		  <button class="dash-rep-tab active" id="dashRepTabDaily"
+			onclick="openDashReport('daily', document.getElementById('dashRepBtnDaily'))">Daily</button>
+		  <button class="dash-rep-tab" id="dashRepTabWeekly"
+			onclick="openDashReport('weekly', document.getElementById('dashRepBtnWeekly'))">Weekly</button>
+		  <button class="dash-rep-tab" id="dashRepTabSummary"
+			onclick="openDashReport('summary', document.getElementById('dashRepBtnSummary'))">Summary</button>
+		  <button class="dash-rep-tab" id="dashRepTabCompanysummary"
+			onclick="openDashReport('companysummary', document.getElementById('dashRepBtnCompanysummary'))">Company Summary</button>
+		  <button class="dash-rep-tab" id="dashRepTabAssignment"
+			onclick="openDashReport('assignment', document.getElementById('dashRepBtnAssignment'))">Assignment</button>
+	  </div>
       <button class="pill-btn outline" onclick="closeDashReport()">Close</button>
     </div>
   </div>
@@ -4425,8 +4428,7 @@ async function openDashReport(type, btnEl) {
 
 function closeDashReport() {
   document.getElementById('dashReportModal').classList.remove('open');
-  // Reset bar button states
-  ['daily','weekly','summary'].forEach(t => {
+  ['daily','weekly','summary','companysummary','assignment'].forEach(t => {
     const b = document.getElementById('dashRepBtn' + t.charAt(0).toUpperCase() + t.slice(1));
     if (b) b.classList.remove('active','loading');
   });
