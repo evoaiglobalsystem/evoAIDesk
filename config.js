@@ -6,5 +6,5 @@ const API = {
   n8n_company_summary_report_workflow: "https://n8n.evoaiglobal.ai/webhook/evoAIDesk_company_summary_report",
   n8n_activity_pipeline: "https://n8n.evoaiglobal.ai/webhook/evoaidesk_activities",
   n8n_company_intel_webhook: "https://n8n.evoaiglobal.ai/webhook/evoaidesk_company_intel",
-  n8n_assignment_report_workflow: "https://n8n.evoaiglobal.ai/webhook/evoaidesk_lead_assignments_report"
+  n8n_assignment_report_workflow: "https://n8n.evoaiglobal.ai/webhook-test/evoaidesk_lead_assignments_report"
 };
