@@ -4343,14 +4343,14 @@ async function openDashReport(type, btnEl) {
   _dashRepCurrentType = type;
 
   // Update bar button states
-  ['daily','weekly','summary','companysummary'].forEach(t => {
+  ['daily','weekly','summary','companysummary','assignment'].forEach(t => {
     const b = document.getElementById('dashRepBtn' + t.charAt(0).toUpperCase() + t.slice(1));
     if (b) b.classList.remove('active','loading');
   });
   if (btnEl) { btnEl.classList.add('loading'); }
 
   // Update tab states in modal footer
-  ['Daily','Weekly','Summary','Company Summary'].forEach(t => {
+  ['Daily','Weekly','Summary','Company Summary','assignment'].forEach(t => {
     const tab = document.getElementById('dashRepTab' + t);
     if (tab) tab.classList.toggle('active', t.toLowerCase() === type);
   });
