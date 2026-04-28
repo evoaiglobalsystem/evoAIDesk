@@ -2550,7 +2550,13 @@
 		  <button class="dash-rep-tab" id="dashRepTabAssignment"
 			onclick="openDashReport('assignment', document.getElementById('dashRepBtnAssignment'))">Assignment</button>
 	  </div>
-      <button class="pill-btn outline" onclick="closeDashReport()">Close</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="dashRepEmailBtn" class="pill-btn outline" onclick="sendReportEmail()" title="Email this report to yourself" style="display:flex;align-items:center;gap:6px;font-size:.76rem;border-color:rgba(0,184,255,.35);color:var(--accent2);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Email Me
+        </button>
+        <button class="pill-btn outline" onclick="closeDashReport()">Close</button>
+      </div>
     </div>
   </div>
 </div>
@@ -4329,7 +4335,8 @@ const DASH_REPORT_HOOKS = {
   weekly:  API.n8n_weekly_report_workflow,
   summary: API.n8n_summary_report_workflow,
   companysummary: API.n8n_company_summary_report_workflow,
-  assignment: API.n8n_assignment_report_workflow,  
+  assignment: API.n8n_assignment_report_workflow,
+  send_report_email: API.n8n_send_report_email || '',
 };
 
 const DASH_REPORT_META = {
@@ -4341,9 +4348,11 @@ const DASH_REPORT_META = {
 };
 
 let _dashRepCurrentType = null;
+let _currentReport = null;   // cache: { type, htmlContent, meta, tenantId, requestedAt }
 
 async function openDashReport(type, btnEl) {
   _dashRepCurrentType = type;
+  _currentReport = null;     // clear stale cache on every new report load
   console.log('openDashReport called:', type); // ← ADD THIS
 
   // Update bar button states
@@ -4396,6 +4405,15 @@ async function openDashReport(type, btnEl) {
       htmlContent = await resp.text();
     }
 
+    // Cache the report for "Email Me"
+    _currentReport = {
+      type,
+      htmlContent,
+      meta:        DASH_REPORT_META[type] || {},
+      tenantId:    window._currentTenantId || '',
+      requestedAt: new Date().toISOString(),
+    };
+
     // Render HTML in a sandboxed iframe
     body.innerHTML = `<div class="dash-report-content-wrap">
       <iframe class="dash-report-html-frame" id="dashRepFrame" sandbox="allow-same-origin allow-scripts"></iframe>
@@ -4439,6 +4457,63 @@ function closeDashReport() {
   const hb = document.getElementById('headerReportBtn');
   if (hb) hb.classList.remove('active','loading');
   _dashRepCurrentType = null;
+}
+
+/* ── Email Me: send cached report to logged-in user via n8n ── */
+async function sendReportEmail() {
+  if (!_currentReport) {
+    toast('No report loaded yet — open a report first', 'warn');
+    return;
+  }
+
+  const btn = document.getElementById('dashRepEmailBtn');
+  if (!btn) return;
+
+  const url = DASH_REPORT_HOOKS.send_report_email;
+  if (!url || url.includes('your-n8n') || url === '') {
+    toast('Email webhook not configured — add API.n8n_send_report_email in config.js', 'warn');
+    return;
+  }
+
+  const recipientEmail = window._currentUserEmail || '';
+  const recipientName  = window._currentUserName  || 'Team';
+
+  btn.disabled    = true;
+  btn.innerHTML   = '<span style="display:inline-flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-icon" style="animation:spin .7s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Sending…</span>';
+
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        reportType:     _currentReport.type,
+        reportTitle:    _currentReport.meta.title  || _currentReport.type,
+        htmlContent:    _currentReport.htmlContent,
+        tenantId:       _currentReport.tenantId,
+        requestedAt:    _currentReport.requestedAt,
+        recipientEmail,
+        recipientName,
+        sentAt:         new Date().toISOString(),
+      }),
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    btn.innerHTML = '✓ Sent!';
+    toast(`Report emailed to ${recipientEmail}`, 'success');
+    setTimeout(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Me';
+      }
+    }, 2500);
+
+  } catch(e) {
+    btn.disabled  = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Me';
+    toast('Email send failed — check n8n_send_report_email webhook', 'error');
+    console.error('sendReportEmail error:', e);
+  }
 }
 
 // Close on backdrop click
