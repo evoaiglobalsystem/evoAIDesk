@@ -2539,16 +2539,16 @@
     </div>
     <div class="dash-report-dialog-foot">
       <div class="rep-tabs" id="dashRepTabs">
-			<button class="dash-rep-tab" id="dashRepTabDaily"
-			  onclick="openDashReport('daily', this)">Daily</button>
-			<button class="dash-rep-tab" id="dashRepTabWeekly"
-			  onclick="openDashReport('weekly', this)">Weekly</button>
-			<button class="dash-rep-tab" id="dashRepTabSummary"
-			  onclick="openDashReport('summary', this)">Summary</button>
-			<button class="dash-rep-tab" id="dashRepTabCompanysummary"
-			  onclick="openDashReport('companysummary', this)">Company Summary</button>
-			<button class="dash-rep-tab" id="dashRepTabAssignment"
-			  onclick="openDashReport('assignment', this)">Assignment</button>
+		  <button class="dash-rep-tab active" id="dashRepTabDaily"
+			onclick="openDashReport('daily', document.getElementById('dashRepBtnDaily'))">Daily</button>
+		  <button class="dash-rep-tab" id="dashRepTabWeekly"
+			onclick="openDashReport('weekly', document.getElementById('dashRepBtnWeekly'))">Weekly</button>
+		  <button class="dash-rep-tab" id="dashRepTabSummary"
+			onclick="openDashReport('summary', document.getElementById('dashRepBtnSummary'))">Summary</button>
+		  <button class="dash-rep-tab" id="dashRepTabCompanysummary"
+			onclick="openDashReport('companysummary', document.getElementById('dashRepBtnCompanysummary'))">Company Summary</button>
+		  <button class="dash-rep-tab" id="dashRepTabAssignment"
+			onclick="openDashReport('assignment', document.getElementById('dashRepBtnAssignment'))">Assignment</button>
 	  </div>
       <button class="pill-btn outline" onclick="closeDashReport()">Close</button>
     </div>
@@ -4344,6 +4344,7 @@ let _dashRepCurrentType = null;
 
 async function openDashReport(type, btnEl) {
   _dashRepCurrentType = type;
+  console.log('openDashReport called:', type); // ← ADD THIS
 
   // Update bar button states
   ['daily','weekly','summary','companysummary','assignment'].forEach(t => {
@@ -4375,6 +4376,8 @@ async function openDashReport(type, btnEl) {
 
   try {
     const url = DASH_REPORT_HOOKS[type];
+	console.log('URL being called:', url); // ← ADD THIS
+	
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4428,7 +4431,8 @@ async function openDashReport(type, btnEl) {
 
 function closeDashReport() {
   document.getElementById('dashReportModal').classList.remove('open');
-  ['daily','weekly','summary','companysummary','assignment'].forEach(t => {
+  // Reset bar button states
+  ['daily','weekly','summary'].forEach(t => {
     const b = document.getElementById('dashRepBtn' + t.charAt(0).toUpperCase() + t.slice(1));
     if (b) b.classList.remove('active','loading');
   });
