@@ -4500,7 +4500,7 @@ async function openDashReport(type, btnEl) {
 function closeDashReport() {
   document.getElementById('dashReportModal').classList.remove('open');
   // Reset bar button states
-  ['daily','weekly','summary'].forEach(t => {
+  ['daily','weekly','summary','companysummary','assignment'].forEach(t => {
     const b = document.getElementById('dashRepBtn' + t.charAt(0).toUpperCase() + t.slice(1));
     if (b) b.classList.remove('active','loading');
   });
