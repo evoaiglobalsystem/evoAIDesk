@@ -938,7 +938,7 @@
   .jump-wrap button:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
 
   /* ── MODAL ── */
-  .overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(4,8,14,.82); backdrop-filter: blur(6px); align-items: center; justify-content: center; }
+  .overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(4,8,14,.82); backdrop-filter: blur(6px); align-items: center; justify-content: center; padding: 16px; }
   .overlay.open { display: flex; }
   .modal {
     background: var(--surface); border: 1px solid var(--border);
@@ -1219,13 +1219,14 @@
     padding-right: 10px; border-right: 1px solid var(--border);
     margin-right: 4px;
   }
-  .dash-report-btns { display: flex; gap: 7px; flex-wrap: wrap; }
+  .dash-report-btns { display: flex; gap: 7px; flex-wrap: wrap; flex: 1; }
   .dash-rep-btn {
     display: flex; align-items: center; gap: 7px;
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: 7px; padding: 7px 14px; cursor: pointer;
     font-family: var(--font); font-size: .76rem; font-weight: 600;
     color: var(--muted); transition: all .16s;
+    white-space: nowrap;
   }
   .dash-rep-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
   .dash-rep-btn.loading { border-color: var(--warn); color: var(--warn); pointer-events: none; }
@@ -1242,6 +1243,7 @@
     position: fixed; inset: 0; z-index: 300;
     background: rgba(4,8,14,.88); backdrop-filter: blur(8px);
     display: none; align-items: center; justify-content: center;
+    padding: 16px;
   }
   #dashReportModal.open { display: flex; }
   .dash-report-dialog {
@@ -1632,6 +1634,54 @@
 
     /* Aside search: bigger tap target */
     .aside-item { padding: 11px 11px; }
+
+    /* ── Report bar: stack label above buttons, full-width buttons ── */
+    .dash-report-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+    .dash-report-label {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      padding-right: 0;
+      padding-bottom: 6px;
+      margin-right: 0;
+      width: 100%;
+    }
+    .dash-report-btns {
+      width: 100%;
+      gap: 6px;
+    }
+    .dash-rep-btn {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 7px 10px;
+      font-size: .71rem;
+      gap: 5px;
+      white-space: normal;
+      text-align: left;
+    }
+    /* Hide icons in report bar buttons on very small screens to save space */
+    .dash-rep-btn svg { display: none; }
+
+    /* ── Modals: pin to top of viewport so they clear the nav bar ── */
+    .overlay {
+      align-items: flex-start;
+      padding-top: calc(var(--nav-h) + 12px);
+    }
+    .modal {
+      max-height: calc(100dvh - var(--nav-h) - 28px);
+    }
+    #dashReportModal {
+      align-items: flex-start;
+      padding-top: calc(var(--nav-h) + 12px);
+    }
+    .dash-report-dialog {
+      max-height: calc(100dvh - var(--nav-h) - 28px);
+      width: 100%;
+    }
   }
 
   /* ── TOUCH: larger tap targets for interactive elements ── */
