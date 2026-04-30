@@ -1075,11 +1075,11 @@
         <div class="form-section-title">Recipient</div>
         <div class="field full">
           <label>Recipient Name <span class="req">*</span></label>
-          <input type="text" id="schRecipientName" placeholder="e.g. John Doe" autocomplete="off"/>
+          <input type="text" id="schRecipientName" placeholder="e.g. John Doe" autocomplete="off" required oninput="this.style.borderColor=this.value.trim()?'var(--accent)':'var(--danger)';"/>
         </div>
         <div class="field full">
           <label>Recipient Email <span class="req">*</span></label>
-          <input type="text" id="schRecipientEmail" placeholder="e.g. ceo@company.com" autocomplete="off"
+          <input type="text" id="schRecipientEmail" placeholder="e.g. ceo@company.com" autocomplete="off" required
             oninput="const v=this.value.trim(); this.style.borderColor=v&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?'var(--danger)':v?'var(--accent)':'';"/>
         </div>
 
@@ -1815,6 +1815,13 @@
   function closeScheduleModal() { document.getElementById('scheduleModal').classList.remove('open'); }
 
   async function saveSchedule() {
+    // Guard: ensure recipient fields are never skipped
+    const _rn = (document.getElementById('schRecipientName').value||'').trim();
+    const _re = (document.getElementById('schRecipientEmail').value||'').trim();
+    if (!_rn || !_re) {
+      if (!_rn) { document.getElementById('schRecipientName').style.borderColor='var(--danger)'; document.getElementById('schRecipientName').focus(); toast('Recipient name is required','error'); return; }
+      if (!_re) { document.getElementById('schRecipientEmail').style.borderColor='var(--danger)'; document.getElementById('schRecipientEmail').focus(); toast('Recipient email is required','error'); return; }
+    }
     const tenant_id       = document.getElementById('schTenantId').value;
     const job_type        = document.getElementById('schJobType').value;
     const job_name        = document.getElementById('schJobName').value.trim().replace(/\s+/g,'_').toLowerCase();
