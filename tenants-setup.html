@@ -1043,11 +1043,6 @@
             <option value="monthly">Monthly</option>
           </select>
         </div>
-        <div class="field">
-          <label>Run Time <span class="req">*</span></label>
-          <input type="text" id="schRunTime" placeholder="09:00" autocomplete="off"/>
-          <div class="field-hint">24h format — HH:MM (tenant local time)</div>
-        </div>
         <div class="field" id="schRunDayWrap">
           <label id="schRunDayLabel">Run Day <span class="req">*</span></label>
           <select id="schRunDay">
@@ -1071,13 +1066,18 @@
           </div>
           <div class="field-hint" id="schNextRunDateHint">Auto-suggested from frequency &amp; run day — editable</div>
         </div>
+        <div class="field">
+          <label>Run Time <span class="req">*</span></label>
+          <input type="text" id="schRunTime" placeholder="09:00" autocomplete="off"/>
+          <div class="field-hint">24h format — HH:MM (tenant local time)</div>
+        </div>
 
         <div class="form-section-title">Recipient</div>
-        <div class="field">
+        <div class="field full">
           <label>Recipient Name <span class="req">*</span></label>
           <input type="text" id="schRecipientName" placeholder="e.g. John Doe" autocomplete="off"/>
         </div>
-        <div class="field">
+        <div class="field full">
           <label>Recipient Email <span class="req">*</span></label>
           <input type="text" id="schRecipientEmail" placeholder="e.g. ceo@company.com" autocomplete="off"
             oninput="const v=this.value.trim(); this.style.borderColor=v&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?'var(--danger)':v?'var(--accent)':'';"/>
