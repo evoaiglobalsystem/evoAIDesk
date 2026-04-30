@@ -13,7 +13,7 @@
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
   import {
     getFirestore, collection, doc,
-    setDoc, getDoc, getDocs, deleteDoc,
+    setDoc, getDoc, getDocs, deleteDoc, addDoc,
     query, orderBy, where, serverTimestamp, Timestamp
   } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
@@ -31,6 +31,8 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
+  window._addDoc = addDoc;
+  window._Timestamp = Timestamp;
   window._auth = auth;
   window._db   = db;
   window._serverTimestamp = serverTimestamp;
@@ -61,6 +63,7 @@
     window._currentUser = { name, email: user.email, initials };
     loadTenants();
     loadUsers();
+    loadSchedules();
   });
 </script>
 
@@ -469,6 +472,11 @@
           Users
           <span class="aside-count" id="cntUsers">—</span>
         </a>
+        <a class="aside-item" href="#" onclick="switchTab('schedules');return false;" id="sideSchedulesLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Schedules
+          <span class="aside-count" id="cntSchedules">—</span>
+        </a>
         <a class="aside-item" href="#" onclick="filterActiveUsers();return false;" id="sideActiveUsersLink">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Active Users
@@ -516,6 +524,11 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Users
         <span class="tab-count" id="tabCntUsers">—</span>
+      </button>
+      <button class="tab-btn" id="tabBtnSchedules" onclick="switchTab('schedules')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedules
+        <span class="tab-count" id="tabCntSchedules">—</span>
       </button>
     </div>
 
@@ -671,6 +684,83 @@
         </table>
       </div>
     </div><!-- /panelUsers -->
+
+    <!-- ════════════════════════════════════ SCHEDULES TAB ═══════════════ -->
+    <div class="tab-panel" id="panelSchedules">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Scheduled Jobs</div>
+          <div class="page-sub">Manage recurring jobs across all tenants — reports, exports, notifications.</div>
+        </div>
+        <button class="pill-btn primary" onclick="openCreateScheduleModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Schedule
+        </button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Jobs</div>
+          <div class="stat-value" id="schStatTotal">—</div>
+          <div class="stat-sub">All scheduled jobs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active</div>
+          <div class="stat-value" id="schStatActive">—</div>
+          <div class="stat-sub">Currently enabled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reports</div>
+          <div class="stat-value" id="schStatReports">—</div>
+          <div class="stat-sub">Report type jobs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Exports</div>
+          <div class="stat-value" id="schStatExports">—</div>
+          <div class="stat-sub">Export type jobs</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head-bar">
+          <div>
+            <h3>All Schedules</h3>
+            <p>Stored at <span style="font-family:var(--mono);color:var(--accent);font-size:.68rem;">/scheduled_jobs/{docId}</span></p>
+          </div>
+          <div class="table-head-bar-right" style="gap:8px;">
+            <select id="schTenantFilter" onchange="renderSchedulesTable()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Tenants</option>
+            </select>
+            <select id="schTypeFilter" onchange="renderSchedulesTable()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Types</option>
+              <option value="report">Report</option>
+              <option value="export">Export</option>
+              <option value="notification">Notification</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Job Name</th>
+              <th>Tenant</th>
+              <th>Type</th>
+              <th>Frequency</th>
+              <th>Next Run</th>
+              <th>Recipient</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="schedulesTableBody">
+            <tr><td colspan="8"><div class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <p>No scheduled jobs yet</p><p class="empty-sub">Click "Add Schedule" to create the first job.</p>
+            </div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /panelSchedules -->
 
   </main>
 </div>
@@ -892,6 +982,100 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════ SCHEDULE MODAL ════════════════════════ -->
+<div class="overlay" id="scheduleModal">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-head">
+      <div class="modal-title" id="modalScheduleTitle">Add Schedule</div>
+      <button class="modal-close" onclick="closeScheduleModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-section-title">Job Details</div>
+        <div class="field full">
+          <label>Tenant <span class="req">*</span></label>
+          <select id="schTenantId">
+            <option value="">— Select tenant —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Job Type <span class="req">*</span></label>
+          <select id="schJobType">
+            <option value="report">Report</option>
+            <option value="export">Export</option>
+            <option value="notification">Notification</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Job Name <span class="req">*</span></label>
+          <input type="text" id="schJobName" placeholder="e.g. pipeline_summary" autocomplete="off"/>
+          <div class="field-hint">Lowercase, underscores OK</div>
+        </div>
+
+        <div class="form-section-title">Schedule</div>
+        <div class="field">
+          <label>Frequency <span class="req">*</span></label>
+          <select id="schFrequency" onchange="onFrequencyChange()">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Run Time <span class="req">*</span></label>
+          <input type="text" id="schRunTime" placeholder="09:00" autocomplete="off"/>
+          <div class="field-hint">24h format — HH:MM (tenant local time)</div>
+        </div>
+        <div class="field" id="schRunDayWrap">
+          <label id="schRunDayLabel">Run Day <span class="req">*</span></label>
+          <select id="schRunDay">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+          <div class="field-hint" id="schRunDayHint">0 = Sunday … 6 = Saturday</div>
+        </div>
+        <div class="field">
+          <label>Next Run Date <span class="req">*</span></label>
+          <input type="date" id="schNextRunDate" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;outline:none;transition:border-color .18s;padding:9px 11px;width:100%;"/>
+        </div>
+
+        <div class="form-section-title">Recipient</div>
+        <div class="field">
+          <label>Recipient Name</label>
+          <input type="text" id="schRecipientName" placeholder="e.g. John Doe" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Recipient Email</label>
+          <input type="email" id="schRecipientEmail" placeholder="e.g. ceo@company.com" autocomplete="off"/>
+        </div>
+
+        <div class="form-section-title">Status</div>
+        <div class="field">
+          <label>Active</label>
+          <select id="schIsActive">
+            <option value="true">Yes — enabled</option>
+            <option value="false">No — disabled</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeScheduleModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveScheduleBtn" onclick="saveSchedule()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Schedule
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   /* ── STATE ── */
   let _tenants  = [];
@@ -920,9 +1104,12 @@
     updateSidebarUserHighlights();
     document.getElementById('panelTenants').classList.toggle('active', tab === 'tenants');
     document.getElementById('panelUsers').classList.toggle('active', tab === 'users');
+    document.getElementById('panelSchedules').classList.toggle('active', tab === 'schedules');
     document.getElementById('tabBtnTenants').classList.toggle('active', tab === 'tenants');
     document.getElementById('tabBtnUsers').classList.toggle('active', tab === 'users');
+    document.getElementById('tabBtnSchedules').classList.toggle('active', tab === 'schedules');
     document.getElementById('sideTenantsLink').classList.toggle('active', tab === 'tenants');
+    document.getElementById('sideSchedulesLink').classList.toggle('active', tab === 'schedules');
   }
 
   function updateSidebarUserHighlights() {
@@ -1388,11 +1575,221 @@
     renderUsersTable();
   }
 
+  /* ══════════════ SCHEDULES STATE ══════════════ */
+  let _schedules = [];
+  let _editScheduleId = null;
+
+  async function loadSchedules() {
+    try {
+      const snap = await window._getDocs(
+        window._query(window._collection(window._db,'scheduled_jobs'), window._orderBy('created_at','desc'))
+      );
+      _schedules = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      renderSchedulesTable();
+      renderScheduleStats();
+      populateSchTenantFilters();
+    } catch(e) { console.error('loadSchedules',e); }
+  }
+
+  function renderScheduleStats() {
+    const total   = _schedules.length;
+    const active  = _schedules.filter(s => s.is_active===true).length;
+    const reports = _schedules.filter(s => s.job_type==='report').length;
+    const exps    = _schedules.filter(s => s.job_type==='export').length;
+    document.getElementById('schStatTotal').textContent    = total;
+    document.getElementById('schStatActive').textContent   = active;
+    document.getElementById('schStatReports').textContent  = reports;
+    document.getElementById('schStatExports').textContent  = exps;
+    document.getElementById('cntSchedules').textContent    = total;
+    document.getElementById('tabCntSchedules').textContent = total;
+  }
+
+  function populateSchTenantFilters() {
+    const opts = _tenants.map(t=>`<option value="${esc(t.slug)}">${esc(t.name)}</option>`).join('');
+    const f = document.getElementById('schTenantFilter');
+    if (f) f.innerHTML = '<option value="">All Tenants</option>'+opts;
+    const m = document.getElementById('schTenantId');
+    if (m) m.innerHTML = '<option value="">— Select tenant —</option>'+opts;
+  }
+
+  function fmtDate(val) {
+    if (!val) return '—';
+    if (val?.toDate) return val.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    if (typeof val==='string') { const d=new Date(val); return isNaN(d)?val:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+    return '—';
+  }
+
+  function tsToDateInput(val) {
+    if (!val) return '';
+    const d = val?.toDate ? val.toDate() : new Date(val);
+    return isNaN(d) ? '' : d.toISOString().slice(0,10);
+  }
+
+  function renderSchedulesTable() {
+    const tbody      = document.getElementById('schedulesTableBody');
+    const tenantFilt = (document.getElementById('schTenantFilter')||{}).value||'';
+    const typeFilt   = (document.getElementById('schTypeFilter')  ||{}).value||'';
+    let rows = _schedules;
+    if (tenantFilt) rows = rows.filter(s=>s.tenant_id===tenantFilt);
+    if (typeFilt)   rows = rows.filter(s=>s.job_type===typeFilt);
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <p>No schedules found</p><p class="empty-sub">Try clearing filters or add a new schedule.</p>
+      </div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(s => {
+      const tenant    = _tenants.find(t=>t.slug===s.tenant_id);
+      const tName     = tenant ? tenant.name : (s.tenant_id||'—');
+      const typeColor = s.job_type==='report'?'manager':s.job_type==='export'?'pro':'agent';
+      const typeBadge = `<span class="badge badge-${typeColor}">${cap(s.job_type||'—')}</span>`;
+      const freqBadge = `<span style="font-family:var(--mono);font-size:.7rem;color:var(--muted);">${s.frequency||'—'}</span>`;
+      const nextRun   = fmtDate(s.next_run_date);
+      const stBadge   = s.is_active ? `<span class="badge badge-active">Active</span>` : `<span class="badge badge-suspended">Inactive</span>`;
+      const recipient = s.recipient_email
+        ? `<span style="font-size:.75rem;">${esc(s.recipient_name||'')} <span class="mono" style="font-size:.68rem;">${esc(s.recipient_email)}</span></span>`
+        : '<span class="mono">—</span>';
+      return `<tr>
+        <td><strong style="font-size:.82rem;">${esc(s.job_name||'—')}</strong></td>
+        <td><span class="tenant-chip">${esc(tName)}</span></td>
+        <td>${typeBadge}</td><td>${freqBadge}</td>
+        <td><span class="mono">${nextRun}</span></td>
+        <td>${recipient}</td><td>${stBadge}</td>
+        <td><div class="row-actions">
+          <button class="icon-btn" title="Edit" onclick="openEditScheduleModal('${esc(s._id)}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="icon-btn danger" title="Delete" onclick="confirmDeleteSchedule('${esc(s._id)}','${esc(s.job_name||s._id)}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function onFrequencyChange() {
+    const freq = document.getElementById('schFrequency').value;
+    const wrap = document.getElementById('schRunDayWrap');
+    const lbl  = document.getElementById('schRunDayLabel');
+    const hint = document.getElementById('schRunDayHint');
+    const sel  = document.getElementById('schRunDay');
+    if (freq==='daily') {
+      wrap.style.display = 'none';
+    } else if (freq==='weekly') {
+      wrap.style.display = '';
+      lbl.innerHTML = 'Run Day <span class="req">*</span>';
+      hint.textContent = '0 = Sunday … 6 = Saturday';
+      sel.innerHTML = [['0','Sunday'],['1','Monday'],['2','Tuesday'],['3','Wednesday'],['4','Thursday'],['5','Friday'],['6','Saturday']]
+        .map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+    } else {
+      wrap.style.display = '';
+      lbl.innerHTML = 'Run Day of Month <span class="req">*</span>';
+      hint.textContent = '1–31 (day of the month)';
+      sel.innerHTML = Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
+    }
+  }
+
+  function openCreateScheduleModal() {
+    _editScheduleId = null;
+    document.getElementById('modalScheduleTitle').textContent = 'Add Schedule';
+    document.getElementById('schJobName').value        = '';
+    document.getElementById('schJobType').value        = 'report';
+    document.getElementById('schFrequency').value      = 'weekly';
+    document.getElementById('schRunTime').value        = '09:00';
+    document.getElementById('schNextRunDate').value    = '';
+    document.getElementById('schRecipientName').value  = '';
+    document.getElementById('schRecipientEmail').value = '';
+    document.getElementById('schIsActive').value       = 'true';
+    populateSchTenantFilters();
+    onFrequencyChange();
+    document.getElementById('schRunDay').value = '1';
+    document.getElementById('scheduleModal').classList.add('open');
+    setTimeout(() => document.getElementById('schJobName').focus(), 100);
+  }
+
+  function openEditScheduleModal(id) {
+    const s = _schedules.find(x=>x._id===id);
+    if (!s) return;
+    _editScheduleId = id;
+    document.getElementById('modalScheduleTitle').textContent = 'Edit Schedule';
+    populateSchTenantFilters();
+    document.getElementById('schTenantId').value       = s.tenant_id       ||'';
+    document.getElementById('schJobType').value        = s.job_type        ||'report';
+    document.getElementById('schJobName').value        = s.job_name        ||'';
+    document.getElementById('schFrequency').value      = s.frequency       ||'weekly';
+    onFrequencyChange();
+    document.getElementById('schRunTime').value        = s.run_time        ||'';
+    document.getElementById('schRunDay').value         = String(s.run_day??1);
+    document.getElementById('schNextRunDate').value    = tsToDateInput(s.next_run_date);
+    document.getElementById('schRecipientName').value  = s.recipient_name  ||'';
+    document.getElementById('schRecipientEmail').value = s.recipient_email ||'';
+    document.getElementById('schIsActive').value       = s.is_active===false?'false':'true';
+    document.getElementById('scheduleModal').classList.add('open');
+  }
+
+  function closeScheduleModal() { document.getElementById('scheduleModal').classList.remove('open'); }
+
+  async function saveSchedule() {
+    const tenant_id       = document.getElementById('schTenantId').value;
+    const job_type        = document.getElementById('schJobType').value;
+    const job_name        = document.getElementById('schJobName').value.trim().replace(/\s+/g,'_').toLowerCase();
+    const frequency       = document.getElementById('schFrequency').value;
+    const run_time        = document.getElementById('schRunTime').value.trim();
+    const run_day         = frequency==='daily' ? null : Number(document.getElementById('schRunDay').value);
+    const nextDateStr     = document.getElementById('schNextRunDate').value;
+    const recipient_name  = document.getElementById('schRecipientName').value.trim();
+    const recipient_email = document.getElementById('schRecipientEmail').value.trim();
+    const is_active       = document.getElementById('schIsActive').value==='true';
+    if (!tenant_id)   { toast('Please select a tenant','error'); return; }
+    if (!job_name)    { toast('Job name is required','error'); return; }
+    if (!run_time)    { toast('Run time is required','error'); return; }
+    if (!nextDateStr) { toast('Next run date is required','error'); return; }
+    if (!/^\d{2}:\d{2}$/.test(run_time)) { toast('Run time must be HH:MM e.g. 09:00','error'); return; }
+    const next_run_date = window._Timestamp.fromDate(new Date(nextDateStr));
+    const btn = document.getElementById('saveScheduleBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const db   = window._db;
+      const data = { tenant_id, job_type, job_name, frequency, run_time, is_active,
+        recipient_name, recipient_email, next_run_date,
+        ...(run_day!==null?{run_day}:{}),
+        updated_at: window._serverTimestamp() };
+      if (_editScheduleId) {
+        await window._setDoc(window._doc(db,'scheduled_jobs',_editScheduleId), data, { merge: true });
+        toast('Schedule updated','success');
+      } else {
+        data.last_run_at = null;
+        data.created_at  = window._serverTimestamp();
+        await window._addDoc(window._collection(db,'scheduled_jobs'), data);
+        toast('Schedule created','success');
+      }
+      closeScheduleModal();
+      await loadSchedules();
+    } catch(e) { console.error(e); toast('Error: '+e.message,'error'); }
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save Schedule';
+  }
+
+  function confirmDeleteSchedule(id, label) {
+    document.getElementById('confirmTitle').textContent = 'Delete Schedule';
+    document.getElementById('confirmBody').innerHTML = `Remove job <strong>${esc(label)}</strong>? This cannot be undone.`;
+    const btn = document.getElementById('confirmOkBtn');
+    btn.onclick = async () => {
+      try {
+        await window._deleteDoc(window._doc(window._db,'scheduled_jobs',id));
+        toast('Schedule deleted','success');
+        closeConfirm();
+        await loadSchedules();
+      } catch(e) { toast('Error: '+e.message,'error'); }
+    };
+    document.getElementById('confirmModal').classList.add('open');
+  }
+
   /* ══════════════ HELPERS ══════════════ */
   function fmt(ts) {
     return ts?.toDate ? ts.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
   }
-  function cap(s) { return s.charAt(0).toUpperCase()+s.slice(1); }
   function esc(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -1407,7 +1804,7 @@
   }
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closeTenantModal(); closeUserModal(); closeConfirm(); }
+    if (e.key === 'Escape') { closeTenantModal(); closeUserModal(); closeConfirm(); closeScheduleModal(); }
   });
 </script>
 </body>
