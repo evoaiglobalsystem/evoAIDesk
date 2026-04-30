@@ -1066,11 +1066,7 @@
           </div>
           <div class="field-hint" id="schNextRunDateHint">Auto-suggested from frequency &amp; run day — editable</div>
         </div>
-        <div class="field full">
-          <label>Run Time <span class="req">*</span></label>
-          <input type="text" id="schRunTime" placeholder="09:00" autocomplete="off"/>
-          <div class="field-hint">24h format — HH:MM (tenant local time)</div>
-        </div>
+
 
         <div class="form-section-title">Recipient</div>
         <div class="field full">
@@ -1778,7 +1774,6 @@
     document.getElementById('schJobName').value        = '';
     document.getElementById('schJobType').value        = 'report';
     document.getElementById('schFrequency').value      = 'weekly';
-    document.getElementById('schRunTime').value        = '09:00';
     document.getElementById('schNextRunDate').value    = '';
     document.getElementById('schRecipientName').value  = '';
     document.getElementById('schRecipientName').style.borderColor = '';
@@ -1803,7 +1798,6 @@
     document.getElementById('schJobName').value        = s.job_name        ||'';
     document.getElementById('schFrequency').value      = s.frequency       ||'weekly';
     onFrequencyChange();
-    document.getElementById('schRunTime').value        = s.run_time        ||'';
     document.getElementById('schRunDay').value         = String(s.run_day??1);
     document.getElementById('schNextRunDate').value    = tsToDateInput(s.next_run_date);
     document.getElementById('schRecipientName').value  = s.recipient_name  ||'';
@@ -1826,7 +1820,6 @@
     const job_type        = document.getElementById('schJobType').value;
     const job_name        = document.getElementById('schJobName').value.trim().replace(/\s+/g,'_').toLowerCase();
     const frequency       = document.getElementById('schFrequency').value;
-    const run_time        = document.getElementById('schRunTime').value.trim();
     const run_day         = frequency==='daily' ? null : Number(document.getElementById('schRunDay').value);
     const nextDateStr     = document.getElementById('schNextRunDate').value;
     const recipient_name  = document.getElementById('schRecipientName').value.trim();
@@ -1834,9 +1827,7 @@
     const is_active       = document.getElementById('schIsActive').value==='true';
     if (!tenant_id)   { toast('Please select a tenant','error'); return; }
     if (!job_name)    { toast('Job name is required','error'); return; }
-    if (!run_time)    { toast('Run time is required','error'); return; }
     if (!nextDateStr) { toast('Next run date is required','error'); return; }
-    if (!/^\d{2}:\d{2}$/.test(run_time)) { toast('Run time must be HH:MM e.g. 09:00','error'); return; }
     if (!recipient_name) {
       document.getElementById('schRecipientName').style.borderColor = 'var(--danger)';
       document.getElementById('schRecipientName').focus();
@@ -1859,7 +1850,7 @@
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
       const db   = window._db;
-      const data = { tenant_id, job_type, job_name, frequency, run_time, is_active,
+      const data = { tenant_id, job_type, job_name, frequency, is_active,
         recipient_name, recipient_email, next_run_date,
         ...(run_day!==null?{run_day}:{}),
         updated_at: window._serverTimestamp() };
