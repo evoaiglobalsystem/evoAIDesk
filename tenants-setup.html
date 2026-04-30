@@ -408,6 +408,26 @@
   .confirm-body { padding: 22px; font-size: .85rem; color: var(--muted); line-height: 1.6; }
   .confirm-body strong { color: var(--text); }
 
+  /* DATE INPUT WRAPPER */
+  .date-input-wrap { position: relative; display: flex; align-items: center; }
+  .date-input-wrap input[type="date"] {
+    width: 100%; padding: 9px 40px 9px 11px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: var(--font); font-size: .82rem;
+    border-radius: 7px; outline: none; transition: border-color .18s;
+    appearance: none; -webkit-appearance: none;
+  }
+  .date-input-wrap input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0; width: 0; pointer-events: none; }
+  .date-input-wrap input[type="date"]:focus { border-color: var(--accent); }
+  .date-cal-btn {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .14s; padding: 0;
+  }
+  .date-cal-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.08); }
+
   @media (max-width: 960px) {
     .shell { grid-template-columns: 1fr; }
     aside  { display: none; }
@@ -1043,16 +1063,22 @@
         </div>
         <div class="field">
           <label>Next Run Date <span class="req">*</span></label>
-          <input type="date" id="schNextRunDate" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;outline:none;transition:border-color .18s;padding:9px 11px;width:100%;"/>
+          <div class="date-input-wrap">
+            <input type="date" id="schNextRunDate"/>
+            <button type="button" class="date-cal-btn" onclick="document.getElementById('schNextRunDate').showPicker()" title="Open calendar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+          <div class="field-hint" id="schNextRunDateHint">Auto-suggested from frequency &amp; run day — editable</div>
         </div>
 
         <div class="form-section-title">Recipient</div>
         <div class="field">
-          <label>Recipient Name</label>
+          <label>Recipient Name <span class="req">*</span></label>
           <input type="text" id="schRecipientName" placeholder="e.g. John Doe" autocomplete="off"/>
         </div>
         <div class="field">
-          <label>Recipient Email</label>
+          <label>Recipient Email <span class="req">*</span></label>
           <input type="email" id="schRecipientEmail" placeholder="e.g. ceo@company.com" autocomplete="off"
             oninput="const v=this.value; this.style.borderColor=v&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?'var(--danger)':'';"/>
         </div>
@@ -1690,6 +1716,25 @@
     }).join('');
   }
 
+  function computeNextRunDate(freq, runDay) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    let d = new Date(today);
+    if (freq === 'daily') {
+      d.setDate(d.getDate() + 1); // tomorrow
+    } else if (freq === 'weekly') {
+      const targetDay = (runDay != null && runDay !== '') ? Number(runDay) : 1;
+      const diff = (targetDay - d.getDay() + 7) % 7 || 7; // at least 1 day ahead
+      d.setDate(d.getDate() + diff);
+    } else { // monthly
+      const targetDay = (runDay != null && runDay !== '') ? Number(runDay) : 1;
+      // Try same month first, then next month
+      d = new Date(today.getFullYear(), today.getMonth(), targetDay);
+      if (d <= today) d = new Date(today.getFullYear(), today.getMonth() + 1, targetDay);
+    }
+    return d.toISOString().slice(0, 10);
+  }
+
   function onFrequencyChange() {
     const freq = document.getElementById('schFrequency').value;
     const wrap = document.getElementById('schRunDayWrap');
@@ -1710,7 +1755,22 @@
       hint.textContent = '1–31 (day of the month)';
       sel.innerHTML = Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('');
     }
+    // Auto-update next run date whenever frequency changes
+    const runDay = freq !== 'daily' ? document.getElementById('schRunDay').value : null;
+    const dateField = document.getElementById('schNextRunDate');
+    dateField.value = computeNextRunDate(freq, runDay);
   }
+
+  // Also recompute next run date when run day changes
+  document.addEventListener('DOMContentLoaded', () => {
+    const runDaySel = document.getElementById('schRunDay');
+    if (runDaySel) {
+      runDaySel.addEventListener('change', () => {
+        const freq = document.getElementById('schFrequency').value;
+        document.getElementById('schNextRunDate').value = computeNextRunDate(freq, runDaySel.value);
+      });
+    }
+  });
 
   function openCreateScheduleModal() {
     _editScheduleId = null;
@@ -1724,7 +1784,7 @@
     document.getElementById('schRecipientEmail').value = '';
     document.getElementById('schIsActive').value       = 'true';
     populateSchTenantFilters();
-    onFrequencyChange();
+    onFrequencyChange(); // this now also sets schNextRunDate
     document.getElementById('schRunDay').value = '1';
     document.getElementById('scheduleModal').classList.add('open');
     setTimeout(() => document.getElementById('schJobName').focus(), 100);
