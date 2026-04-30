@@ -1085,6 +1085,35 @@
   let _filter   = 'all';
   let _activeTab = 'tenants';
 
+  /* ══════════════ HELPERS (defined first — used everywhere) ══════════════ */
+  function fmt(ts) {
+    return ts?.toDate ? ts.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  }
+  function cap(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmtDate(val) {
+    if (!val) return '—';
+    if (val?.toDate) return val.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+    if (typeof val==='string') { const d=new Date(val); return isNaN(d)?val:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+    return '—';
+  }
+  function tsToDateInput(val) {
+    if (!val) return '';
+    const d = val?.toDate ? val.toDate() : new Date(val);
+    return isNaN(d) ? '' : d.toISOString().slice(0,10);
+  }
+  let _toastTimer;
+  function toast(msg, type='success') {
+    const el = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    el.className = 'show ' + type;
+    el.querySelector('.toast-dot').style.background = type==='success'?'var(--accent)':'var(--danger)';
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => { el.className=''; }, 3000);
+  }
+
   /* ══════════════ SMTP PASSWORD TOGGLE ══════════════ */
   function toggleSmtpPw(btn) {
     const input = document.getElementById('fSmtpAppPassword');
@@ -1582,9 +1611,14 @@
   async function loadSchedules() {
     try {
       const snap = await window._getDocs(
-        window._query(window._collection(window._db,'scheduled_jobs'), window._orderBy('created_at','desc'))
+        window._collection(window._db,'scheduled_jobs')
       );
       _schedules = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      _schedules.sort((a,b) => {
+        const ta = a.created_at?.toMillis ? a.created_at.toMillis() : 0;
+        const tb = b.created_at?.toMillis ? b.created_at.toMillis() : 0;
+        return tb - ta;
+      });
       renderSchedulesTable();
       renderScheduleStats();
       populateSchTenantFilters();
@@ -1610,19 +1644,6 @@
     if (f) f.innerHTML = '<option value="">All Tenants</option>'+opts;
     const m = document.getElementById('schTenantId');
     if (m) m.innerHTML = '<option value="">— Select tenant —</option>'+opts;
-  }
-
-  function fmtDate(val) {
-    if (!val) return '—';
-    if (val?.toDate) return val.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-    if (typeof val==='string') { const d=new Date(val); return isNaN(d)?val:d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-    return '—';
-  }
-
-  function tsToDateInput(val) {
-    if (!val) return '';
-    const d = val?.toDate ? val.toDate() : new Date(val);
-    return isNaN(d) ? '' : d.toISOString().slice(0,10);
   }
 
   function renderSchedulesTable() {
@@ -1784,23 +1805,6 @@
       } catch(e) { toast('Error: '+e.message,'error'); }
     };
     document.getElementById('confirmModal').classList.add('open');
-  }
-
-  /* ══════════════ HELPERS ══════════════ */
-  function fmt(ts) {
-    return ts?.toDate ? ts.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-  }
-  function esc(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  let _toastTimer;
-  function toast(msg, type='success') {
-    const el = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = msg;
-    el.className = 'show ' + type;
-    el.querySelector('.toast-dot').style.background = type==='success'?'var(--accent)':'var(--danger)';
-    clearTimeout(_toastTimer);
-    _toastTimer = setTimeout(() => { el.className=''; }, 3000);
   }
 
   document.addEventListener('keydown', e => {
