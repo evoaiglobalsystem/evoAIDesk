@@ -1079,8 +1079,8 @@
         </div>
         <div class="field">
           <label>Recipient Email <span class="req">*</span></label>
-          <input type="email" id="schRecipientEmail" placeholder="e.g. ceo@company.com" autocomplete="off"
-            oninput="const v=this.value; this.style.borderColor=v&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?'var(--danger)':'';"/>
+          <input type="text" id="schRecipientEmail" placeholder="e.g. ceo@company.com" autocomplete="off"
+            oninput="const v=this.value.trim(); this.style.borderColor=v&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?'var(--danger)':v?'var(--accent)':'';"/>
         </div>
 
         <div class="form-section-title">Status</div>
@@ -1781,7 +1781,9 @@
     document.getElementById('schRunTime').value        = '09:00';
     document.getElementById('schNextRunDate').value    = '';
     document.getElementById('schRecipientName').value  = '';
+    document.getElementById('schRecipientName').style.borderColor = '';
     document.getElementById('schRecipientEmail').value = '';
+    document.getElementById('schRecipientEmail').style.borderColor = '';
     document.getElementById('schIsActive').value       = 'true';
     populateSchTenantFilters();
     onFrequencyChange(); // this now also sets schNextRunDate
@@ -1828,9 +1830,23 @@
     if (!run_time)    { toast('Run time is required','error'); return; }
     if (!nextDateStr) { toast('Next run date is required','error'); return; }
     if (!/^\d{2}:\d{2}$/.test(run_time)) { toast('Run time must be HH:MM e.g. 09:00','error'); return; }
-    if (!recipient_name)   { toast('Recipient name is required','error'); return; }
-    if (!recipient_email)  { toast('Recipient email is required','error'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient_email)) { toast('Recipient email is not a valid email address','error'); return; }
+    if (!recipient_name) {
+      document.getElementById('schRecipientName').style.borderColor = 'var(--danger)';
+      document.getElementById('schRecipientName').focus();
+      toast('Recipient name is required','error'); return;
+    }
+    document.getElementById('schRecipientName').style.borderColor = '';
+    if (!recipient_email) {
+      document.getElementById('schRecipientEmail').style.borderColor = 'var(--danger)';
+      document.getElementById('schRecipientEmail').focus();
+      toast('Recipient email is required','error'); return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient_email)) {
+      document.getElementById('schRecipientEmail').style.borderColor = 'var(--danger)';
+      document.getElementById('schRecipientEmail').focus();
+      toast('Recipient email is not a valid email address','error'); return;
+    }
+    document.getElementById('schRecipientEmail').style.borderColor = '';
     const next_run_date = window._Timestamp.fromDate(new Date(nextDateStr));
     const btn = document.getElementById('saveScheduleBtn');
     btn.disabled = true; btn.textContent = 'Saving…';
