@@ -1828,7 +1828,9 @@
     if (!run_time)    { toast('Run time is required','error'); return; }
     if (!nextDateStr) { toast('Next run date is required','error'); return; }
     if (!/^\d{2}:\d{2}$/.test(run_time)) { toast('Run time must be HH:MM e.g. 09:00','error'); return; }
-    if (recipient_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient_email)) { toast('Recipient email is not a valid email address','error'); return; }
+    if (!recipient_name)   { toast('Recipient name is required','error'); return; }
+    if (!recipient_email)  { toast('Recipient email is required','error'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient_email)) { toast('Recipient email is not a valid email address','error'); return; }
     const next_run_date = window._Timestamp.fromDate(new Date(nextDateStr));
     const btn = document.getElementById('saveScheduleBtn');
     btn.disabled = true; btn.textContent = 'Saving…';
