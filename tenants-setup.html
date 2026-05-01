@@ -923,6 +923,10 @@
               <option value="user">User</option>
               <option value="schedule">Schedule</option>
             </select>
+            <!-- Tenant filter -->
+            <select id="logTenantFilter" onchange="resetLogsPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Tenants</option>
+            </select>
             <!-- Search -->
             <div class="search-wrap">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -935,6 +939,7 @@
             <tr>
               <th>Time</th>
               <th>Level</th>
+              <th>Tenant</th>
               <th>Status</th>
               <th>Module</th>
               <th>Source</th>
@@ -944,7 +949,7 @@
             </tr>
           </thead>
           <tbody id="logsTableBody">
-            <tr><td colspan="8"><div class="empty-state">
+            <tr><td colspan="9"><div class="empty-state">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               <p>No logs loaded</p><p class="empty-sub">Click the Logs tab or Refresh to fetch entries.</p>
             </div></td></tr>
@@ -1310,13 +1315,13 @@
   const N8N_LOG_WRITE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
   const N8N_LOG_READ  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
 
-  async function writeLog({ level = 'info', status = null, module, source, message, meta = {} }) {
+  async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null }) {
     try {
       const uid = window._currentUser?.email || null;
       await fetch(N8N_LOG_WRITE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level, status, module, source, user_id: uid, message, meta: JSON.stringify(meta) })
+        body: JSON.stringify({ level, status, module, source, user_id: uid, tenant_id, message, meta: JSON.stringify(meta) })
       });
     } catch(e) {
       console.warn('[writeLog] failed:', e.message);
@@ -1514,6 +1519,7 @@
       writeLog({
         level: 'info', status: 'success',
         module: 'tenant', source: 'saveTenant',
+        tenant_id: slug,
         message: `Tenant ${action}: ${name}`,
         meta: { slug, plan, status, action }
       });
@@ -1525,6 +1531,7 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'tenant', source: 'saveTenant',
+        tenant_id: document.getElementById('fSlug').value || null,
         message: `Failed to save tenant: ${e.message}`,
         meta: { slug: document.getElementById('fSlug').value }
       });
@@ -1639,6 +1646,7 @@
       writeLog({
         level: 'info', status: 'success',
         module: 'user', source: 'saveUser',
+        tenant_id: tenant_id || null,
         message: `User ${action}: ${google_id}`,
         meta: { google_id, role, status, tenant_id, action }
       });
@@ -1650,6 +1658,7 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'user', source: 'saveUser',
+        tenant_id: document.getElementById('uTenantId').value || null,
         message: `Failed to save user: ${e.message}`,
         meta: { google_id: document.getElementById('uGoogleId').value }
       });
@@ -1667,9 +1676,11 @@
       try {
         await window._deleteDoc(window._doc(window._db, 'users', uid));
         toast('User deleted', 'success');
+        const deletedUser = _users.find(u => u._id === uid);
         writeLog({
           level: 'warn', status: 'success',
           module: 'user', source: 'deleteUser',
+          tenant_id: deletedUser?.tenant_id || null,
           message: `User deleted: ${label}`,
           meta: { uid, label }
         });
@@ -1680,6 +1691,7 @@
         writeLog({
           level: 'error', status: 'failure',
           module: 'user', source: 'deleteUser',
+          tenant_id: _users.find(u => u._id === uid)?.tenant_id || null,
           message: `Failed to delete user: ${e.message}`,
           meta: { uid, label }
         });
@@ -2117,6 +2129,7 @@
         writeLog({
           level: 'info', status: 'success',
           module: 'schedule', source: 'saveSchedule',
+          tenant_id: tenant_id || null,
           message: `Schedule updated: ${job_name}`,
           meta: { job_name, job_type, frequency, tenant_id, action: 'updated' }
         });
@@ -2128,6 +2141,7 @@
         writeLog({
           level: 'info', status: 'success',
           module: 'schedule', source: 'saveSchedule',
+          tenant_id: tenant_id || null,
           message: `Schedule created: ${job_name}`,
           meta: { job_name, job_type, frequency, tenant_id, action: 'created' }
         });
@@ -2140,6 +2154,7 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'schedule', source: 'saveSchedule',
+        tenant_id: document.getElementById('schTenantId').value || null,
         message: `Failed to save schedule: ${e.message}`,
         meta: { job_name: document.getElementById('schJobName').value }
       });
@@ -2156,9 +2171,11 @@
       try {
         await window._deleteDoc(window._doc(window._db,'scheduled_jobs',id));
         toast('Schedule deleted','success');
+        const deletedSch = _schedules.find(s => s._id === id);
         writeLog({
           level: 'warn', status: 'success',
           module: 'schedule', source: 'deleteSchedule',
+          tenant_id: deletedSch?.tenant_id || null,
           message: `Schedule deleted: ${label}`,
           meta: { id, label }
         });
@@ -2169,6 +2186,7 @@
         writeLog({
           level: 'error', status: 'failure',
           module: 'schedule', source: 'deleteSchedule',
+          tenant_id: _schedules.find(s => s._id === id)?.tenant_id || null,
           message: `Failed to delete schedule: ${e.message}`,
           meta: { id, label }
         });
@@ -2193,7 +2211,7 @@
     if (_logsLoaded && !force) return; // use cache
     _logsLoading = true;
     const tbody = document.getElementById('logsTableBody');
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
       <div class="auth-spinner" style="margin:0 auto 10px;"></div>
       <p style="font-size:.8rem;">Loading logs…</p>
     </div></td></tr>`;
@@ -2207,13 +2225,19 @@
       _logs = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
       _logsLoaded = true;
       _logsPage = 1;
+      // Populate tenant filter from log data
+      const tenantSel = document.getElementById('logTenantFilter');
+      const prevTenant = tenantSel.value;
+      const tenantIds = [...new Set(_logs.map(l => l.tenant_id).filter(Boolean))].sort();
+      tenantSel.innerHTML = '<option value="">All Tenants</option>' +
+        tenantIds.map(t => `<option value="${esc(t)}"${t === prevTenant ? ' selected' : ''}>${esc(t)}</option>`).join('');
       renderLogsTable();
       renderLogStats();
       document.getElementById('cntLogs').textContent    = _logs.length;
       document.getElementById('tabCntLogs').textContent = _logs.length;
     } catch(e) {
       console.error('loadLogs', e);
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
         <p>Failed to load logs</p><p class="empty-sub">${esc(e.message)}</p>
       </div></td></tr>`;
     }
@@ -2281,20 +2305,23 @@
     const levelFilt  = document.getElementById('logLevelFilter').value;
     const statusFilt = document.getElementById('logStatusFilter').value;
     const moduleFilt = document.getElementById('logModuleFilter').value;
+    const tenantFilt = document.getElementById('logTenantFilter').value;
     const search     = (document.getElementById('logSearch').value || '').toLowerCase();
 
     let rows = _logs;
-    if (levelFilt)  rows = rows.filter(l => l.level  === levelFilt);
-    if (statusFilt) rows = rows.filter(l => l.status === statusFilt);
-    if (moduleFilt) rows = rows.filter(l => l.module === moduleFilt);
+    if (levelFilt)  rows = rows.filter(l => l.level     === levelFilt);
+    if (statusFilt) rows = rows.filter(l => l.status    === statusFilt);
+    if (moduleFilt) rows = rows.filter(l => l.module    === moduleFilt);
+    if (tenantFilt) rows = rows.filter(l => l.tenant_id === tenantFilt);
     if (search)     rows = rows.filter(l =>
-      (l.message || '').toLowerCase().includes(search) ||
-      (l.source  || '').toLowerCase().includes(search) ||
-      (l.user_id || '').toLowerCase().includes(search)
+      (l.message   || '').toLowerCase().includes(search) ||
+      (l.source    || '').toLowerCase().includes(search) ||
+      (l.user_id   || '').toLowerCase().includes(search) ||
+      (l.tenant_id || '').toLowerCase().includes(search)
     );
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
         <p>No log entries match</p><p class="empty-sub">Try adjusting the filters.</p>
       </div></td></tr>`;
@@ -2311,6 +2338,9 @@
       const time   = l.created_at ? new Date(l.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
       const level  = l.level  ? `<span class="badge badge-${l.level}">${l.level}</span>`   : '<span class="mono">—</span>';
       const status = l.status ? `<span class="badge badge-${l.status}">${l.status}</span>` : '<span class="mono" style="color:var(--muted);font-size:.7rem;">—</span>';
+      const tenant = l.tenant_id
+        ? `<span class="tenant-chip">${esc(l.tenant_id)}</span>`
+        : '<span class="mono" style="color:var(--muted);font-size:.7rem;">—</span>';
       let metaObj = null;
       if (l.meta) {
         try { metaObj = typeof l.meta === 'string' ? JSON.parse(l.meta) : l.meta; } catch(e) { metaObj = { raw: l.meta }; }
@@ -2324,6 +2354,7 @@
       return `<tr>
         <td><span class="mono" style="font-size:.7rem;">${time}</span></td>
         <td>${level}</td>
+        <td>${tenant}</td>
         <td>${status}</td>
         <td><span style="font-size:.78rem;font-weight:500;">${esc(l.module||'—')}</span></td>
         <td><span class="mono" style="font-size:.7rem;color:var(--muted);">${esc(l.source||'—')}</span></td>
