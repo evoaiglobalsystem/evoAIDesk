@@ -1365,7 +1365,9 @@
   /* ══════════════ TAB SWITCHING ══════════════ */
   function switchTab(tab, resetUserFilter) {
     _activeTab = tab;
-    if (resetUserFilter || tab !== 'users') {
+    if (resetUserFilter) {
+      _userStatusFilter = 'all';
+    } else if (tab !== 'users') {
       _userStatusFilter = 'all';
     }
     updateSidebarUserHighlights();
@@ -1870,36 +1872,14 @@
   /* ══════════════ USER STATUS FILTERS ══════════════ */
   function filterActiveUsers() {
     _userStatusFilter = 'active';
-    _activeTab = 'users';
-    document.getElementById('panelTenants').classList.remove('active');
-    document.getElementById('panelSchedules').classList.remove('active');
-    document.getElementById('panelLogs').classList.remove('active');
-    document.getElementById('panelUsers').classList.add('active');
-    document.getElementById('tabBtnTenants').classList.remove('active');
-    document.getElementById('tabBtnSchedules').classList.remove('active');
-    document.getElementById('tabBtnLogs').classList.remove('active');
-    document.getElementById('tabBtnUsers').classList.add('active');
-    document.getElementById('sideTenantsLink').classList.remove('active');
-    document.getElementById('sideSchedulesLink').classList.remove('active');
-    document.getElementById('sideLogsLink').classList.remove('active');
+    switchTab('users');
     updateSidebarUserHighlights();
     renderUsersTable();
   }
 
   function filterSuspendedUsers() {
     _userStatusFilter = 'suspended';
-    _activeTab = 'users';
-    document.getElementById('panelTenants').classList.remove('active');
-    document.getElementById('panelSchedules').classList.remove('active');
-    document.getElementById('panelLogs').classList.remove('active');
-    document.getElementById('panelUsers').classList.add('active');
-    document.getElementById('tabBtnTenants').classList.remove('active');
-    document.getElementById('tabBtnSchedules').classList.remove('active');
-    document.getElementById('tabBtnLogs').classList.remove('active');
-    document.getElementById('tabBtnUsers').classList.add('active');
-    document.getElementById('sideTenantsLink').classList.remove('active');
-    document.getElementById('sideSchedulesLink').classList.remove('active');
-    document.getElementById('sideLogsLink').classList.remove('active');
+    switchTab('users');
     updateSidebarUserHighlights();
     renderUsersTable();
   }
