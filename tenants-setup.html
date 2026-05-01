@@ -2199,7 +2199,11 @@
     </div></td></tr>`;
     try {
       const res  = await fetch(N8N_LOG_READ);
-      const data = await res.json();
+      const text = await res.text();
+      let data = [];
+      if (text && text.trim()) {
+        try { data = JSON.parse(text); } catch(e) { data = []; }
+      }
       _logs = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
       _logsLoaded = true;
       _logsPage = 1;
