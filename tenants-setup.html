@@ -474,6 +474,33 @@
   .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
   .page-btn.active { background: rgba(0,229,160,.12); border-color: rgba(0,229,160,.3); color: var(--accent); font-weight: 700; }
   .page-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* META MODAL */
+  .meta-modal { max-width: 480px; }
+  .meta-kv-list { display: flex; flex-direction: column; gap: 10px; }
+  .meta-kv-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px;
+  }
+  .meta-kv-key {
+    flex-shrink: 0; min-width: 110px; font-family: var(--mono);
+    font-size: .69rem; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: .06em; padding-top: 1px;
+  }
+  .meta-kv-val {
+    font-size: .78rem; color: var(--text); word-break: break-all; line-height: 1.5;
+  }
+  .meta-kv-val.is-bool  { color: #f0a05a; font-family: var(--mono); font-size: .74rem; }
+  .meta-kv-val.is-num   { color: #79c0ff; font-family: var(--mono); font-size: .74rem; }
+  .meta-kv-val.is-null  { color: var(--muted); font-family: var(--mono); font-size: .74rem; font-style: italic; }
+  .meta-kv-val.is-obj   { font-family: var(--mono); font-size: .71rem; color: var(--muted); white-space: pre-wrap; }
+  .meta-badge {
+    display: inline-flex; align-items: center;
+    background: rgba(0,229,160,.08); border: 1px solid rgba(0,229,160,.2);
+    border-radius: 4px; padding: 1px 7px; font-family: var(--mono);
+    font-size: .68rem; color: var(--accent); font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -936,6 +963,27 @@
 
 <!-- TOAST -->
 <div id="toast"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+
+<!-- META MODAL -->
+<div class="overlay" id="metaModal">
+  <div class="modal meta-modal">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div class="modal-title">Log Meta</div>
+      </div>
+      <button class="modal-close" onclick="closeMetaModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="meta-kv-list" id="metaKvList"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeMetaModal()">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════ TENANT MODAL ══════════════════════════ -->
 <div class="overlay" id="tenantModal">
@@ -2145,7 +2193,7 @@
   let _logs = [];
   let _logsLoading = false;
   let _logsPage = 1;
-  const LOGS_PER_PAGE = 10;
+  const LOGS_PER_PAGE = 25;
 
   async function loadLogs() {
     if (_logsLoading) return;
@@ -2158,7 +2206,6 @@
     try {
       const res  = await fetch(N8N_LOG_READ);
       const data = await res.json();
-      // n8n Respond to Webhook returns an array of items — each has a `json` property
       _logs = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
       _logsPage = 1;
       renderLogsTable();
@@ -2187,6 +2234,45 @@
 
   function resetLogsPage() { _logsPage = 1; renderLogsTable(); }
   function goLogsPage(p)   { _logsPage = p; renderLogsTable(); }
+
+  /* ── Meta modal ── */
+  function showMetaModal(metaObj) {
+    const list = document.getElementById('metaKvList');
+    if (!metaObj || !Object.keys(metaObj).length) {
+      list.innerHTML = `<div style="text-align:center;padding:18px 0;font-size:.8rem;color:var(--muted);">No meta data available.</div>`;
+    } else {
+      list.innerHTML = Object.entries(metaObj).map(([k, v]) => {
+        let valHtml;
+        if (v === null || v === undefined) {
+          valHtml = `<span class="meta-kv-val is-null">null</span>`;
+        } else if (typeof v === 'boolean') {
+          valHtml = `<span class="meta-kv-val is-bool">${v}</span>`;
+        } else if (typeof v === 'number') {
+          valHtml = `<span class="meta-kv-val is-num">${v}</span>`;
+        } else if (typeof v === 'object') {
+          valHtml = `<span class="meta-kv-val is-obj">${esc(JSON.stringify(v, null, 2))}</span>`;
+        } else {
+          /* strings — highlight if looks like email / status badge */
+          const s = String(v);
+          const isBadge = ['active','inactive','success','failure','pending','admin','user','error','warn','info'].includes(s.toLowerCase());
+          valHtml = isBadge
+            ? `<span class="meta-badge">${esc(s)}</span>`
+            : `<span class="meta-kv-val">${esc(s)}</span>`;
+        }
+        return `<div class="meta-kv-row">
+          <div class="meta-kv-key">${esc(k)}</div>
+          <div style="flex:1;">${valHtml}</div>
+        </div>`;
+      }).join('');
+    }
+    document.getElementById('metaModal').classList.add('open');
+  }
+  function closeMetaModal() {
+    document.getElementById('metaModal').classList.remove('open');
+  }
+  document.getElementById('metaModal').addEventListener('click', function(e) {
+    if (e.target === this) closeMetaModal();
+  });
 
   function renderLogsTable() {
     const tbody      = document.getElementById('logsTableBody');
@@ -2223,10 +2309,13 @@
       const time   = l.created_at ? new Date(l.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
       const level  = l.level  ? `<span class="badge badge-${l.level}">${l.level}</span>`   : '<span class="mono">—</span>';
       const status = l.status ? `<span class="badge badge-${l.status}">${l.status}</span>` : '<span class="mono" style="color:var(--muted);font-size:.7rem;">—</span>';
-      const meta   = l.meta   ? `<span class="meta-pill" title="${esc(JSON.stringify(l.meta))}" onclick="alert(JSON.stringify(${esc(JSON.stringify(l.meta))}, null, 2))">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        meta
-      </span>` : '<span class="mono" style="color:var(--muted);font-size:.7rem;">—</span>';
+      const metaObj = l.meta || null;
+      const meta = metaObj
+        ? `<span class="meta-pill" onclick='showMetaModal(${JSON.stringify(metaObj)})'>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            meta
+          </span>`
+        : '<span class="mono" style="color:var(--muted);font-size:.7rem;">—</span>';
       return `<tr>
         <td><span class="mono" style="font-size:.7rem;">${time}</span></td>
         <td>${level}</td>
