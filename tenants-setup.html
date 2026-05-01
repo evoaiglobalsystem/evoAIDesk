@@ -454,6 +454,26 @@
     .form-grid { grid-template-columns: 1fr; }
     .form-grid .full, .form-section-title { grid-column: 1; }
   }
+
+  /* PAGINATION */
+  .pagination-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px; border-top: 1px solid var(--border);
+    flex-wrap: wrap; gap: 8px;
+  }
+  .pagination-info { font-size: .72rem; color: var(--muted); font-family: var(--mono); }
+  .pagination-btns { display: flex; gap: 5px; }
+  .page-btn {
+    min-width: 30px; height: 28px; padding: 0 8px;
+    border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    font-family: var(--mono); font-size: .72rem;
+    cursor: pointer; transition: all .14s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
+  .page-btn.active { background: rgba(0,229,160,.12); border-color: rgba(0,229,160,.3); color: var(--accent); font-weight: 700; }
+  .page-btn:disabled { opacity: .35; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -855,7 +875,7 @@
           </div>
           <div class="table-head-bar-right" style="gap:8px;flex-wrap:wrap;">
             <!-- Level filter -->
-            <select id="logLevelFilter" onchange="renderLogsTable()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+            <select id="logLevelFilter" onchange="resetLogsPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
               <option value="">All Levels</option>
               <option value="info">Info</option>
               <option value="warn">Warn</option>
@@ -863,14 +883,14 @@
               <option value="debug">Debug</option>
             </select>
             <!-- Status filter -->
-            <select id="logStatusFilter" onchange="renderLogsTable()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+            <select id="logStatusFilter" onchange="resetLogsPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
               <option value="">All Statuses</option>
               <option value="success">Success</option>
               <option value="failure">Failure</option>
               <option value="partial">Partial</option>
             </select>
             <!-- Module filter -->
-            <select id="logModuleFilter" onchange="renderLogsTable()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
+            <select id="logModuleFilter" onchange="resetLogsPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
               <option value="">All Modules</option>
               <option value="tenant">Tenant</option>
               <option value="user">User</option>
@@ -879,7 +899,7 @@
             <!-- Search -->
             <div class="search-wrap">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input class="search-input" id="logSearch" placeholder="Search message…" oninput="renderLogsTable()"/>
+              <input class="search-input" id="logSearch" placeholder="Search message…" oninput="resetLogsPage()"/>
             </div>
           </div>
         </div>
@@ -903,6 +923,10 @@
             </div></td></tr>
           </tbody>
         </table>
+        <div class="pagination-bar" id="logsPagBar" style="display:none;">
+          <span class="pagination-info" id="logsPagInfo"></span>
+          <div class="pagination-btns" id="logsPagBtns"></div>
+        </div>
       </div>
     </div><!-- /panelLogs -->
 
@@ -2120,6 +2144,8 @@
   /* ══════════════ LOGS PANEL ══════════════ */
   let _logs = [];
   let _logsLoading = false;
+  let _logsPage = 1;
+  const LOGS_PER_PAGE = 25;
 
   async function loadLogs() {
     if (_logsLoading) return;
@@ -2134,6 +2160,7 @@
       const data = await res.json();
       // n8n Respond to Webhook returns an array of items — each has a `json` property
       _logs = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
+      _logsPage = 1;
       renderLogsTable();
       renderLogStats();
       document.getElementById('cntLogs').textContent    = _logs.length;
@@ -2158,12 +2185,15 @@
     document.getElementById('logStatSuccess').textContent  = success;
   }
 
+  function resetLogsPage() { _logsPage = 1; renderLogsTable(); }
+  function goLogsPage(p)   { _logsPage = p; renderLogsTable(); }
+
   function renderLogsTable() {
-    const tbody       = document.getElementById('logsTableBody');
-    const levelFilt   = document.getElementById('logLevelFilter').value;
-    const statusFilt  = document.getElementById('logStatusFilter').value;
-    const moduleFilt  = document.getElementById('logModuleFilter').value;
-    const search      = (document.getElementById('logSearch').value || '').toLowerCase();
+    const tbody      = document.getElementById('logsTableBody');
+    const levelFilt  = document.getElementById('logLevelFilter').value;
+    const statusFilt = document.getElementById('logStatusFilter').value;
+    const moduleFilt = document.getElementById('logModuleFilter').value;
+    const search     = (document.getElementById('logSearch').value || '').toLowerCase();
 
     let rows = _logs;
     if (levelFilt)  rows = rows.filter(l => l.level  === levelFilt);
@@ -2180,10 +2210,16 @@
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
         <p>No log entries match</p><p class="empty-sub">Try adjusting the filters.</p>
       </div></td></tr>`;
+      document.getElementById('logsPagBar').style.display = 'none';
       return;
     }
 
-    tbody.innerHTML = rows.map(l => {
+    const totalPages = Math.ceil(rows.length / LOGS_PER_PAGE);
+    if (_logsPage > totalPages) _logsPage = totalPages;
+    const start = (_logsPage - 1) * LOGS_PER_PAGE;
+    const page  = rows.slice(start, start + LOGS_PER_PAGE);
+
+    tbody.innerHTML = page.map(l => {
       const time   = l.created_at ? new Date(l.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
       const level  = l.level  ? `<span class="badge badge-${l.level}">${l.level}</span>`   : '<span class="mono">—</span>';
       const status = l.status ? `<span class="badge badge-${l.status}">${l.status}</span>` : '<span class="mono" style="color:var(--muted);font-size:.7rem;">—</span>';
@@ -2202,6 +2238,32 @@
         <td>${meta}</td>
       </tr>`;
     }).join('');
+
+    /* ── Pagination bar ── */
+    const bar  = document.getElementById('logsPagBar');
+    const info = document.getElementById('logsPagInfo');
+    const btns = document.getElementById('logsPagBtns');
+    bar.style.display = 'flex';
+    info.textContent  = `${start + 1}–${Math.min(start + LOGS_PER_PAGE, rows.length)} of ${rows.length}`;
+
+    let pages = [];
+    if (totalPages <= 7) {
+      pages = Array.from({length: totalPages}, (_, i) => i + 1);
+    } else {
+      pages = [1];
+      if (_logsPage > 3) pages.push('…');
+      for (let i = Math.max(2, _logsPage - 1); i <= Math.min(totalPages - 1, _logsPage + 1); i++) pages.push(i);
+      if (_logsPage < totalPages - 2) pages.push('…');
+      pages.push(totalPages);
+    }
+
+    btns.innerHTML =
+      `<button class="page-btn" onclick="goLogsPage(${_logsPage - 1})" ${_logsPage === 1 ? 'disabled' : ''}>‹</button>` +
+      pages.map(p => p === '…'
+        ? `<span class="page-btn" style="cursor:default;opacity:.4;">…</span>`
+        : `<button class="page-btn ${p === _logsPage ? 'active' : ''}" onclick="goLogsPage(${p})">${p}</button>`
+      ).join('') +
+      `<button class="page-btn" onclick="goLogsPage(${_logsPage + 1})" ${_logsPage === totalPages ? 'disabled' : ''}>›</button>`;
   }
 </script>
 </body>
