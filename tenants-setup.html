@@ -1231,52 +1231,22 @@
   let _filter   = 'all';
   let _activeTab = 'tenants';
 
-  /* ══════════════ NEON LOGGER ══════════════
-     Uses Neon's serverless HTTP API — browser-safe, no direct Postgres needed.
-     Replace NEON_API_URL with your project's HTTP endpoint from:
-     Neon Console → Project → Connection Details → "Serverless" tab
-  ═══════════════════════════════════════════ */
-  // ── NEON HTTP CONFIG ──────────────────────────────────────────────────────
-  // Neon's serverless HTTP driver endpoint: https://<host>/sql
-  // Auth: Basic — username = DB user, password = DB password
-  // Get these from: Neon Console → Connection Details → "Show password"
-  const NEON_SQL_URL  = 'https://ep-nameless-glade-aoxvuexk-pooler.c-2.ap-southeast-1.aws.neon.tech/sql';
-  const NEON_DB_USER  = 'neondb_owner';
-  const NEON_DB_PASS  = 'npg_y6TAdbPEV1JH'; // from Neon Console → Show password
-  const NEON_DB_NAME  = 'neondb';
-  const NEON_AUTH     = 'Basic ' + btoa(NEON_DB_USER + ':' + NEON_DB_PASS);
-  // ─────────────────────────────────────────────────────────────────────────
-
-  async function neonQuery(query, params = []) {
-    const res  = await fetch(NEON_SQL_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': NEON_AUTH,
-        'Neon-Connection-String': `postgresql://${NEON_DB_USER}:${NEON_DB_PASS}@ep-nameless-glade-aoxvuexk-pooler.c-2.ap-southeast-1.aws.neon.tech/${NEON_DB_NAME}?sslmode=require`
-      },
-      body: JSON.stringify({ query, params })
-    });
-    const text = await res.text();
-    if (!text) throw new Error('Empty response — check DB password and endpoint');
-    let data;
-    try { data = JSON.parse(text); } catch(e) { throw new Error('Bad JSON: ' + text.slice(0, 200)); }
-    if (!res.ok) throw new Error(data?.message || data?.error || `HTTP ${res.status}`);
-    // Neon /sql returns { fields:[{name},...], rows:[[v,v],...] }
-    const fields = (data.fields || []).map(f => f.name);
-    return (data.rows || []).map(row => Object.fromEntries(fields.map((f,i) => [f, row[i]])));
-  }
+  /* ══════════════ N8N WEBHOOK CONFIG ══════════════
+     All Neon queries are proxied through n8n webhooks to avoid CORS.
+     Paste your webhook URLs below after creating them in n8n.
+  ═════════════════════════════════════════════════ */
+  const N8N_LOG_WRITE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
+  const N8N_LOG_READ  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
 
   async function writeLog({ level = 'info', status = null, module, source, message, meta = {} }) {
     try {
-      const user = window._currentUser;
-      const uid  = user?.email || null;
-      await neonQuery(
-        `INSERT INTO logs (level, status, module, source, user_id, message, meta)
-         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)`,
-        [level, status, module, source, uid, message, JSON.stringify(meta)]
-      );
-    } catch (e) {
+      const uid = window._currentUser?.email || null;
+      await fetch(N8N_LOG_WRITE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level, status, module, source, user_id: uid, message, meta: JSON.stringify(meta) })
+      });
+    } catch(e) {
       console.warn('[writeLog] failed:', e.message);
     }
   }
@@ -2160,10 +2130,10 @@
       <p style="font-size:.8rem;">Loading logs…</p>
     </div></td></tr>`;
     try {
-      _logs = await neonQuery(
-        `SELECT id, created_at, level, status, module, source, user_id, message, meta
-         FROM logs ORDER BY created_at DESC LIMIT 200`
-      );
+      const res  = await fetch(N8N_LOG_READ);
+      const data = await res.json();
+      // n8n Respond to Webhook returns an array of items — each has a `json` property
+      _logs = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
       renderLogsTable();
       renderLogStats();
       document.getElementById('cntLogs').textContent    = _logs.length;
