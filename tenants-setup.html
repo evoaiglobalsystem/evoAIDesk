@@ -1872,10 +1872,16 @@
     _userStatusFilter = 'active';
     _activeTab = 'users';
     document.getElementById('panelTenants').classList.remove('active');
+    document.getElementById('panelSchedules').classList.remove('active');
+    document.getElementById('panelLogs').classList.remove('active');
     document.getElementById('panelUsers').classList.add('active');
     document.getElementById('tabBtnTenants').classList.remove('active');
+    document.getElementById('tabBtnSchedules').classList.remove('active');
+    document.getElementById('tabBtnLogs').classList.remove('active');
     document.getElementById('tabBtnUsers').classList.add('active');
     document.getElementById('sideTenantsLink').classList.remove('active');
+    document.getElementById('sideSchedulesLink').classList.remove('active');
+    document.getElementById('sideLogsLink').classList.remove('active');
     updateSidebarUserHighlights();
     renderUsersTable();
   }
@@ -1884,10 +1890,16 @@
     _userStatusFilter = 'suspended';
     _activeTab = 'users';
     document.getElementById('panelTenants').classList.remove('active');
+    document.getElementById('panelSchedules').classList.remove('active');
+    document.getElementById('panelLogs').classList.remove('active');
     document.getElementById('panelUsers').classList.add('active');
     document.getElementById('tabBtnTenants').classList.remove('active');
+    document.getElementById('tabBtnSchedules').classList.remove('active');
+    document.getElementById('tabBtnLogs').classList.remove('active');
     document.getElementById('tabBtnUsers').classList.add('active');
     document.getElementById('sideTenantsLink').classList.remove('active');
+    document.getElementById('sideSchedulesLink').classList.remove('active');
+    document.getElementById('sideLogsLink').classList.remove('active');
     updateSidebarUserHighlights();
     renderUsersTable();
   }
@@ -2194,7 +2206,7 @@
   let _logsLoading = false;
   let _logsLoaded  = false;
   let _logsPage = 1;
-  const LOGS_PER_PAGE = 10;
+  const LOGS_PER_PAGE = 25;
 
   async function loadLogs(force = false) {
     if (_logsLoading) return;
