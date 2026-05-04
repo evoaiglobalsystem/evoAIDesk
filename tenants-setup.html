@@ -54,8 +54,7 @@
   onAuthStateChanged(auth, async user => {
     if (!user) { window.location.replace("login.html"); return; }
 
-    // ISO 27001 A.9: Role check against Firestore — same source of truth as login.html
-    // (custom claims are not used; role lives in the users/{email} document)
+    // ISO 27001 A.9: Verify super-admin role from Firestore (same source of truth as login.html)
     try {
       const snap = await getDoc(doc(db, 'users', user.email));
       if (!snap.exists() || snap.data().role !== 'super-admin') {
@@ -1346,13 +1345,14 @@
   const N8N_LOG_WRITE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
   const N8N_LOG_READ  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
 
-  async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null, actor = null }) {
+  async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null }) {
     try {
-      const resolvedActor = actor || window._currentUser?.email || 'unknown';
+      // ISO 27001 A.12: user_id captures who performed every action
+      const user_id = window._currentUser?.email || 'unknown';
       await fetch(N8N_LOG_WRITE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level, status, module, source, actor: resolvedActor, user_id: resolvedActor, tenant_id, message, meta: JSON.stringify(meta) })
+        body: JSON.stringify({ level, status, module, source, user_id, tenant_id, message, meta: JSON.stringify(meta) })
       });
     } catch(e) {
       console.warn('[writeLog] failed:', e.message);
@@ -1554,7 +1554,6 @@
       writeLog({
         level: 'info', status: 'success',
         module: 'tenant', source: 'saveTenant',
-          actor: window._currentUser?.email || 'unknown',
         tenant_id: slug,
         message: `Tenant ${action}: ${name}`,
         meta: { slug, plan, status, action }
@@ -1567,7 +1566,6 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'tenant', source: 'saveTenant',
-          actor: window._currentUser?.email || 'unknown',
         tenant_id: document.getElementById('fSlug').value || null,
         message: `Failed to save tenant: ${e.message}`,
         meta: { slug: document.getElementById('fSlug').value }
@@ -1683,7 +1681,6 @@
       writeLog({
         level: 'info', status: 'success',
         module: 'user', source: 'saveUser',
-          actor: window._currentUser?.email || 'unknown',
         tenant_id: tenant_id || null,
         message: `User ${action}: ${google_id}`,
         meta: { google_id, role, status, tenant_id, action }
@@ -1696,7 +1693,6 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'user', source: 'saveUser',
-          actor: window._currentUser?.email || 'unknown',
         tenant_id: document.getElementById('uTenantId').value || null,
         message: `Failed to save user: ${e.message}`,
         meta: { google_id: document.getElementById('uGoogleId').value }
@@ -1729,7 +1725,6 @@
         writeLog({
           level: 'warn', status: 'success',
           module: 'user', source: 'deleteUser',
-          actor: window._currentUser?.email || 'unknown',
           tenant_id: deletedUser?.tenant_id || null,
           message: `User deleted: ${label}`,
           meta: { uid, label }
@@ -1741,7 +1736,6 @@
         writeLog({
           level: 'error', status: 'failure',
           module: 'user', source: 'deleteUser',
-          actor: window._currentUser?.email || 'unknown',
           tenant_id: _users.find(u => u._id === uid)?.tenant_id || null,
           message: `Failed to delete user: ${e.message}`,
           meta: { uid, label }
@@ -2180,7 +2174,6 @@
         writeLog({
           level: 'info', status: 'success',
           module: 'schedule', source: 'saveSchedule',
-          actor: window._currentUser?.email || 'unknown',
           tenant_id: tenant_id || null,
           message: `Schedule updated: ${job_name}`,
           meta: { job_name, job_type, frequency, tenant_id, action: 'updated' }
@@ -2193,7 +2186,6 @@
         writeLog({
           level: 'info', status: 'success',
           module: 'schedule', source: 'saveSchedule',
-          actor: window._currentUser?.email || 'unknown',
           tenant_id: tenant_id || null,
           message: `Schedule created: ${job_name}`,
           meta: { job_name, job_type, frequency, tenant_id, action: 'created' }
@@ -2207,7 +2199,6 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'schedule', source: 'saveSchedule',
-          actor: window._currentUser?.email || 'unknown',
         tenant_id: document.getElementById('schTenantId').value || null,
         message: `Failed to save schedule: ${e.message}`,
         meta: { job_name: document.getElementById('schJobName').value }
@@ -2229,7 +2220,6 @@
         writeLog({
           level: 'warn', status: 'success',
           module: 'schedule', source: 'deleteSchedule',
-          actor: window._currentUser?.email || 'unknown',
           tenant_id: deletedSch?.tenant_id || null,
           message: `Schedule deleted: ${label}`,
           meta: { id, label }
@@ -2241,7 +2231,6 @@
         writeLog({
           level: 'error', status: 'failure',
           module: 'schedule', source: 'deleteSchedule',
-          actor: window._currentUser?.email || 'unknown',
           tenant_id: _schedules.find(s => s._id === id)?.tenant_id || null,
           message: `Failed to delete schedule: ${e.message}`,
           meta: { id, label }
