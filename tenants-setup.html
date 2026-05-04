@@ -54,18 +54,16 @@
   onAuthStateChanged(auth, async user => {
     if (!user) { window.location.replace("login.html"); return; }
 
-    // ISO 27001 A.9: Enforce super-admin only access
-    // forceRefresh: true ensures we get the latest custom claims,
-    // not a cached token that may predate the claim being set
+    // ISO 27001 A.9: Role check against Firestore — same source of truth as login.html
+    // (custom claims are not used; role lives in the users/{email} document)
     try {
-      const token = await user.getIdTokenResult(true); // true = force refresh
-      if (token.claims.role !== 'super-admin') {
+      const snap = await getDoc(doc(db, 'users', user.email));
+      if (!snap.exists() || snap.data().role !== 'super-admin') {
         await signOut(auth);
         window.location.replace("login.html");
         return;
       }
     } catch(e) {
-      // If claim check fails (e.g. network error), fail safe — deny access
       await signOut(auth);
       window.location.replace("login.html");
       return;
@@ -80,7 +78,7 @@
     document.getElementById('userEmail').textContent    = user.email;
     window._currentUser = { name, email: user.email, initials };
 
-    // ISO 27001 A.9.4: 30-min inactivity session timeout
+    // ISO 27001 A.9.4: 30-min inactivity timeout
     let _idleTimer;
     const resetIdle = () => {
       clearTimeout(_idleTimer);
@@ -1504,7 +1502,7 @@
     document.getElementById('fContactPhone').value = t.tenant_contact_phone || '';
     document.getElementById('fLocation').value     = t.location             || '';
     document.getElementById('fFromEmail').value       = t.from_email         || '';
-    // ISO 27001 A.10: Never send credentials back to browser — write-only
+    // ISO 27001 A.10: Never send credentials back to browser
     document.getElementById('fSmtpAppPassword').value = '';
     document.getElementById('fSmtpAppPassword').placeholder = '•••••••• (leave blank to keep current)';
     document.getElementById('fSmtpAppPassword').type  = 'password';
@@ -1540,7 +1538,7 @@
         const existing = await window._getDoc(ref);
         if (existing.exists()) { toast(`Slug "${slug}" already exists`, 'error'); btn.disabled=false; resetSaveTenantBtn(); return; }
       }
-      // ISO 27001 A.10: Only persist smtp_app_password if a new value was typed
+      // ISO 27001 A.10: Only persist smtp_app_password if a new value was entered
       const data = {
         id: slug, name, slug, plan, status,
         timezone, currency, tenant_contact_email, tenant_contact_phone, location,
@@ -1716,7 +1714,7 @@
     btn.onclick = async () => {
       try {
         const deletedUser = _users.find(u => u._id === uid);
-        // ISO 27001 A.9.2: Revoke claims first so active sessions are blocked on next refresh
+        // ISO 27001 A.9.2: Revoke claims before deleting so active sessions are blocked on next refresh
         try {
           await fetch('/set-claims', {
             method: 'POST',
