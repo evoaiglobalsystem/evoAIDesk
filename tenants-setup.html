@@ -51,8 +51,23 @@
     window.location.replace("login.html");
   };
 
-  onAuthStateChanged(auth, user => {
+  onAuthStateChanged(auth, async user => {
     if (!user) { window.location.replace("login.html"); return; }
+
+    // ── ISO 27001 A.9: Enforce super-admin only access ──
+    try {
+      const token = await user.getIdTokenResult();
+      if (token.claims.role !== 'super-admin') {
+        await signOut(auth);
+        window.location.replace("login.html");
+        return;
+      }
+    } catch(e) {
+      await signOut(auth);
+      window.location.replace("login.html");
+      return;
+    }
+
     document.getElementById('authLoading').style.display = 'none';
     document.getElementById('appShell').style.display    = 'contents';
     const name     = user.displayName || user.email.split('@')[0];
@@ -61,6 +76,29 @@
     document.getElementById('userName').textContent     = name;
     document.getElementById('userEmail').textContent    = user.email;
     window._currentUser = { name, email: user.email, initials };
+
+    // ── ISO 27001 A.12: Log super-admin session start ──
+    writeLog({
+      level: 'info', status: 'success',
+      module: 'auth', source: 'onAuthStateChanged',
+      actor: user.email,
+      message: 'Super-admin session started',
+      meta: { email: user.email }
+    });
+
+    // ── ISO 27001 A.9.4: 30-min inactivity session timeout ──
+    let _idleTimer;
+    const resetIdle = () => {
+      clearTimeout(_idleTimer);
+      _idleTimer = setTimeout(async () => {
+        writeLog({ level: 'warn', status: 'success', module: 'auth', source: 'idleTimeout', actor: user.email, message: 'Session expired: inactivity timeout', meta: {} });
+        await signOut(auth);
+        window.location.replace("login.html");
+      }, 30 * 60 * 1000);
+    };
+    ['click','keydown','mousemove','scroll'].forEach(e => document.addEventListener(e, resetIdle, { passive: true }));
+    resetIdle();
+
     loadTenants();
     loadUsers();
     loadSchedules();
@@ -1315,13 +1353,14 @@
   const N8N_LOG_WRITE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
   const N8N_LOG_READ  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
 
-  async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null }) {
+  async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null, actor = null }) {
     try {
-      const uid = window._currentUser?.email || null;
+      // ISO 27001 A.12: Always capture who performed the action
+      const resolvedActor = actor || window._currentUser?.email || 'unknown';
       await fetch(N8N_LOG_WRITE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level, status, module, source, user_id: uid, tenant_id, message, meta: JSON.stringify(meta) })
+        body: JSON.stringify({ level, status, module, source, actor: resolvedActor, user_id: resolvedActor, tenant_id, message, meta: JSON.stringify(meta) })
       });
     } catch(e) {
       console.warn('[writeLog] failed:', e.message);
@@ -1471,7 +1510,9 @@
     document.getElementById('fContactPhone').value = t.tenant_contact_phone || '';
     document.getElementById('fLocation').value     = t.location             || '';
     document.getElementById('fFromEmail').value       = t.from_email         || '';
-    document.getElementById('fSmtpAppPassword').value = t.smtp_app_password  || '';
+    // ISO 27001 A.10: Never round-trip credentials to client — write-only
+    document.getElementById('fSmtpAppPassword').value = '';
+    document.getElementById('fSmtpAppPassword').placeholder = '•••••••• (leave blank to keep current)';
     document.getElementById('fSmtpAppPassword').type  = 'password';
     document.getElementById('tenantModal').classList.add('open');
   }
@@ -1505,10 +1546,12 @@
         const existing = await window._getDoc(ref);
         if (existing.exists()) { toast(`Slug "${slug}" already exists`, 'error'); btn.disabled=false; resetSaveTenantBtn(); return; }
       }
+      // ISO 27001 A.10: Only write smtp_app_password if a new value was entered
       const data = {
         id: slug, name, slug, plan, status,
         timezone, currency, tenant_contact_email, tenant_contact_phone, location,
-        from_email, smtp_app_password,
+        from_email,
+        ...(smtp_app_password ? { smtp_app_password } : {}),
         ..._editTenantSlug
           ? { updatedAt: window._serverTimestamp() }
           : { createdAt: window._serverTimestamp(), updatedAt: window._serverTimestamp() }
@@ -1519,6 +1562,7 @@
       writeLog({
         level: 'info', status: 'success',
         module: 'tenant', source: 'saveTenant',
+          actor: window._currentUser?.email || 'unknown',
         tenant_id: slug,
         message: `Tenant ${action}: ${name}`,
         meta: { slug, plan, status, action }
@@ -1531,6 +1575,7 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'tenant', source: 'saveTenant',
+          actor: window._currentUser?.email || 'unknown',
         tenant_id: document.getElementById('fSlug').value || null,
         message: `Failed to save tenant: ${e.message}`,
         meta: { slug: document.getElementById('fSlug').value }
@@ -1646,6 +1691,7 @@
       writeLog({
         level: 'info', status: 'success',
         module: 'user', source: 'saveUser',
+          actor: window._currentUser?.email || 'unknown',
         tenant_id: tenant_id || null,
         message: `User ${action}: ${google_id}`,
         meta: { google_id, role, status, tenant_id, action }
@@ -1658,6 +1704,7 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'user', source: 'saveUser',
+          actor: window._currentUser?.email || 'unknown',
         tenant_id: document.getElementById('uTenantId').value || null,
         message: `Failed to save user: ${e.message}`,
         meta: { google_id: document.getElementById('uGoogleId').value }
@@ -1674,12 +1721,24 @@
     const btn = document.getElementById('confirmOkBtn');
     btn.onclick = async () => {
       try {
+        const deletedUser = _users.find(u => u._id === uid);
+        // ISO 27001 A.9.2: Revoke Firebase claims before deleting doc
+        // so active sessions are blocked on next token refresh
+        try {
+          await fetch('/set-claims', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': window._CLAIMS_API_KEY || '' },
+            body: JSON.stringify({ uid, role: 'revoked', tenant_id: null, status: 'suspended' })
+          });
+        } catch(claimsErr) {
+          console.warn('[deleteUser] claims revoke failed (non-blocking):', claimsErr.message);
+        }
         await window._deleteDoc(window._doc(window._db, 'users', uid));
         toast('User deleted', 'success');
-        const deletedUser = _users.find(u => u._id === uid);
         writeLog({
           level: 'warn', status: 'success',
           module: 'user', source: 'deleteUser',
+          actor: window._currentUser?.email || 'unknown',
           tenant_id: deletedUser?.tenant_id || null,
           message: `User deleted: ${label}`,
           meta: { uid, label }
@@ -1691,6 +1750,7 @@
         writeLog({
           level: 'error', status: 'failure',
           module: 'user', source: 'deleteUser',
+          actor: window._currentUser?.email || 'unknown',
           tenant_id: _users.find(u => u._id === uid)?.tenant_id || null,
           message: `Failed to delete user: ${e.message}`,
           meta: { uid, label }
@@ -2129,6 +2189,7 @@
         writeLog({
           level: 'info', status: 'success',
           module: 'schedule', source: 'saveSchedule',
+          actor: window._currentUser?.email || 'unknown',
           tenant_id: tenant_id || null,
           message: `Schedule updated: ${job_name}`,
           meta: { job_name, job_type, frequency, tenant_id, action: 'updated' }
@@ -2141,6 +2202,7 @@
         writeLog({
           level: 'info', status: 'success',
           module: 'schedule', source: 'saveSchedule',
+          actor: window._currentUser?.email || 'unknown',
           tenant_id: tenant_id || null,
           message: `Schedule created: ${job_name}`,
           meta: { job_name, job_type, frequency, tenant_id, action: 'created' }
@@ -2154,6 +2216,7 @@
       writeLog({
         level: 'error', status: 'failure',
         module: 'schedule', source: 'saveSchedule',
+          actor: window._currentUser?.email || 'unknown',
         tenant_id: document.getElementById('schTenantId').value || null,
         message: `Failed to save schedule: ${e.message}`,
         meta: { job_name: document.getElementById('schJobName').value }
@@ -2175,6 +2238,7 @@
         writeLog({
           level: 'warn', status: 'success',
           module: 'schedule', source: 'deleteSchedule',
+          actor: window._currentUser?.email || 'unknown',
           tenant_id: deletedSch?.tenant_id || null,
           message: `Schedule deleted: ${label}`,
           meta: { id, label }
@@ -2186,6 +2250,7 @@
         writeLog({
           level: 'error', status: 'failure',
           module: 'schedule', source: 'deleteSchedule',
+          actor: window._currentUser?.email || 'unknown',
           tenant_id: _schedules.find(s => s._id === id)?.tenant_id || null,
           message: `Failed to delete schedule: ${e.message}`,
           meta: { id, label }
