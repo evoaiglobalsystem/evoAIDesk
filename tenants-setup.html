@@ -54,15 +54,18 @@
   onAuthStateChanged(auth, async user => {
     if (!user) { window.location.replace("login.html"); return; }
 
-    // ── ISO 27001 A.9: Enforce super-admin only access ──
+    // ISO 27001 A.9: Enforce super-admin only access
+    // forceRefresh: true ensures we get the latest custom claims,
+    // not a cached token that may predate the claim being set
     try {
-      const token = await user.getIdTokenResult();
+      const token = await user.getIdTokenResult(true); // true = force refresh
       if (token.claims.role !== 'super-admin') {
         await signOut(auth);
         window.location.replace("login.html");
         return;
       }
     } catch(e) {
+      // If claim check fails (e.g. network error), fail safe — deny access
       await signOut(auth);
       window.location.replace("login.html");
       return;
@@ -77,26 +80,18 @@
     document.getElementById('userEmail').textContent    = user.email;
     window._currentUser = { name, email: user.email, initials };
 
-    // ── ISO 27001 A.12: Log super-admin session start ──
-    writeLog({
-      level: 'info', status: 'success',
-      module: 'auth', source: 'onAuthStateChanged',
-      actor: user.email,
-      message: 'Super-admin session started',
-      meta: { email: user.email }
-    });
-
-    // ── ISO 27001 A.9.4: 30-min inactivity session timeout ──
+    // ISO 27001 A.9.4: 30-min inactivity session timeout
     let _idleTimer;
     const resetIdle = () => {
       clearTimeout(_idleTimer);
       _idleTimer = setTimeout(async () => {
-        writeLog({ level: 'warn', status: 'success', module: 'auth', source: 'idleTimeout', actor: user.email, message: 'Session expired: inactivity timeout', meta: {} });
         await signOut(auth);
         window.location.replace("login.html");
       }, 30 * 60 * 1000);
     };
-    ['click','keydown','mousemove','scroll'].forEach(e => document.addEventListener(e, resetIdle, { passive: true }));
+    ['click','keydown','mousemove','scroll'].forEach(e =>
+      document.addEventListener(e, resetIdle, { passive: true })
+    );
     resetIdle();
 
     loadTenants();
@@ -1355,7 +1350,6 @@
 
   async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null, actor = null }) {
     try {
-      // ISO 27001 A.12: Always capture who performed the action
       const resolvedActor = actor || window._currentUser?.email || 'unknown';
       await fetch(N8N_LOG_WRITE, {
         method: 'POST',
@@ -1510,7 +1504,7 @@
     document.getElementById('fContactPhone').value = t.tenant_contact_phone || '';
     document.getElementById('fLocation').value     = t.location             || '';
     document.getElementById('fFromEmail').value       = t.from_email         || '';
-    // ISO 27001 A.10: Never round-trip credentials to client — write-only
+    // ISO 27001 A.10: Never send credentials back to browser — write-only
     document.getElementById('fSmtpAppPassword').value = '';
     document.getElementById('fSmtpAppPassword').placeholder = '•••••••• (leave blank to keep current)';
     document.getElementById('fSmtpAppPassword').type  = 'password';
@@ -1546,7 +1540,7 @@
         const existing = await window._getDoc(ref);
         if (existing.exists()) { toast(`Slug "${slug}" already exists`, 'error'); btn.disabled=false; resetSaveTenantBtn(); return; }
       }
-      // ISO 27001 A.10: Only write smtp_app_password if a new value was entered
+      // ISO 27001 A.10: Only persist smtp_app_password if a new value was typed
       const data = {
         id: slug, name, slug, plan, status,
         timezone, currency, tenant_contact_email, tenant_contact_phone, location,
@@ -1722,8 +1716,7 @@
     btn.onclick = async () => {
       try {
         const deletedUser = _users.find(u => u._id === uid);
-        // ISO 27001 A.9.2: Revoke Firebase claims before deleting doc
-        // so active sessions are blocked on next token refresh
+        // ISO 27001 A.9.2: Revoke claims first so active sessions are blocked on next refresh
         try {
           await fetch('/set-claims', {
             method: 'POST',
