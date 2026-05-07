@@ -1682,7 +1682,7 @@
       }
       const data = {
         google_id, name, role, status, tenant_id,
-        ...(telegram_user_id ? { telegram_user_id } : {}),
+        telegram_user_id: telegram_user_id || '',
         ..._editUserId
           ? { updatedAt: window._serverTimestamp() }
           : { createdAt: window._serverTimestamp(), updatedAt: window._serverTimestamp() }
