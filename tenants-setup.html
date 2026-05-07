@@ -1204,6 +1204,14 @@
           </select>
           <div class="field-hint">Maps to <span style="color:var(--accent);">tenant_id</span> field in Firestore</div>
         </div>
+
+        <div class="form-section-title">Integrations</div>
+        <div class="field full">
+          <label>Telegram User ID</label>
+          <input type="text" id="uTelegramUserId" placeholder="e.g. 8494253461" autocomplete="off"
+            oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">telegram_user_id</span> in Firestore — numeric ID from Telegram</div>
+        </div>
       </div>
     </div>
     <div class="modal-foot">
@@ -1620,6 +1628,7 @@
     document.getElementById('uTenantId').value  = '';
     document.getElementById('uGoogleId').disabled = false;
     nameEl.disabled = false;
+    document.getElementById('uTelegramUserId').value = '';
     populateTenantDropdowns();
     document.getElementById('userModal').classList.add('open');
     setTimeout(() => document.getElementById('uGoogleId').focus(), 100);
@@ -1638,6 +1647,7 @@
     document.getElementById('uStatus').value    = u.status    || 'active';
     populateTenantDropdowns();
     document.getElementById('uTenantId').value  = u.tenant_id || '';
+    document.getElementById('uTelegramUserId').value = u.telegram_user_id || '';
     document.getElementById('uGoogleId').disabled = true;
     document.getElementById('userModal').classList.add('open');
   }
@@ -1650,6 +1660,7 @@
     const role      = document.getElementById('uRole').value;
     const status    = document.getElementById('uStatus').value;
     const tenant_id = document.getElementById('uTenantId').value;
+    const telegram_user_id = document.getElementById('uTelegramUserId').value.trim();
     if (!google_id)  { toast('Google ID / Email is required', 'error'); return; }
     if (!tenant_id)  { toast('Please select a tenant', 'error'); return; }
     const btn = document.getElementById('saveUserBtn');
@@ -1671,6 +1682,7 @@
       }
       const data = {
         google_id, name, role, status, tenant_id,
+        ...(telegram_user_id ? { telegram_user_id } : {}),
         ..._editUserId
           ? { updatedAt: window._serverTimestamp() }
           : { createdAt: window._serverTimestamp(), updatedAt: window._serverTimestamp() }
