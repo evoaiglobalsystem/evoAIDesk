@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>evoAIDesk CRM Bot — Command Reference v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0b1f3a;--surface:#0e1420;--surface2:#141c2a;--border:#1e2d42;
+  --accent:#00e5a0;--accent2:#00b8ff;--danger:#ff4d6d;--warn:#ffb730;
+  --text:#e8f0fe;--muted:#6b7fa3;--purple:#c084fc;
+  --hot:#ff4d6d;--warm:#ffb730;--cold:#64b4ff;--orange:#ff6b35;
+  --tg:#29a8eb;
+}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-weight:400;line-height:1.6;}
+.doc{width:90%;max-width:1400px;margin:0 auto;padding:32px 24px 48px;background:#080c10;}
+
+/* ── SECTION LABEL ── */
+.section-label{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── HERO ── */
+.hero{border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:30px 36px;margin-bottom:16px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,160,.07) 0%,transparent 70%);}
+.hero::after{content:'';position:absolute;bottom:-40px;left:30%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,184,255,.05) 0%,transparent 70%);}
+.hero-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
+.logo-badge{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:500;}
+.hero-divider{flex:1;height:1px;background:var(--border);min-width:20px;}
+.tg-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(41,168,235,.1);border:1px solid rgba(41,168,235,.25);border-radius:20px;padding:4px 12px;font-size:.65rem;color:var(--tg);font-weight:600;}
+.hero-title{font-size:1.75rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:8px;}
+.hero-title .g{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:.82rem;color:var(--muted);line-height:1.65;max-width:600px;margin-bottom:18px;}
+.hero-pills{display:flex;flex-wrap:wrap;gap:7px;}
+.hpill{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:.68rem;font-weight:600;color:var(--muted);}
+.hpill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--accent);}
+.hpill.blue .dot{background:var(--accent2);}
+.hpill.orange .dot{background:var(--orange);}
+.hpill.warn .dot{background:var(--warn);}
+.hpill.red .dot{background:var(--danger);}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.stat-label{font-size:.56rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.stat-val{font-size:1.25rem;font-weight:700;font-family:'DM Mono',monospace;}
+.stat-sub{font-size:.58rem;color:var(--muted);margin-top:2px;}
+.c-green{color:var(--accent);}.c-blue{color:var(--accent2);}.c-orange{color:var(--orange);}.c-warn{color:var(--warn);}.c-hot{color:var(--hot);}
+
+/* ── QUICK REF TABLE ── */
+.qref-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.qref-header{display:grid;grid-template-columns:2fr 3fr 1fr;gap:0;background:var(--surface2);border-bottom:1px solid var(--border);padding:9px 16px;}
+.qref-header span{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.qref-body{}
+.qref-group-label{background:rgba(0,229,160,.04);border-bottom:1px solid var(--border);border-top:1px solid var(--border);padding:7px 16px;font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:7px;}
+.qref-group-label:first-child{border-top:none;}
+.qref-row{display:grid;grid-template-columns:2fr 3fr 1fr;gap:0;border-bottom:1px solid rgba(30,45,66,.6);padding:7px 16px;align-items:center;transition:background .15s;}
+.qref-row:hover{background:rgba(255,255,255,.02);}
+.qref-row:last-child{border-bottom:none;}
+.qref-cmd{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--accent);background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);padding:2px 8px;border-radius:5px;display:inline-block;}
+.qref-cmd.blue{color:var(--accent2);background:rgba(0,184,255,.06);border-color:rgba(0,184,255,.15);}
+.qref-cmd.orange{color:var(--orange);background:rgba(255,107,53,.06);border-color:rgba(255,107,53,.15);}
+.qref-cmd.warn{color:var(--warn);background:rgba(255,183,48,.06);border-color:rgba(255,183,48,.15);}
+.qref-cmd.hot{color:var(--hot);background:rgba(255,77,109,.06);border-color:rgba(255,77,109,.15);}
+.qref-desc{font-size:.7rem;color:var(--muted);padding-left:12px;line-height:1.45;}
+.qref-tag{font-size:.55rem;font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:20px;font-weight:600;text-align:center;}
+.tag-overview{background:rgba(0,229,160,.1);color:var(--accent);border:1px solid rgba(0,229,160,.2);}
+.tag-count{background:rgba(0,184,255,.1);color:var(--accent2);border:1px solid rgba(0,184,255,.2);}
+.tag-reps{background:rgba(192,132,252,.1);color:var(--purple);border:1px solid rgba(192,132,252,.2);}
+.tag-list{background:rgba(0,229,160,.1);color:var(--accent);border:1px solid rgba(0,229,160,.2);}
+.tag-time{background:rgba(0,184,255,.1);color:var(--accent2);border:1px solid rgba(0,184,255,.2);}
+.tag-revenue{background:rgba(255,107,53,.1);color:var(--orange);border:1px solid rgba(255,107,53,.2);}
+.tag-tier{background:rgba(255,77,109,.1);color:var(--hot);border:1px solid rgba(255,77,109,.2);}
+.tag-segment{background:rgba(192,132,252,.1);color:var(--purple);border:1px solid rgba(192,132,252,.2);}
+.tag-system{background:rgba(255,183,48,.1);color:var(--warn);border:1px solid rgba(255,183,48,.2);}
+.tag-addlead{background:rgba(255,107,53,.1);color:var(--orange);border:1px solid rgba(255,107,53,.2);}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px;}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+.info-title{font-size:.76rem;font-weight:700;color:var(--text);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+
+/* ── TIER CARDS ── */
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.tier-card{border-radius:9px;padding:13px 16px;display:flex;align-items:center;gap:11px;}
+.tier-card.hot{background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.2);}
+.tier-card.warm{background:rgba(255,183,48,.07);border:1px solid rgba(255,183,48,.2);}
+.tier-card.cold{background:rgba(100,180,255,.07);border:1px solid rgba(100,180,255,.2);}
+.tier-emoji{font-size:1.4rem;flex-shrink:0;}
+.tier-info{}
+.tier-name{font-size:.78rem;font-weight:700;margin-bottom:1px;}
+.hot .tier-name{color:var(--hot);}
+.warm .tier-name{color:var(--warn);}
+.cold .tier-name{color:var(--cold);}
+.tier-score{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:2px;}
+.tier-desc{font-size:.62rem;color:var(--muted);line-height:1.45;}
+
+/* ── SCORING TABLE ── */
+.score-grid{display:flex;flex-direction:column;gap:5px;}
+.score-row{display:flex;align-items:center;gap:9px;font-size:.68rem;}
+.score-field{color:var(--text);font-weight:600;width:120px;flex-shrink:0;}
+.score-bar-wrap{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:2px;}
+.score-pts{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--accent);width:36px;text-align:right;flex-shrink:0;}
+
+/* ── PIPELINE STAGES ── */
+.stage-row-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;}
+.pipe-stage{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 5px;text-align:center;}
+.pipe-dot{width:22px;height:22px;border-radius:50%;margin:0 auto 4px;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;font-family:'DM Mono',monospace;}
+.pipe-name{font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+
+/* ── ADDLEAD FLOW ── */
+.flow-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px;overflow-x:auto;}
+.flow{display:flex;align-items:stretch;gap:0;}
+.flow-step{display:flex;flex-direction:column;align-items:center;min-width:95px;}
+.flow-node{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 10px;text-align:center;width:100%;position:relative;}
+.flow-step:first-child .flow-node,.flow-step:last-child .flow-node{border-color:var(--accent);}
+.flow-num{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--muted);margin-bottom:3px;}
+.flow-label{font-size:.68rem;font-weight:700;color:var(--text);}
+.flow-sub{font-size:.58rem;color:var(--muted);margin-top:2px;}
+.flow-arrow{display:flex;align-items:center;padding:0 4px;color:var(--border);font-size:16px;margin-top:-16px;flex-shrink:0;}
+
+/* ── LIMITS ── */
+.limits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px;}
+.limit-item{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.limit-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+.limit-title{font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+.limit-desc{font-size:.65rem;color:var(--muted);line-height:1.5;}
+
+/* ── KEYWORD PILLS ── */
+.kw-groups{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+.kw-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:14px 16px;}
+.kw-title{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.kw-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.pill{font-family:'DM Mono',monospace;font-size:.65rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:3px 9px;border-radius:5px;}
+.pill.a{border-color:rgba(0,229,160,.3);color:var(--accent);background:rgba(0,229,160,.06);}
+.pill.b{border-color:rgba(0,184,255,.3);color:var(--accent2);background:rgba(0,184,255,.06);}
+.pill.o{border-color:rgba(255,107,53,.3);color:var(--orange);background:rgba(255,107,53,.06);}
+
+/* ── FOOTER ── */
+.footer{display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid var(--border);gap:16px;flex-wrap:wrap;margin-top:24px;}
+.footer-brand{font-size:.82rem;font-weight:700;}
+.footer-brand .evo{color:var(--accent);}.footer-brand .ai{color:var(--accent2);}.footer-brand .rest{color:var(--text);}
+.footer-right{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);}
+.powered{display:flex;align-items:center;gap:5px;font-size:.65rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<!-- BACK BUTTON -->
+<div style="margin-bottom:14px;">
+  <a href="evoAIDesk_KnowMore.html" style="display:inline-flex;align-items:center;gap:7px;font-family:'Sora',sans-serif;font-size:.7rem;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 14px;text-decoration:none;transition:color .15s,border-color .15s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='rgba(0,229,160,.4)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Know More
+  </a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-top">
+    <img style="height:32px;width:auto;object-fit:contain;" src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk"/>
+    <span class="logo-badge">CRM Bot v1.7</span>
+    <div class="hero-divider"></div>
+    <span class="tg-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.888.942z"/></svg>
+      Telegram Bot
+    </span>
+  </div>
+  <div class="hero-title">CRM Bot <span class="g">Command Reference</span></div>
+  <div class="hero-sub">Everything your team needs to get answers from the bot — no guesswork. Type naturally using the keywords below. Case-insensitive.</div>
+  <div class="hero-pills">
+    <span class="hpill"><span class="dot"></span>Case-insensitive</span>
+    <span class="hpill blue"><span class="dot"></span>Add a number to any list query</span>
+    <span class="hpill warn"><span class="dot"></span>Type "refresh" to force-sync</span>
+    <span class="hpill orange"><span class="dot"></span>Cache auto-refreshes every 60 min</span>
+    <span class="hpill red"><span class="dot"></span>You only see your company's leads</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat"><div class="stat-label">Pipeline Stages</div><div class="stat-val c-green">8</div><div class="stat-sub">New → Won / Lost</div></div>
+  <div class="stat"><div class="stat-label">Lead Score</div><div class="stat-val c-hot">100</div><div class="stat-sub">Auto-computed</div></div>
+  <div class="stat"><div class="stat-label">Tiers</div><div class="stat-val c-warn">3</div><div class="stat-sub">HOT · WARM · COLD</div></div>
+  <div class="stat"><div class="stat-label">Cache TTL</div><div class="stat-val c-blue">60m</div><div class="stat-sub">Type refresh to reset</div></div>
+  <div class="stat"><div class="stat-label">Add Lead Steps</div><div class="stat-val c-orange">8</div><div class="stat-sub">/addlead to start</div></div>
+  <div class="stat"><div class="stat-label">Duplicate Check</div><div class="stat-val c-green">✓</div><div class="stat-sub">By email address</div></div>
+</div>
+
+<!-- QUICK REFERENCE TABLE -->
+<div class="section-label">⚡ Quick Reference — Commands at a Glance</div>
+<div class="qref-wrap">
+  <div class="qref-header">
+    <span>Command / Example</span>
+    <span>What it does</span>
+    <span>Category</span>
+  </div>
+  <div class="qref-body">
+
+    <!-- PIPELINE & OVERVIEW -->
+    <div class="qref-group-label">📊 Pipeline &amp; Overview</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">pipeline summary</span></div>
+      <div class="qref-desc">Full pipeline overview — stages, win rate, top rep, top source, total deal value</div>
+      <div><span class="qref-tag tag-overview">Overview</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">summary</span></div>
+      <div class="qref-desc">Quick alias for pipeline summary</div>
+      <div><span class="qref-tag tag-overview">Overview</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">funnel view</span></div>
+      <div class="qref-desc">Stage-by-stage drop-off analysis with % alerts</div>
+      <div><span class="qref-tag tag-overview">Overview</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">win rate</span></div>
+      <div class="qref-desc">Won vs lost vs total closed leads with percentage</div>
+      <div><span class="qref-tag tag-overview">Overview</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">top performer</span></div>
+      <div class="qref-desc">Rep with the most leads; also try "top rep" or "best performer"</div>
+      <div><span class="qref-tag tag-reps">Reps</span></div>
+    </div>
+
+    <!-- COUNTS & ASSIGNMENTS -->
+    <div class="qref-group-label">🔢 Counts &amp; Assignments</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">how many leads</span></div>
+      <div class="qref-desc">Total lead count</div>
+      <div><span class="qref-tag tag-count">Count</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">how many new leads</span></div>
+      <div class="qref-desc">Count for any specific pipeline stage — replace "new" with any stage name</div>
+      <div><span class="qref-tag tag-count">Count</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">how many hot leads</span></div>
+      <div class="qref-desc">Hot leads count</div>
+      <div><span class="qref-tag tag-count">Count</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">leads assigned to Raj</span></div>
+      <div class="qref-desc">Count + full lead list for that rep (use exact name as in CRM)</div>
+      <div><span class="qref-tag tag-reps">Reps</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">rep breakdown</span></div>
+      <div class="qref-desc">All reps ranked by lead count</div>
+      <div><span class="qref-tag tag-reps">Reps</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">stage breakdown</span></div>
+      <div class="qref-desc">All pipeline stages with counts and percentages</div>
+      <div><span class="qref-tag tag-count">Count</span></div>
+    </div>
+
+    <!-- LISTING & FILTERING -->
+    <div class="qref-group-label">📋 Listing &amp; Filtering</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">show me all leads</span></div>
+      <div class="qref-desc">Full lead list across all statuses</div>
+      <div><span class="qref-tag tag-list">List</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">show me all qualified leads</span></div>
+      <div class="qref-desc">Filter by any pipeline stage name</div>
+      <div><span class="qref-tag tag-list">List</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">show leads in healthcare</span></div>
+      <div class="qref-desc">Filter by industry — use any industry keyword (see reference below)</div>
+      <div><span class="qref-tag tag-list">List</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">list leads for Innova</span></div>
+      <div class="qref-desc">Filter by company name — partial match works</div>
+      <div><span class="qref-tag tag-list">List</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">show leads from referral</span></div>
+      <div class="qref-desc">Filter by lead source</div>
+      <div><span class="qref-tag tag-list">List</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">show intelligent automation leads</span></div>
+      <div class="qref-desc">Filter by service interest</div>
+      <div><span class="qref-tag tag-list">List</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">show latest 5 leads</span></div>
+      <div class="qref-desc">5 most recently added leads; also try "newest" or "most recent"</div>
+      <div><span class="qref-tag tag-time">Time</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd blue">show oldest leads</span></div>
+      <div class="qref-desc">Earliest entries first; also try "earliest"</div>
+      <div><span class="qref-tag tag-time">Time</span></div>
+    </div>
+
+    <!-- DEAL VALUE & REVENUE -->
+    <div class="qref-group-label">💰 Deal Value &amp; Revenue</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd orange">top 5 deals by value</span></div>
+      <div class="qref-desc">Top 5 highest deal values across all leads</div>
+      <div><span class="qref-tag tag-revenue">Revenue</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd orange">top 3 deal values in hot</span></div>
+      <div class="qref-desc">Top 3 HOT tier leads sorted by deal value</div>
+      <div><span class="qref-tag tag-revenue">Revenue</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd orange">revenue</span></div>
+      <div class="qref-desc">Total pipeline value + top 5 leads by deal value</div>
+      <div><span class="qref-tag tag-revenue">Revenue</span></div>
+    </div>
+
+    <!-- TIERS -->
+    <div class="qref-group-label">🌡️ Lead Tiers</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">show hot leads</span></div>
+      <div class="qref-desc">All HOT tier leads listed (score 60–100)</div>
+      <div><span class="qref-tag tag-tier">Tier</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">show me warm leads</span></div>
+      <div class="qref-desc">WARM tier leads (score 35–59)</div>
+      <div><span class="qref-tag tag-tier">Tier</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">show cold leads</span></div>
+      <div class="qref-desc">All COLD tier leads (score 0–34)</div>
+      <div><span class="qref-tag tag-tier">Tier</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">tier breakdown</span></div>
+      <div class="qref-desc">HOT / WARM / COLD counts with percentages</div>
+      <div><span class="qref-tag tag-tier">Tier</span></div>
+    </div>
+
+    <!-- SEGMENTS -->
+    <div class="qref-group-label">🏢 Segments &amp; Breakdowns</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">source breakdown</span></div>
+      <div class="qref-desc">All lead sources ranked by count</div>
+      <div><span class="qref-tag tag-segment">Segment</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">industry breakdown</span></div>
+      <div class="qref-desc">All industries ranked by lead count</div>
+      <div><span class="qref-tag tag-segment">Segment</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">service breakdown</span></div>
+      <div class="qref-desc">Service interest distribution across all leads</div>
+      <div><span class="qref-tag tag-segment">Segment</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd">company breakdown</span></div>
+      <div class="qref-desc">Leads grouped and counted per company</div>
+      <div><span class="qref-tag tag-segment">Segment</span></div>
+    </div>
+
+    <!-- SYSTEM -->
+    <div class="qref-group-label">⚙️ System Commands</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd warn">refresh</span></div>
+      <div class="qref-desc">Force-pull fresh data from CRM right now (bypasses 60-min cache)</div>
+      <div><span class="qref-tag tag-system">System</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd warn">reload</span> &nbsp;<span class="qref-cmd warn">update data</span></div>
+      <div class="qref-desc">Same as refresh — all three work</div>
+      <div><span class="qref-tag tag-system">System</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd orange">/addlead</span></div>
+      <div class="qref-desc">Start the guided 8-step flow to add a new lead to the CRM</div>
+      <div><span class="qref-tag tag-addlead">Add Lead</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd orange">cancel</span></div>
+      <div class="qref-desc">Abort the /addlead flow at any step</div>
+      <div><span class="qref-tag tag-addlead">Add Lead</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd orange">skip</span></div>
+      <div class="qref-desc">Skip an optional field during /addlead flow</div>
+      <div><span class="qref-tag tag-addlead">Add Lead</span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TIER + SCORING -->
+<div class="section-label">Lead Tiers &amp; Scoring</div>
+<div class="two-col">
+  <div class="info-card">
+    <div class="info-title">🌡️ Tier Thresholds</div>
+    <div class="tier-grid">
+      <div class="tier-card hot">
+        <div class="tier-emoji">🔴</div>
+        <div class="tier-info">
+          <div class="tier-name">HOT</div>
+          <div class="tier-score">Score: 60 – 100</div>
+          <div class="tier-desc">High completeness + advanced stage. Phone, email, company filled. Qualified or beyond.</div>
+        </div>
+      </div>
+      <div class="tier-card warm">
+        <div class="tier-emoji">🟡</div>
+        <div class="tier-info">
+          <div class="tier-name">WARM</div>
+          <div class="tier-score">Score: 35 – 59</div>
+          <div class="tier-desc">Partial data. Contacted or discovery stage. Good potential, needs nurturing.</div>
+        </div>
+      </div>
+      <div class="tier-card cold">
+        <div class="tier-emoji">🔵</div>
+        <div class="tier-info">
+          <div class="tier-name">COLD</div>
+          <div class="tier-score">Score: 0 – 34</div>
+          <div class="tier-desc">Minimal info or very early stage. Needs qualification work before investing time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="info-card">
+    <div class="info-title">⭐ How Scores Are Computed</div>
+    <div class="score-grid">
+      <div class="score-row"><span class="score-field">Phone number</span><div class="score-bar-wrap"><div class="score-bar-fill" style="width:75%;background:var(--accent);"></div></div><span class="score-pts">+15</span></div>
+      <div class="score-row"><span class="score-field">Pipeline stage</span><div class="score-bar-wrap"><div class="score-bar-fill" style="width:100%;background:var(--accent2);"></div></div><span class="score-pts">5–100</span></div>
+      <div class="score-row"><span class="score-field">Email address</span><div class="score-bar-wrap"><div class="score-bar-fill" style="width:50%;background:var(--accent);"></div></div><span class="score-pts">+10</span></div>
+      <div class="score-row"><span class="score-field">Company name</span><div class="score-bar-wrap"><div class="score-bar-fill" style="width:50%;background:var(--accent);"></div></div><span class="score-pts">+10</span></div>
+      <div class="score-row"><span class="score-field">LinkedIn URL</span><div class="score-bar-wrap"><div class="score-bar-fill" style="width:50%;background:var(--accent);"></div></div><span class="score-pts">+10</span></div>
+      <div class="score-row"><span class="score-field">Service interest</span><div class="score-bar-wrap"><div class="score-bar-fill" style="width:50%;background:var(--accent);"></div></div><span class="score-pts">+10</span></div>
+      <div class="score-row"><span class="score-field">Deal value</span><div class="score-bar-wrap"><div class="score-bar-fill" style="width:100%;background:var(--warn);"></div></div><span class="score-pts">up to +20</span></div>
+      <div style="font-size:.6rem;color:var(--muted);margin-top:4px;">Deal value: +1 per ₹5,000 · Max score capped at 100</div>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE STAGES -->
+<div class="section-label" style="margin-top:16px;">Pipeline Stage Names (use these exactly)</div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+  <div class="stage-row-grid">
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(0,229,160,.15);color:var(--accent);">1</div><div class="pipe-name">New</div></div>
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(0,184,255,.15);color:var(--accent2);">2</div><div class="pipe-name">Contacted</div></div>
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(192,132,252,.15);color:var(--purple);">3</div><div class="pipe-name">Discovery Call</div></div>
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(255,183,48,.15);color:var(--warn);">4</div><div class="pipe-name">Qualified</div></div>
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(255,107,53,.15);color:var(--orange);">5</div><div class="pipe-name">Proposal Sent</div></div>
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(255,77,109,.15);color:var(--hot);">6</div><div class="pipe-name">Negotiation</div></div>
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(0,229,160,.2);color:var(--accent);">✓</div><div class="pipe-name">Won</div></div>
+    <div class="pipe-stage"><div class="pipe-dot" style="background:rgba(255,77,109,.15);color:var(--hot);">✗</div><div class="pipe-name">Lost</div></div>
+  </div>
+</div>
+
+<!-- KEYWORD REFERENCE -->
+<div class="section-label">Keyword Reference</div>
+<div class="kw-groups">
+  <div class="kw-card">
+    <div class="kw-title">Services (exact match)</div>
+    <div class="kw-pills">
+      <span class="pill b">ai strategy</span>
+      <span class="pill b">intelligent automation</span>
+      <span class="pill b">predictive analytics</span>
+    </div>
+  </div>
+  <div class="kw-card">
+    <div class="kw-title">System Commands</div>
+    <div class="kw-pills">
+      <span class="pill a">refresh</span>
+      <span class="pill a">reload</span>
+      <span class="pill a">update data</span>
+      <span class="pill a">reset</span>
+      <span class="pill o">/addlead</span>
+      <span class="pill o">/newlead</span>
+      <span class="pill o">cancel</span>
+      <span class="pill o">skip</span>
+    </div>
+  </div>
+  <div class="kw-card">
+    <div class="kw-title">Industry Keywords (shortcuts work)</div>
+    <div class="kw-pills">
+      <span class="pill">healthcare</span>
+      <span class="pill">pharma</span>
+      <span class="pill">banking</span>
+      <span class="pill">bfsi</span>
+      <span class="pill">fintech</span>
+      <span class="pill">retail</span>
+      <span class="pill">fmcg</span>
+      <span class="pill">software</span>
+      <span class="pill">logistics</span>
+      <span class="pill">manufacturing</span>
+      <span class="pill">insurance</span>
+      <span class="pill">education</span>
+      <span class="pill">energy</span>
+      <span class="pill">real estate</span>
+      <span class="pill">media</span>
+      <span class="pill">travel</span>
+      <span class="pill">consulting</span>
+    </div>
+  </div>
+  <div class="kw-card">
+    <div class="kw-title">Scoring-Related Keywords</div>
+    <div class="kw-pills">
+      <span class="pill">hot</span>
+      <span class="pill">warm</span>
+      <span class="pill">cold</span>
+      <span class="pill">tier breakdown</span>
+      <span class="pill">score</span>
+      <span class="pill">priority</span>
+      <span class="pill">top deals</span>
+      <span class="pill">deal value</span>
+      <span class="pill">revenue</span>
+      <span class="pill">biggest deals</span>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LEAD FLOW -->
+<div class="section-label">Adding a New Lead — Step by Step</div>
+<div class="flow-wrap">
+  <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px;">Type <span style="font-family:'DM Mono';color:var(--orange);background:var(--surface2);padding:1px 7px;border-radius:4px;border:1px solid var(--border);">/addlead</span> to start. Type <span style="font-family:'DM Mono';color:var(--muted);background:var(--surface2);padding:1px 7px;border-radius:4px;border:1px solid var(--border);">skip</span> for optional fields. Type <span style="font-family:'DM Mono';color:var(--muted);background:var(--surface2);padding:1px 7px;border-radius:4px;border:1px solid var(--border);">cancel</span> anytime to abort.</div>
+  <div class="flow">
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">START</div><div class="flow-label">/addlead</div><div class="flow-sub">command</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 1</div><div class="flow-label">Full Name</div><div class="flow-sub">required</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 2</div><div class="flow-label">Phone</div><div class="flow-sub">or skip</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 3</div><div class="flow-label">Company</div><div class="flow-sub">or skip</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 4</div><div class="flow-label">Service</div><div class="flow-sub">pick 1–4</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 5</div><div class="flow-label">Source</div><div class="flow-sub">or skip</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 6</div><div class="flow-label">Assign To</div><div class="flow-sub">rep name</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 7</div><div class="flow-label">Deal Value</div><div class="flow-sub">₹ or skip</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">Step 8</div><div class="flow-label">Confirm</div><div class="flow-sub">type yes</div></div></div>
+    <div class="flow-arrow">›</div>
+    <div class="flow-step"><div class="flow-node"><div class="flow-num">DONE</div><div class="flow-label">Saved ✅</div><div class="flow-sub">in CRM</div></div></div>
+  </div>
+</div>
+
+<!-- LIMITATIONS -->
+<div class="section-label">Limitations to Know</div>
+<div class="limits-grid">
+  <div class="limit-item"><span class="limit-icon">🔤</span><div><div class="limit-title">Use exact keywords</div><div class="limit-desc">"Who's my star closer?" won't work. Use "top performer" instead. The bot matches fixed phrases, not free-form language.</div></div></div>
+  <div class="limit-item"><span class="limit-icon">👤</span><div><div class="limit-title">Full rep names only</div><div class="limit-desc">Use the rep's full name as stored in the CRM. "Chandra" won't match "Chandrashekhar".</div></div></div>
+  <div class="limit-item"><span class="limit-icon">⏱️</span><div><div class="limit-title">Data is cached (60 min)</div><div class="limit-desc">The bot caches data to stay fast. Type "refresh" if you need real-time data after a recent CRM update.</div></div></div>
+  <div class="limit-item"><span class="limit-icon">📏</span><div><div class="limit-title">Lead lists capped at 15 by default</div><div class="limit-desc">All lead list queries show up to 15 results. Add "all" to see everything: "show all leads" or "show all hot leads". For ranked queries (top deals, latest, oldest) the default is top 5 unless you specify a number: "latest 10 leads".</div></div></div>
+  <div class="limit-item"><span class="limit-icon">🔁</span><div><div class="limit-title">One query at a time</div><div class="limit-desc">The bot processes one message at a time. Wait for the response before sending the next query.</div></div></div>
+  <div class="limit-item"><span class="limit-icon">🚫</span><div><div class="limit-title">Off-topic queries blocked</div><div class="limit-desc">The bot only handles CRM queries. Anything unrelated returns a polite error with example commands.</div></div></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div>
+    <div class="footer-brand"><span class="evo">evo</span><span class="ai">AI</span><span class="rest">Desk</span> &nbsp;·&nbsp; <span style="font-weight:400;color:var(--muted);">CRM Bot Command Reference</span></div>
+    <div style="font-size:.6rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;">All data stays within your private CRM · No external data sharing</div>
+  </div>
+  <div style="text-align:right;">
+    <div class="powered">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Powered by <a href="https://evoaiglobal.ai" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;">evoaiglobal.ai</a>
+    </div>
+    <div style="font-size:.58rem;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;">evoAIDesk_ChatBot_CheatSheet · v2.0 &nbsp;·&nbsp; © 2026 evoAI Global</div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
