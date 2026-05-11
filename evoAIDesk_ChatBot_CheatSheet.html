@@ -23,12 +23,12 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-w
 
 /* ── HERO ── */
 .hero{border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:30px 36px;margin-bottom:16px;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,160,.07) 0%,transparent 70%);}
-.hero::after{content:'';position:absolute;bottom:-40px;left:30%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,184,255,.05) 0%,transparent 70%);}
+.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,160,.07) 0%,transparent 70%);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:-40px;left:30%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,184,255,.05) 0%,transparent 70%);pointer-events:none;}
 .hero-top{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
 .logo-badge{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.25);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:500;}
 .hero-divider{flex:1;height:1px;background:var(--border);min-width:20px;}
-.tg-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(41,168,235,.1);border:1px solid rgba(41,168,235,.25);border-radius:20px;padding:4px 12px;font-size:.65rem;color:var(--tg);font-weight:600;}
+.tg-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(41,168,235,.1);border:1px solid rgba(41,168,235,.25);border-radius:20px;padding:4px 12px;font-size:.65rem;color:var(--tg);font-weight:600;text-decoration:none;position:relative;z-index:10;pointer-events:all;cursor:pointer;}
 .hero-title{font-size:1.75rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:8px;}
 .hero-title .g{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .hero-sub{font-size:.82rem;color:var(--muted);line-height:1.65;max-width:600px;margin-bottom:18px;}
@@ -163,10 +163,10 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-w
     <img style="height:32px;width:auto;object-fit:contain;" src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk"/>
     <span class="logo-badge">CRM Bot v1.7</span>
     <div class="hero-divider"></div>
-    <span class="tg-badge">
+    <a href="https://t.me/evoaidesk_bot" target="_blank" class="tg-badge" style="text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s;" onmouseover="this.style.background='rgba(41,168,235,.2)';this.style.borderColor='rgba(41,168,235,.5)'" onmouseout="this.style.background='rgba(41,168,235,.1)';this.style.borderColor='rgba(41,168,235,.25)'">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.888.942z"/></svg>
-      Telegram Bot
-    </span>
+      Try Bot ↗
+    </a>
   </div>
   <div class="hero-title">CRM Bot <span class="g">Command Reference</span></div>
   <div class="hero-sub">Everything your team needs to get answers from the bot — no guesswork. Type naturally using the keywords below. Case-insensitive.</div>
