@@ -2036,8 +2036,8 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="searchInput" placeholder="Search name, email, company, service, assignee… then press Enter" oninput="onSearchInput(this.value)" onkeydown="if(event.key==='Enter'){ var t=this.value.trim(); if(t) runSearch(t); else clearSearch(); }"/>
       </div>
-      <button id="searchBtn" onclick="(function(){ var t=document.getElementById('searchInput').value.trim(); if(t) runSearch(t); else clearSearch(); })()" style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Search</button>
-      <button id="searchClearBtn" onclick="clearSearch()" title="Clear search" style="display:none;padding:8px 11px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:.85rem;cursor:pointer;line-height:1;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+      <button id="searchBtn" class="pill-btn primary" onclick="(function(){ var t=document.getElementById('searchInput').value.trim(); if(t) runSearch(t); else clearSearch(); })()">Search</button>
+      <button id="searchClearBtn" class="pill-btn outline" onclick="clearSearch()" title="Clear search" style="display:none;">✕</button>
       <select id="serviceFilter" onchange="onFilterChange()">
         <option value="">All services</option>
         <option>AI Strategy &amp; Consulting</option>
