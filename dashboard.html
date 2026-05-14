@@ -330,6 +330,26 @@
     return snap.docs.map(d => window.docToLead(d));
   };
 
+  /* ─── Overdue Leads: server-side followupDate range query ─── */
+  window.dbLoadOverdueLeads = async (filters = {}) => {
+    const ref = collection(db, 'leads');
+    const tenantId = window._currentTenantId || '';
+    const todayStart = Timestamp.fromDate(new Date(new Date().toISOString().slice(0,10) + 'T00:00:00'));
+    const constraints = [
+      where('tenant_id',    '==', tenantId),
+      where('deleted',      '==', false),
+      where('followupDate', '<',  todayStart),
+      orderBy('followupDate', 'asc')  // oldest overdue first
+    ];
+    if (filters.service)  constraints.push(where('service',  '==', filters.service));
+    if (filters.industry) constraints.push(where('industry', '==', filters.industry));
+    const snap = await getDocs(query(ref, ...constraints));
+    // status not-in can't be combined with range filter in Firestore — exclude Won/Lost client-side
+    return snap.docs
+      .map(d => window.docToLead(d))
+      .filter(l => l.status !== 'Won' && l.status !== 'Lost');
+  };
+
   /* ─── CRUD ─── */
   window.dbAddLead = async (lead) => {
     // Store any incoming leadId as reference_lead_id (from import/external source)
@@ -3143,10 +3163,7 @@ async function runOverdueFilter() {
   document.getElementById('searchModeBanner').classList.remove('show');
   setLoadingState(true);
   try {
-    const today = new Date().toISOString().slice(0,10);
-    // Always search with empty filters so status filter never contaminates overdue results
-    const all = await window.dbSearchLeads('', { service: activeFilters.service, industry: activeFilters.industry }, 500);
-    const overdue = all.filter(l => l.followup && l.followup < today && l.status !== 'Won' && l.status !== 'Lost');
+    const overdue = await window.dbLoadOverdueLeads({ service: activeFilters.service, industry: activeFilters.industry });
     searchResults = overdue; currentLeads = overdue;
     document.getElementById('cnt-overdue').textContent        = overdue.length;
     document.getElementById('overdueModeBanner').classList.add('show');
