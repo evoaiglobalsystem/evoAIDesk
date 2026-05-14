@@ -315,6 +315,43 @@
       .filter(l => JSON.stringify(l).toLowerCase().includes(term));
   };
 
+  /* ─── Field-targeted search: server-side range query on a specific Firestore field ─── */
+  window.dbFieldSearch = async (field, term, filters = {}) => {
+    if (!term) return [];
+    const ref = collection(db, 'leads');
+    const tenantId = window._currentTenantId || '';
+    const lo  = term.toLowerCase();
+    const hi  = lo + '\uf8ff';
+
+    // Exact-match fields (status, assignedTo) use == instead of range
+    const exactFields = ['status', 'assignedTo'];
+    const isExact = exactFields.includes(field);
+
+    const constraints = [
+      where('tenant_id', '==', tenantId),
+      where('deleted',   '==', false),
+    ];
+
+    if (isExact) {
+      constraints.push(where(field, '==', term));
+    } else {
+      constraints.push(where(field, '>=', lo));
+      constraints.push(where(field, '<=', hi));
+      constraints.push(orderBy(field));
+    }
+
+    // Apply any active dropdown filters
+    if (filters.status   && field !== 'status')     constraints.push(where('status',     '==', filters.status));
+    if (filters.service  && field !== 'service')    constraints.push(where('service',    '==', filters.service));
+    if (filters.industry && field !== 'industry')   constraints.push(where('industry',   '==', filters.industry));
+    if (filters.assignedTo && field !== 'assignedTo') constraints.push(where('assignedTo','==', filters.assignedTo));
+
+    if (!isExact) constraints.push(limit(200));
+
+    const snap = await getDocs(query(ref, ...constraints));
+    return snap.docs.map(d => window.docToLead(d));
+  };
+
   /* ─── My Leads: direct Firestore query by assignedToEmail ─── */
   window.dbLoadMyLeads = async (email) => {
     const ref = collection(db, 'leads');
@@ -928,7 +965,33 @@
   .export-drop-item:hover { background: rgba(0,229,160,.06); color: var(--accent); }
   .export-drop-item svg { flex-shrink: 0; margin-top: 2px; }
 
-  /* ── EMPTY / LOADING ── */
+  /* ── FIELD SEARCH ── */
+  .search-field-wrap {
+    display: flex; align-items: center;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; flex: 1; min-width: 0;
+  }
+  .search-field-wrap:focus-within { border-color: var(--accent2); }
+  .search-field-wrap select {
+    background: rgba(0,184,255,.08); border: none; border-right: 1px solid var(--border);
+    color: var(--accent2); font-family: var(--font); font-size: .76rem; font-weight: 600;
+    padding: 0 10px; height: 38px; cursor: pointer; outline: none; flex-shrink: 0;
+    min-width: 110px;
+  }
+  .search-field-wrap select:hover { background: rgba(0,184,255,.14); }
+  .search-wrap-inner {
+    display: flex; align-items: center; gap: 8px; padding: 0 12px;
+    flex: 1; background: transparent; border: none;
+  }
+  .search-wrap-inner svg { color: var(--muted); flex-shrink: 0; }
+  .search-wrap-inner input {
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-family: var(--font); font-size: .84rem;
+    width: 100%; padding: 9px 0;
+  }
+  .search-wrap-inner input::placeholder { color: var(--muted); font-size: .78rem; }
+
+
   .empty-state { padding: 56px 20px; text-align: center; color: var(--muted); }
   .empty-state svg { margin-bottom: 12px; opacity: .35; }
   .empty-state p { font-size: .88rem; }
@@ -2032,9 +2095,19 @@
     </div>
 
     <div class="toolbar">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="Search name, email, company, service, assignee… then press Enter" oninput="onSearchInput(this.value)" onkeydown="if(event.key==='Enter'){ var t=this.value.trim(); if(t) runSearch(t); else clearSearch(); }"/>
+      <div class="search-field-wrap">
+        <select id="searchFieldSelect" title="Choose which field to search">
+          <option value="fullName">Name</option>
+          <option value="email">Email</option>
+          <option value="company">Company</option>
+          <option value="phone">Phone</option>
+          <option value="status">Status</option>
+          <option value="assignedTo">Assigned To</option>
+        </select>
+        <div class="search-wrap search-wrap-inner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Enter value, press Enter or click Search…" oninput="onSearchInput(this.value)" onkeydown="if(event.key==='Enter'){ var t=this.value.trim(); if(t) runSearch(t); else clearSearch(); }"/>
+        </div>
       </div>
       <button id="searchBtn" class="pill-btn primary" onclick="(function(){ var t=document.getElementById('searchInput').value.trim(); if(t) runSearch(t); else clearSearch(); })()">Search</button>
       <button id="searchClearBtn" class="pill-btn outline" onclick="clearSearch()" title="Clear search" style="display:none;">✕</button>
@@ -3280,9 +3353,16 @@ async function runSearch(term) {
   const clearBtn = document.getElementById('searchClearBtn');
   if (clearBtn) clearBtn.style.display = '';
   try {
-    searchResults = await window.dbSearchLeads(term, activeFilters, 500);
+    const fieldSel = document.getElementById('searchFieldSelect');
+    const field = fieldSel ? fieldSel.value : 'fullName';
+    searchResults = await window.dbFieldSearch(field, term, activeFilters);
     document.getElementById('searchModeBanner').classList.add('show');
-    document.getElementById('searchResultCount').textContent = searchResults.length;
+    const fieldLabels = {
+      fullName:'Name', email:'Email', company:'Company',
+      phone:'Phone', status:'Status', assignedTo:'Assigned To'
+    };
+    document.getElementById('searchResultCount').textContent =
+      `${searchResults.length} (field: ${fieldLabels[field] || field})`;
     document.getElementById('pagination').style.display      = 'none';
     document.getElementById('listPagination').style.display  = 'none';
     currentLeads = searchResults;
