@@ -3251,6 +3251,10 @@ function onFilterChange() {
   activeFilters.industry = document.getElementById('industryFilter').value;
   clearSearch();
   resetPagination();
+
+  if (isOverdueMode) { runOverdueFilter(); return; }
+  if (isMyLeadsMode) { runMyLeadsFilter(); return; }
+
   loadPage('first').then(refreshCounts);
 }
 
