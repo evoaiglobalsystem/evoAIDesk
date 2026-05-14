@@ -335,9 +335,10 @@
     if (isExact) {
       constraints.push(where(field, '==', term));
     } else {
+      // orderBy on the range field MUST come before the >= / <= where clauses
+      constraints.push(orderBy(field));
       constraints.push(where(field, '>=', lo));
       constraints.push(where(field, '<=', hi));
-      constraints.push(orderBy(field));
     }
 
     // Apply any active dropdown filters
