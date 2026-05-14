@@ -3171,12 +3171,7 @@ async function runOverdueFilter() {
     document.getElementById('pagination').style.display       = 'none';
     document.getElementById('listPagination').style.display   = 'none';
     renderCurrentView();
-  } catch(e) {
-    // Log full error so the Firestore index creation URL is visible in console
-    console.error('[evoAIDesk] runOverdueFilter error:', e);
-    if (e.message) console.error('[evoAIDesk] message:', e.message);
-    toast('Failed to load overdue leads: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Failed to load overdue leads: ' + e.message, 'error'); }
   finally { setLoadingState(false); }
 }
 
