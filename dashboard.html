@@ -3367,7 +3367,21 @@ async function runSearch(term) {
     document.getElementById('listPagination').style.display  = 'none';
     currentLeads = searchResults;
     renderCurrentView();
-  } catch(e) { toast('Search failed: ' + e.message, 'error'); }
+  } catch(e) {
+    // Firestore missing-index errors contain a direct link to create the index in the Firebase console.
+    // Log it as a clickable group so the developer can just click it.
+    const indexUrl = (e.message || '').match(/https:\/\/console\.firebase\.google\.com\S+/)?.[0];
+    if (indexUrl) {
+      console.group('%c⚠️ Firestore index required for this search field', 'color:#ffb730;font-weight:700;');
+      console.error(e);
+      console.log('%c👉 Click to create the missing index:', 'color:#00e5a0;font-weight:600;', indexUrl);
+      console.groupEnd();
+      toast('Index missing — check the console to create it (F12)', 'warn');
+    } else {
+      console.error('[evoAIDesk] Search failed:', e);
+      toast('Search failed: ' + e.message, 'error');
+    }
+  }
   finally { setLoadingState(false); }
 }
 
