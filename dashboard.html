@@ -315,6 +315,21 @@
       .filter(l => JSON.stringify(l).toLowerCase().includes(term));
   };
 
+  /* ─── My Leads: direct Firestore query by assignedToEmail ─── */
+  window.dbLoadMyLeads = async (email) => {
+    const ref = collection(db, 'leads');
+    const tenantId = window._currentTenantId || '';
+    const q = query(
+      ref,
+      where('tenant_id',       '==', tenantId),
+      where('deleted',         '==', false),
+      where('assignedToEmail', '==', email),
+      orderBy('createdAt', 'desc')
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map(d => window.docToLead(d));
+  };
+
   /* ─── CRUD ─── */
   window.dbAddLead = async (lead) => {
     // Store any incoming leadId as reference_lead_id (from import/external source)
@@ -3179,8 +3194,7 @@ async function runMyLeadsFilter() {
   try {
     const myEmail = (window._currentUserEmail || '').toLowerCase();
     if (!myEmail) { toast('No user email found', 'warn'); return; }
-    const all = await window.dbSearchLeads('', {}, 500);
-    const mine = all.filter(l => (l.assignedToEmail || '').toLowerCase() === myEmail);
+    const mine = await window.dbLoadMyLeads(myEmail);
     searchResults = mine; currentLeads = mine;
     document.getElementById('cnt-my').textContent = mine.length;
     document.getElementById('pagination').style.display     = 'none';
