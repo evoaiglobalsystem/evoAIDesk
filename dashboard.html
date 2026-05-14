@@ -336,13 +336,13 @@
     const tenantId = window._currentTenantId || '';
     const todayStart = Timestamp.fromDate(new Date(new Date().toISOString().slice(0,10) + 'T00:00:00'));
     const constraints = [
-      where('tenant_id',    '==', tenantId),
-      where('deleted',      '==', false),
-      where('followupDate', '<',  todayStart),
-      orderBy('followupDate', 'asc')  // oldest overdue first
+      where('tenant_id', '==', tenantId),
+      where('deleted',   '==', false),
     ];
     if (filters.service)  constraints.push(where('service',  '==', filters.service));
     if (filters.industry) constraints.push(where('industry', '==', filters.industry));
+    constraints.push(where('followupDate', '<', todayStart));
+    constraints.push(orderBy('followupDate', 'asc'));  // oldest overdue first
     const snap = await getDocs(query(ref, ...constraints));
     // status not-in can't be combined with range filter in Firestore — exclude Won/Lost client-side
     return snap.docs
