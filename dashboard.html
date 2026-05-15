@@ -3095,19 +3095,17 @@ async function refreshCounts() {
     try {
       const pipelineStatuses = ['New','Contacted','Discovery Call','Qualified','Proposal Sent','Negotiation'];
       const activeLeads = await window.dbSearchLeads('', {}, 500);
-      const isCapped = activeLeads.length === 500;
-
-      const pipelineLeads = activeLeads.filter(l => pipelineStatuses.includes(l.status));
-      const total = pipelineLeads
+      const total = activeLeads
+        .filter(l => pipelineStatuses.includes(l.status))
         .reduce((sum, l) => sum + (Number(String(l.dealvalue||'').replace(/[^0-9.]/g,''))||0), 0);
 
-      document.getElementById('s-pipeline').textContent = total > 0 ? fmtCurrency(total) : '—';
-      document.getElementById('s-pipeline').title       = isCapped
-        ? 'Estimated from first 500 active leads (excl. Won / Lost)'
-        : 'Sum of all active pipeline deal values (excl. Won / Lost)';
-      document.getElementById('s-pipeline-sub').textContent = isCapped
-        ? 'Active deals · est. 500 leads'
-        : `Active deals · ${pipelineLeads.length} lead${pipelineLeads.length !== 1 ? 's' : ''}`;
+      let formatted;
+      if (total > 0) formatted = fmtCurrency(total);
+      else           formatted = '—';
+
+      document.getElementById('s-pipeline').textContent     = formatted;
+      document.getElementById('s-pipeline').title           = 'Sampled from first 500 active leads (excl. Won / Lost)';
+      document.getElementById('s-pipeline-sub').textContent = 'Active deals · est. 500 leads';
 
       const today = new Date().toISOString().slice(0,10);
       const overdueCount = activeLeads.filter(l =>
@@ -5011,24 +5009,31 @@ async function emptyTrash() {
   if (!confirm(`Permanently delete ALL ${n} lead${n!==1?'s':''} in Trash?
 
 This CANNOT be undone.`)) return;
-  let done = 0, failed = 0;
+
+  // Run all deletes in parallel — far faster than awaiting one by one in a loop
+  const results = await Promise.allSettled(
+    trashLeads.map(l => window.dbPermanentDeleteLead(l._docId))
+  );
+
   const failedIds = new Set();
-  const firstError = { msg: null };
-  for (const l of trashLeads) {
-    try { await window.dbPermanentDeleteLead(l._docId); done++; }
-    catch(e) {
-      failed++;
-      failedIds.add(l._docId);
-      if (!firstError.msg) firstError.msg = (e && e.message) ? e.message : String(e);
-      console.error('emptyTrash perm-delete failed:', l._docId, e);
+  let firstError = null;
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      failedIds.add(trashLeads[i]._docId);
+      if (!firstError) firstError = (r.reason?.message) ? r.reason.message : String(r.reason);
+      console.error('emptyTrash perm-delete failed:', trashLeads[i]._docId, r.reason);
     }
-  }
+  });
+
+  const done   = results.length - failedIds.size;
+  const failed = failedIds.size;
+
   // Only wipe leads that were actually deleted — keep failed ones visible in Trash
   trashLeads = failed > 0 ? trashLeads.filter(l => failedIds.has(l._docId)) : [];
   renderTrash(trashLeads);
   refreshCounts();
   if (failed === 0) toast(`${done} lead${done!==1?'s':''} permanently deleted`, 'success');
-  else toast(`${done} deleted · ${failed} failed: ${firstError.msg || 'unknown error'} — failed leads still shown in Trash`, 'error');
+  else toast(`${done} deleted · ${failed} failed: ${firstError || 'unknown error'} — failed leads still shown in Trash`, 'error');
 }
 
 /* ════════════════════════════════════════════════════
