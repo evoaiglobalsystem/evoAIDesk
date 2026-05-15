@@ -75,6 +75,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-w
 .tag-segment{background:rgba(192,132,252,.1);color:var(--purple);border:1px solid rgba(192,132,252,.2);}
 .tag-system{background:rgba(255,183,48,.1);color:var(--warn);border:1px solid rgba(255,183,48,.2);}
 .tag-addlead{background:rgba(255,107,53,.1);color:var(--orange);border:1px solid rgba(255,107,53,.2);}
+.tag-followup{background:rgba(255,77,109,.1);color:var(--danger);border:1px solid rgba(255,77,109,.2);}
 
 /* ── TWO COL ── */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px;}
@@ -367,6 +368,29 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-w
       <div><span class="qref-tag tag-segment">Segment</span></div>
     </div>
 
+    <!-- OVERDUE FOLLOWUPS -->
+    <div class="qref-group-label">🔔 Overdue Follow-ups</div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">overdue followup</span></div>
+      <div class="qref-desc">Lists all leads whose follow-up date is before today — sorted oldest-due first. Excludes Won &amp; Lost.</div>
+      <div><span class="qref-tag tag-followup">Follow-up</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">missed followup</span></div>
+      <div class="qref-desc">Alias — same result as "overdue followup"</div>
+      <div><span class="qref-tag tag-followup">Follow-up</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">pending followup</span></div>
+      <div class="qref-desc">Alias — shows all leads where the follow-up date has already passed</div>
+      <div><span class="qref-tag tag-followup">Follow-up</span></div>
+    </div>
+    <div class="qref-row">
+      <div><span class="qref-cmd hot">followups due</span></div>
+      <div class="qref-desc">Alias — another way to surface the same overdue list</div>
+      <div><span class="qref-tag tag-followup">Follow-up</span></div>
+    </div>
+
     <!-- SYSTEM -->
     <div class="qref-group-label">⚙️ System Commands</div>
     <div class="qref-row">
@@ -463,6 +487,17 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;font-w
 <!-- KEYWORD REFERENCE -->
 <div class="section-label">Keyword Reference</div>
 <div class="kw-groups">
+  <div class="kw-card">
+    <div class="kw-title">Follow-up Keywords (any combination works)</div>
+    <div class="kw-pills">
+      <span class="pill" style="border-color:rgba(255,77,109,.3);color:var(--danger);background:rgba(255,77,109,.06);">overdue followup</span>
+      <span class="pill" style="border-color:rgba(255,77,109,.3);color:var(--danger);background:rgba(255,77,109,.06);">missed followup</span>
+      <span class="pill" style="border-color:rgba(255,77,109,.3);color:var(--danger);background:rgba(255,77,109,.06);">pending followup</span>
+      <span class="pill" style="border-color:rgba(255,77,109,.3);color:var(--danger);background:rgba(255,77,109,.06);">followups due</span>
+      <span class="pill" style="border-color:rgba(255,77,109,.3);color:var(--danger);background:rgba(255,77,109,.06);">due followup</span>
+      <span class="pill" style="border-color:rgba(255,77,109,.3);color:var(--danger);background:rgba(255,77,109,.06);">follow up overdue</span>
+    </div>
+  </div>
   <div class="kw-card">
     <div class="kw-title">Services (exact match)</div>
     <div class="kw-pills">
