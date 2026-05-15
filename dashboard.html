@@ -3592,7 +3592,7 @@ function renderBoard() {
       <span class="board-col-label" style="color:${stage.color}">${esc(stage.label)}</span>
       <div style="display:flex;align-items:center;gap:5px;">
         ${stageValue>0?`<span style="font-family:var(--mono);font-size:.6rem;color:#c084fc;font-weight:700;">${esc(fmtCurrency(stageValue))}</span>`:''}
-        <span class="board-col-count">${stageLeads.length}${stageLeads.length===200?'+':''}</span>
+        <span class="board-col-count">${stageLeads.length}${stageLeads.length===5?'+':''}</span>
         ${stageLeads.length===200?`<span title="Showing first 200 leads — this column may have more" style="cursor:default;font-size:.58rem;color:var(--warn);font-family:var(--mono);font-weight:700;background:rgba(255,183,48,.1);border:1px solid rgba(255,183,48,.25);border-radius:4px;padding:1px 5px;">cap</span>`:''}
       </div>`;
     col.appendChild(head);
