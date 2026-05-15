@@ -420,9 +420,16 @@
   };
 
   window.dbLoadAll = async () => {
+    const EXPORT_LIMIT = 10;
+	
     const tenantId = window._currentTenantId || '';
-    const snap = await getDocs(query(collection(db, 'leads'), where('tenant_id', '==', tenantId), where('deleted', '!=', true), orderBy('createdAt', 'desc')));
-    return snap.docs.map(d => window.docToLead(d));
+    const snap = await getDocs(query(collection(db, 'leads'), where('tenant_id', '==', tenantId), where('deleted', '!=', true), orderBy('createdAt', 'desc'),limit(EXPORT_LIMIT) ));
+	
+	if (snap.docs.length === EXPORT_LIMIT) {
+         toast(`Export capped at ${EXPORT_LIMIT} leads — use date filters for full export`, 'warn');
+    }
+    
+	return snap.docs.map(d => window.docToLead(d));
   };
 
   window.dbGetLead = async (docId) => {
