@@ -421,15 +421,19 @@
 
   window.dbLoadAll = async () => {
     const EXPORT_LIMIT = 10;
-	
     const tenantId = window._currentTenantId || '';
-    const snap = await getDocs(query(collection(db, 'leads'), where('tenant_id', '==', tenantId), where('deleted', '!=', true), orderBy('createdAt', 'desc'),limit(EXPORT_LIMIT) ));
-	
-	if (snap.docs.length === EXPORT_LIMIT) {
-         toast(`Export capped at ${EXPORT_LIMIT} leads — use date filters for full export`, 'warn');
-    }
-    
-	return snap.docs.map(d => window.docToLead(d));
+    const snap = await getDocs(query(
+      collection(db, 'leads'),
+      where('tenant_id', '==', tenantId),
+      where('deleted', '!=', true),
+      orderBy('createdAt', 'desc'),
+      limit(EXPORT_LIMIT)
+    ));
+    return {
+      leads:  snap.docs.map(d => window.docToLead(d)),
+      capped: snap.docs.length === EXPORT_LIMIT,
+      limit:  EXPORT_LIMIT
+    };
   };
 
   window.dbGetLead = async (docId) => {
@@ -4404,14 +4408,17 @@ function exportCSV() {
 
 /* Export every lead in Firestore */
 async function exportAllCSV() {
-  const btn = document.getElementById('exportDropWrap');
   toast('Fetching all leads…', 'success');
   try {
-    const all = await window.dbLoadAll();
-    if (!all.length) { toast('No leads found', 'warn'); return; }
-    const ts  = new Date().toISOString().slice(0,10);
-    downloadCSV(buildCSV(all), `leads-all-${ts}.csv`);
-    toast(`Exported all ${all.length} leads as CSV`, 'success');
+    const { leads, capped, limit } = await window.dbLoadAll();
+    if (!leads.length) { toast('No leads found', 'warn'); return; }
+    const ts = new Date().toISOString().slice(0,10);
+    downloadCSV(buildCSV(leads), `leads-all-${ts}.csv`);
+    if (capped) {
+      toast(`Exported first ${limit} leads — export is incomplete, use filters to get the rest`, 'warn');
+    } else {
+      toast(`Exported all ${leads.length} leads as CSV`, 'success');
+    }
   } catch(e) {
     toast('Export failed: ' + e.message, 'error');
   }
