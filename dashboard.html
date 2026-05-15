@@ -3192,6 +3192,11 @@ async function loadPage(direction = 'first') {
     pageFirstSnap = result.firstSnap;
     pageLastSnap  = result.lastSnap;
 
+    // Clear bulk selection on every page change — selected rows from previous page are no longer visible
+    selectedLeads.clear();
+    updateBulkBar();
+    const sa = document.getElementById('selectAll'); if (sa) sa.checked = false;
+
     if (direction === 'first')      pageStack = [pageFirstSnap];
     else if (direction === 'next')  pageStack.push(pageFirstSnap);
     else if (direction === 'last') { pageStack = new Array(pageNumber).fill(null); pageStack[pageNumber-1] = pageFirstSnap; }
@@ -3587,7 +3592,8 @@ function renderBoard() {
       <span class="board-col-label" style="color:${stage.color}">${esc(stage.label)}</span>
       <div style="display:flex;align-items:center;gap:5px;">
         ${stageValue>0?`<span style="font-family:var(--mono);font-size:.6rem;color:#c084fc;font-weight:700;">${esc(fmtCurrency(stageValue))}</span>`:''}
-        <span class="board-col-count">${stageLeads.length}</span>
+        <span class="board-col-count">${stageLeads.length}${stageLeads.length===200?'+':''}</span>
+        ${stageLeads.length===200?`<span title="Showing first 200 leads — this column may have more" style="cursor:default;font-size:.58rem;color:var(--warn);font-family:var(--mono);font-weight:700;background:rgba(255,183,48,.1);border:1px solid rgba(255,183,48,.25);border-radius:4px;padding:1px 5px;">cap</span>`:''}
       </div>`;
     col.appendChild(head);
 
@@ -4606,7 +4612,6 @@ let _currentReport = null;   // cache: { type, htmlContent, meta, tenantId, requ
 async function openDashReport(type, btnEl) {
   _dashRepCurrentType = type;
   _currentReport = null;     // clear stale cache on every new report load
-  console.log('openDashReport called:', type); // ← ADD THIS
 
   // Update bar button states
   ['daily','weekly','summary','companysummary','assignment'].forEach(t => {
@@ -4638,8 +4643,6 @@ async function openDashReport(type, btnEl) {
 
   try {
     const url = DASH_REPORT_HOOKS[type];
-	console.log('URL being called:', url); // ← ADD THIS
-	
     const resp = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
