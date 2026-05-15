@@ -38,7 +38,8 @@
     limitToLast,
     getCountFromServer,
     serverTimestamp,
-    Timestamp
+    Timestamp,
+    writeBatch
   } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -472,11 +473,14 @@
   };**/
   
   window.dbPermanentDeleteLead = async (docId) => {
-   // 1. Delete all activities in the subcollection
+   // 1. Delete all activities using a batch — avoids N parallel deleteDoc calls
    const activitiesRef = collection(db, 'leads', docId, 'activities');
    const activitiesSnap = await getDocs(activitiesRef);
-   const deletions = activitiesSnap.docs.map(d => deleteDoc(d.ref));
-   await Promise.all(deletions);
+   if (activitiesSnap.docs.length > 0) {
+     const batch = writeBatch(db);
+     activitiesSnap.docs.forEach(d => batch.delete(d.ref));
+     await batch.commit();
+   }
 
    // 2. Then delete the lead document itself
    await deleteDoc(doc(db, 'leads', docId));
