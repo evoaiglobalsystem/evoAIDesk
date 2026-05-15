@@ -365,7 +365,7 @@
   };
 
   /* ─── My Leads: direct Firestore query by assignedToEmail ─── */
-  const MY_LEADS_LIMIT = 10;
+  const MY_LEADS_LIMIT = 200;
   window.dbLoadMyLeads = async (email) => {
     const ref = collection(db, 'leads');
     const tenantId = window._currentTenantId || '';
