@@ -420,7 +420,7 @@
   };
 
   window.dbLoadAll = async () => {
-    const EXPORT_LIMIT = 10;
+    const EXPORT_LIMIT = 500;
     const tenantId = window._currentTenantId || '';
     const snap = await getDocs(query(
       collection(db, 'leads'),
