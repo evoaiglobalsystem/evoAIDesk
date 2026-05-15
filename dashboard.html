@@ -4476,52 +4476,53 @@ async function bulkAssignToMe() {
   if (!name && !email) { toast('No user info — please sign in again', 'warn'); return; }
 
   const user = document.getElementById('sideUserName').textContent || 'Team';
-  let succeeded = 0, failed = 0;
+  toast(`Assigning ${entries.length} lead${entries.length > 1 ? 's' : ''} to ${name}...`, 'success');
 
-  toast(`Assigning ${entries.length} lead${entries.length > 1 ? 's' : ''} to ${name}…`, 'success');
-
-  for (const lead of entries) {
-    try {
-      const updated = { ...lead, assignedTo: name, assignedToEmail: email, _setAssignedAt: true };
-      await window.dbUpdateLead(lead._docId, updated);
-      await window.dbAddActivity(lead._docId, {
-        type: 'assign',
-        text: `Assigned to ${name}${email ? ' (' + email + ')' : ''}`,
-        user,
-      });
-      succeeded++;
-    } catch(e) {
-      console.error('bulk assign failed for', lead.leadId, e);
-      failed++;
-    }
-  }
-
-  clearSelection();
-  await refreshAll();
-
-  if (failed === 0) {
-    toast(`${succeeded} lead${succeeded > 1 ? 's' : ''} assigned to ${name}`, 'success');
-  } else if (succeeded === 0) {
-    toast(`Assignment failed for all ${failed} lead${failed > 1 ? 's' : ''} — check Firestore permissions`, 'error');
-  } else {
-    toast(`${succeeded} assigned ✓  •  ${failed} failed ✗ — check console for details`, 'warn');
+  try {
+    await Promise.all(
+      entries.map(lead => {
+        const updated = { ...lead, assignedTo: name, assignedToEmail: email, _setAssignedAt: true };
+        return window.dbUpdateLead(lead._docId, updated)
+          .then(() => window.dbAddActivity(lead._docId, {
+            type: 'assign',
+            text: `Assigned to ${name}${email ? ' (' + email + ')' : ''}`,
+            user,
+          }));
+      })
+    );
+    clearSelection();
+    await refreshAll();
+    toast(`${entries.length} lead${entries.length > 1 ? 's' : ''} assigned to ${name}`, 'success');
+  } catch(e) {
+    console.error('bulk assign failed:', e);
+    clearSelection();
+    await refreshAll();
+    toast('Bulk assign failed — some leads may have been updated. Refresh and retry.', 'error');
   }
 }
 async function applyBulkStatus() {
   const newStatus = document.getElementById('bulkStatusSelect').value;
   const entries   = [...selectedLeads.values()];
   closeModal('bulkStatusOverlay');
-  toast(`Updating ${entries.length} leads to "${newStatus}"…`,'success');
-  const user = document.getElementById('sideUserName').textContent||'Team';
-  for(const lead of entries) {
-    try {
-      await window.dbUpdateLead(lead._docId, { ...lead, status: newStatus });
-      await window.dbAddActivity(lead._docId, {type:'status',text:`Status changed to ${newStatus}`,user});
-    } catch(e) { console.error('bulk update', e); }
+  toast(`Updating ${entries.length} leads to "${newStatus}"...`, 'success');
+  const user = document.getElementById('sideUserName').textContent || 'Team';
+
+  try {
+    await Promise.all(
+      entries.map(lead =>
+        window.dbUpdateLead(lead._docId, { ...lead, status: newStatus })
+          .then(() => window.dbAddActivity(lead._docId, { type: 'status', text: `Status changed to ${newStatus}`, user }))
+      )
+    );
+    clearSelection();
+    await refreshAll();
+    toast(`${entries.length} leads updated to "${newStatus}"`, 'success');
+  } catch(e) {
+    console.error('bulk status update failed:', e);
+    clearSelection();
+    await refreshAll();
+    toast('Bulk status update failed — some leads may have been updated. Refresh and retry.', 'error');
   }
-  clearSelection();
-  await refreshAll();
-  toast(`${entries.length} leads updated to "${newStatus}"`, 'success');
 }
 
 function bulkExport() {
