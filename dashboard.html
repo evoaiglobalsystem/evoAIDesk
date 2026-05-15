@@ -3095,17 +3095,19 @@ async function refreshCounts() {
     try {
       const pipelineStatuses = ['New','Contacted','Discovery Call','Qualified','Proposal Sent','Negotiation'];
       const activeLeads = await window.dbSearchLeads('', {}, 500);
-      const total = activeLeads
-        .filter(l => pipelineStatuses.includes(l.status))
+      const isCapped = activeLeads.length === 500;
+
+      const pipelineLeads = activeLeads.filter(l => pipelineStatuses.includes(l.status));
+      const total = pipelineLeads
         .reduce((sum, l) => sum + (Number(String(l.dealvalue||'').replace(/[^0-9.]/g,''))||0), 0);
 
-      let formatted;
-      if (total > 0) formatted = fmtCurrency(total);
-      else           formatted = '—';
-
-      document.getElementById('s-pipeline').textContent     = formatted;
-      document.getElementById('s-pipeline').title           = 'Sampled from first 500 active leads (excl. Won / Lost)';
-      document.getElementById('s-pipeline-sub').textContent = 'Active deals · est. 500 leads';
+      document.getElementById('s-pipeline').textContent = total > 0 ? fmtCurrency(total) : '—';
+      document.getElementById('s-pipeline').title       = isCapped
+        ? 'Estimated from first 500 active leads (excl. Won / Lost)'
+        : 'Sum of all active pipeline deal values (excl. Won / Lost)';
+      document.getElementById('s-pipeline-sub').textContent = isCapped
+        ? 'Active deals · est. 500 leads'
+        : `Active deals · ${pipelineLeads.length} lead${pipelineLeads.length !== 1 ? 's' : ''}`;
 
       const today = new Date().toISOString().slice(0,10);
       const overdueCount = activeLeads.filter(l =>
