@@ -365,7 +365,7 @@
   };
 
   /* ─── My Leads: direct Firestore query by assignedToEmail ─── */
-  const MY_LEADS_LIMIT = 200;
+  const MY_LEADS_LIMIT = 500;
   window.dbLoadMyLeads = async (email) => {
     const ref = collection(db, 'leads');
     const tenantId = window._currentTenantId || '';
@@ -3148,7 +3148,7 @@ async function loadPage(direction = 'first') {
       pageNumber = 1; pageStack = []; afterSnap = null; beforeSnap = null;
     }
 
-    if (direction !== 'last') totalCount = await window.dbCountLeads(activeFilters);
+    if (direction === 'first') totalCount = await window.dbCountLeads(activeFilters);
 
     const result = await window.dbLoadPage(activeFilters, PAGE_SIZE, afterSnap, beforeSnap, useLastPage);
     currentLeads  = result.leads;
