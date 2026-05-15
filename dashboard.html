@@ -320,18 +320,19 @@
     if (!term) return [];
     const ref = collection(db, 'leads');
     const tenantId = window._currentTenantId || '';
-    const termLower = term.toLowerCase();
+
+    // Normalise the search term to match how data is stored in Firestore:
+    // - fullName / company: Title Case  ("john smith" → "John Smith")
+    // - everything else: lowercase      (email, phone, linkedin are naturally lowercase)
+    // This keeps the range query efficient — reads only qualifying docs, no full scans.
+    const titleCaseFields = ['fullName', 'company'];
+    const normTerm = titleCaseFields.includes(field)
+      ? term.replace(/\b\w/g, c => c.toUpperCase())
+      : term.toLowerCase();
 
     // Exact-match fields (status, assignedTo) use == instead of range
     const exactFields = ['status', 'assignedTo'];
     const isExact = exactFields.includes(field);
-
-    // fullName and company are stored in mixed/title case in Firestore.
-    // Firestore range queries are case-sensitive, so a lowercase search term
-    // like "john" will never match "John Smith" via >= / <=.
-    // Fix: fetch a broad batch (ordered by createdAt) and filter client-side.
-    const clientSideFields = ['fullName', 'company'];
-    const isClientSide = clientSideFields.includes(field);
 
     const constraints = [
       where('tenant_id', '==', tenantId),
@@ -344,23 +345,12 @@
     if (filters.industry   && field !== 'industry')   constraints.push(where('industry',   '==', filters.industry));
     if (filters.assignedTo && field !== 'assignedTo') constraints.push(where('assignedTo', '==', filters.assignedTo));
 
-    if (isClientSide) {
-      // Broad fetch ordered by createdAt, then filter client-side case-insensitively
-      constraints.push(orderBy('createdAt', 'desc'));
-      constraints.push(limit(500));
-      const snap = await getDocs(query(ref, ...constraints));
-      // Map Firestore field name → internal lead property name
-      const leadProp = field === 'fullName' ? 'name' : field; // company → company, fullName → name
-      return snap.docs
-        .map(d => window.docToLead(d))
-        .filter(l => (l[leadProp] || '').toLowerCase().includes(termLower));
-    }
-
     if (isExact) {
       constraints.push(where(field, '==', term));
     } else {
-      // orderBy on the range field MUST come before the >= / <= where clauses
-      const lo = termLower;
+      // Range query: Firestore returns only docs whose field starts with normTerm.
+      // Reads only matching docs — no client-side full-collection scan.
+      const lo = normTerm;
       const hi = lo + '\uf8ff';
       constraints.push(orderBy(field));
       constraints.push(where(field, '>=', lo));
