@@ -404,6 +404,61 @@
       .filter(l => l.status !== 'Won' && l.status !== 'Lost');
   };
 
+  /* ─── Dashboard stat helpers (optimised — no full collection reads) ─── */
+
+  /* Count overdue leads server-side: followupDate < today AND not Won/Lost.
+     Uses getCountFromServer — 1 read regardless of result size.
+     Note: Firestore can't combine range + not-in, so Won/Lost are excluded
+     by querying only active pipeline statuses instead of using not-in.        */
+  window.dbCountOverdue = async () => {
+    const ref = collection(db, 'leads');
+    const tenantId = window._currentTenantId || '';
+    const todayStart = Timestamp.fromDate(new Date(new Date().toISOString().slice(0,10) + 'T00:00:00'));
+    const pipelineStatuses = ['New','Contacted','Discovery Call','Qualified','Proposal Sent','Negotiation'];
+    // 'in' filter on status excludes Won/Lost without needing not-in + range combo
+    const snap = await getCountFromServer(query(ref,
+      where('tenant_id',    '==', tenantId),
+      where('deleted',      '==', false),
+      where('status',       'in', pipelineStatuses),
+      where('followupDate', '<',  todayStart)
+    ));
+    return snap.data().count;
+  };
+
+  /* Count leads assigned to a specific email — 1 read. */
+  window.dbCountMyLeads = async (email) => {
+    if (!email) return 0;
+    const ref = collection(db, 'leads');
+    const tenantId = window._currentTenantId || '';
+    const snap = await getCountFromServer(query(ref,
+      where('tenant_id',       '==', tenantId),
+      where('deleted',         '==', false),
+      where('assignedToEmail', '==', email)
+    ));
+    return snap.data().count;
+  };
+
+  /* Fetch only pipeline-status leads to sum dealValue.
+     Reads only active leads (not Won/Lost/deleted) — far fewer than 500 in most tenants.
+     Returns { total, count, isCapped }.                                        */
+  window.dbPipelineValue = async () => {
+    const ref = collection(db, 'leads');
+    const tenantId = window._currentTenantId || '';
+    const pipelineStatuses = ['New','Contacted','Discovery Call','Qualified','Proposal Sent','Negotiation'];
+    const PIPELINE_LIMIT = 500;
+    const snap = await getDocs(query(ref,
+      where('tenant_id', '==', tenantId),
+      where('deleted',   '==', false),
+      where('status',    'in', pipelineStatuses),
+      limit(PIPELINE_LIMIT)
+    ));
+    const total = snap.docs.reduce((sum, d) => {
+      const v = d.data().dealValue;
+      return sum + (Number(String(v ?? '').replace(/[^0-9.]/g, '')) || 0);
+    }, 0);
+    return { total, count: snap.docs.length, isCapped: snap.docs.length === PIPELINE_LIMIT };
+  };
+
   /* ─── CRUD ─── */
   window.dbAddLead = async (lead) => {
     // Store any incoming leadId as reference_lead_id (from import/external source)
@@ -3097,34 +3152,27 @@ async function refreshCounts() {
   if (!pipelineValueLoaded) {
     pipelineValueLoaded = true;
     try {
-      const pipelineStatuses = ['New','Contacted','Discovery Call','Qualified','Proposal Sent','Negotiation'];
-      const activeLeads = await window.dbSearchLeads('', {}, 500);
-      const isCapped = activeLeads.length === 500;
+      // ── Three targeted server-side queries replace the old 500-read full fetch ──
+      // Run all three in parallel — total cost: N pipeline reads + 2 getCountFromServer reads
+      const myEmail = window._currentUserEmail || '';
+      const [pipeline, overdueCount, myCount] = await Promise.all([
+        window.dbPipelineValue(),                  // reads only active pipeline leads for dealValue sum
+        window.dbCountOverdue(),                   // 1 read — server-side count, no docs transferred
+        window.dbCountMyLeads(myEmail),            // 1 read — server-side count, no docs transferred
+      ]);
 
-      const pipelineLeads = activeLeads.filter(l => pipelineStatuses.includes(l.status));
-      const total = pipelineLeads
-        .reduce((sum, l) => sum + (Number(String(l.dealvalue||'').replace(/[^0-9.]/g,''))||0), 0);
-
-      document.getElementById('s-pipeline').textContent = total > 0 ? fmtCurrency(total) : '—';
-      document.getElementById('s-pipeline').title       = isCapped
+      // Pipeline value
+      document.getElementById('s-pipeline').textContent = pipeline.total > 0 ? fmtCurrency(pipeline.total) : '—';
+      document.getElementById('s-pipeline').title       = pipeline.isCapped
         ? 'Estimated from first 500 active leads (excl. Won / Lost)'
         : 'Sum of all active pipeline deal values (excl. Won / Lost)';
-      document.getElementById('s-pipeline-sub').textContent = isCapped
+      document.getElementById('s-pipeline-sub').textContent = pipeline.isCapped
         ? 'Active deals · est. 500 leads'
-        : `Active deals · ${pipelineLeads.length} lead${pipelineLeads.length !== 1 ? 's' : ''}`;
+        : `Active deals · ${pipeline.count} lead${pipeline.count !== 1 ? 's' : ''}`;
 
-      const today = new Date().toISOString().slice(0,10);
-      const overdueCount = activeLeads.filter(l =>
-        l.followup && l.followup < today && l.status !== 'Won' && l.status !== 'Lost'
-      ).length;
+      // Overdue & My Leads — server-side counts, no client-side filtering needed
       document.getElementById('cnt-overdue').textContent = overdueCount;
-
-      // My leads count
-      const myEmail = window._currentUserEmail || '';
-      const myCount = myEmail
-        ? activeLeads.filter(l => l.assignedToEmail && l.assignedToEmail.toLowerCase() === myEmail.toLowerCase()).length
-        : 0;
-      document.getElementById('cnt-my').textContent = myCount;
+      document.getElementById('cnt-my').textContent      = myCount;
     } catch(e) {
       console.warn('Pipeline value / counts failed', e);
       document.getElementById('s-pipeline').textContent = '—';
