@@ -4415,7 +4415,7 @@ async function exportAllCSV() {
     const ts = new Date().toISOString().slice(0,10);
     downloadCSV(buildCSV(leads), `leads-all-${ts}.csv`);
     if (capped) {
-      toast(`Exported first ${limit} leads — export is incomplete, use filters to get the rest`, 'warn');
+      toast(`Exported first ${limit} leads — export is partial, use filters to get the required data set`, 'warn');
     } else {
       toast(`Exported all ${leads.length} leads as CSV`, 'success');
     }
