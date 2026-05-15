@@ -301,23 +301,6 @@
     return snap.docs.map(d => window.docToLead(d));
   };
 
-  window.dbSearchLeads = async (searchTerm, filters = {}, maxDocs = 500) => {
-    const ref = collection(db, 'leads');
-    const tenantId = window._currentTenantId || '';
-    // dbSearchLeads fetches a large batch client-side — always include extra filters so use == false
-    const constraints = [ orderBy('createdAt', 'desc'), where('tenant_id', '==', tenantId), where('deleted', '==', false), limit(maxDocs) ];
-    if (filters.status)   constraints.push(where('status',      '==', filters.status));
-    if (filters.service)  constraints.push(where('service',     '==', filters.service));
-    if (filters.industry) constraints.push(where('industry',    '==', filters.industry));
-    if (filters.assignedTo) constraints.push(where('assignedTo','==', filters.assignedTo));
-    const snap = await getDocs(query(ref, ...constraints));
-    if (!searchTerm) return snap.docs.map(d => window.docToLead(d));
-    const term = searchTerm.toLowerCase();
-    return snap.docs
-      .map(d => window.docToLead(d))
-      .filter(l => JSON.stringify(l).toLowerCase().includes(term));
-  };
-
   /* ─── Field-targeted search: server-side range query on a specific Firestore field ─── */
   window.dbFieldSearch = async (field, term, filters = {}) => {
     if (!term) return [];
