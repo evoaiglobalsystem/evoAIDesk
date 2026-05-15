@@ -247,13 +247,15 @@
     const tenantId = window._currentTenantId || '';
     // Total count: no extra field filter, safe to use != true (includes docs without the deleted field)
     const tenantQuery = query(ref, where('tenant_id', '==', tenantId), where('deleted', '!=', true));
+    const trashQuery  = query(ref, where('tenant_id', '==', tenantId), where('deleted', '==', true));
     const statuses = ['New','Contacted','Discovery Call','Qualified','Proposal Sent','Negotiation','Won','Lost'];
-    const [totalSnap, ...statusSnaps] = await Promise.all([
+    const [totalSnap, trashSnap, ...statusSnaps] = await Promise.all([
       getCountFromServer(tenantQuery),
+      getCountFromServer(trashQuery),
       // Per-status: combined with status filter — use == false to avoid composite index requirement
       ...statuses.map(s => getCountFromServer(query(ref, where('tenant_id','==',tenantId), where('deleted','==',false), where('status','==',s))))
     ]);
-    const result = { ALL: totalSnap.data().count };
+    const result = { ALL: totalSnap.data().count, trash: trashSnap.data().count };
     statuses.forEach((s,i) => { result[s] = statusSnaps[i].data().count; });
     return result;
   };
@@ -390,6 +392,7 @@
     ];
     if (filters.service)  constraints.push(where('service',  '==', filters.service));
     if (filters.industry) constraints.push(where('industry', '==', filters.industry));
+    constraints.push(limit(500));
     const snap = await getDocs(query(ref, ...constraints));
     // status not-in can't be combined with range filter in Firestore — exclude Won/Lost client-side
     return snap.docs
@@ -3074,11 +3077,9 @@ async function refreshCounts() {
     document.getElementById('cnt-won').textContent         = counts['Won']            || 0;
     document.getElementById('cnt-lost').textContent        = counts['Lost']           || 0;
 
-    // Refresh trash count (non-blocking, best-effort)
-    window.dbCountTrash().then(n => {
-      const el = document.getElementById('cnt-trash');
-      if (el) el.textContent = n || 0;
-    }).catch(() => {});
+    // Trash count is now included in dbCountAllStatuses — no extra round trip needed
+    const trashEl = document.getElementById('cnt-trash');
+    if (trashEl) trashEl.textContent = counts['trash'] || 0;
 
     document.getElementById('s-total').textContent = counts['ALL']       || 0;
     document.getElementById('s-new').textContent   = counts['New']       || 0;
