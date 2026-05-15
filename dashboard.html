@@ -365,6 +365,7 @@
   };
 
   /* ─── My Leads: direct Firestore query by assignedToEmail ─── */
+  const MY_LEADS_LIMIT = 10;
   window.dbLoadMyLeads = async (email) => {
     const ref = collection(db, 'leads');
     const tenantId = window._currentTenantId || '';
@@ -373,10 +374,12 @@
       where('tenant_id',       '==', tenantId),
       where('deleted',         '==', false),
       where('assignedToEmail', '==', email),
-      orderBy('createdAt', 'desc')
+      orderBy('createdAt', 'desc'),
+      limit(MY_LEADS_LIMIT)
     );
     const snap = await getDocs(q);
-    return snap.docs.map(d => window.docToLead(d));
+    const leads = snap.docs.map(d => window.docToLead(d));
+    return { leads, capped: snap.docs.length === MY_LEADS_LIMIT, limit: MY_LEADS_LIMIT };
   };
 
   /* ─── Overdue Leads: server-side followupDate range query ─── */
@@ -3308,13 +3311,17 @@ async function runMyLeadsFilter() {
   try {
     const myEmail = (window._currentUserEmail || '').toLowerCase();
     if (!myEmail) { toast('No user email found', 'warn'); return; }
-    const mine = await window.dbLoadMyLeads(myEmail);
+    const { leads: mine, capped, limit: myLimit } = await window.dbLoadMyLeads(myEmail);
     searchResults = mine; currentLeads = mine;
     document.getElementById('cnt-my').textContent = mine.length;
     document.getElementById('pagination').style.display     = 'none';
     document.getElementById('listPagination').style.display = 'none';
     renderCurrentView();
-    toast(`Showing ${mine.length} leads assigned to you`, 'success');
+    if (capped) {
+      toast(`Showing first ${myLimit} leads assigned to you — limit reached. Use filters to narrow results.`, 'warn');
+    } else {
+      toast(`Showing ${mine.length} leads assigned to you`, 'success');
+    }
   } catch(e) { toast('Failed to load my leads: ' + e.message, 'error'); }
   finally { setLoadingState(false); }
 }
