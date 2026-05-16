@@ -429,7 +429,9 @@
     if (!tenantId) return { total: 0, count: 0, isCapped: false };
 
     // ── PRIMARY: n8n hook → Firestore aggregation query (1 read, all leads, exact) ──
-    const hookUrl = (typeof API !== 'undefined' && API.n8n_pipeline_value) ? API.n8n_pipeline_value : '';
+    // Read from window.N8N_PIPELINE_VALUE_URL (set in config.js) — avoids ES module
+    // timing race where API object may not be parsed yet when this function is defined.
+    const hookUrl = window.N8N_PIPELINE_VALUE_URL || '';
     if (hookUrl) {
       try {
         const res = await fetch(
