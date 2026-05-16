@@ -436,7 +436,7 @@
       try {
         const res = await fetch(
           `${hookUrl}?tenantId=${encodeURIComponent(tenantId)}`,
-          { method: 'GET', headers: { 'ngrok-skip-browser-warning': 'true' } }
+          { method: 'GET' }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
