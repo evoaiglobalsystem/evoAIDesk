@@ -11,4 +11,4 @@ const API = {
 };
 
 // Must be outside the object — window assignment is a statement, not a property
-window.N8N_PIPELINE_VALUE_URL = "https://n8n.evoaiglobal.ai/webhook/evoaidesk_pipeline_value";
+window.N8N_PIPELINE_VALUE_URL = 'https://evoaidesk-dashboard-api.evoaiglobal-system.workers.dev/api/pipeline-value';
