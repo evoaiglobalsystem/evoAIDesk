@@ -425,8 +425,31 @@
      Reads only active leads (not Won/Lost/deleted) — far fewer than 500 in most tenants.
      Returns { total, count, isCapped }.                                        */
   window.dbPipelineValue = async () => {
-    const ref = collection(db, 'leads');
     const tenantId = window._currentTenantId || '';
+    if (!tenantId) return { total: 0, count: 0, isCapped: false };
+
+    // ── PRIMARY: n8n hook → Firestore aggregation query (1 read, all leads, exact) ──
+    const hookUrl = (typeof API !== 'undefined' && API.n8n_pipeline_value) ? API.n8n_pipeline_value : '';
+    if (hookUrl) {
+      try {
+        const res = await fetch(
+          `${hookUrl}?tenantId=${encodeURIComponent(tenantId)}`,
+          { method: 'GET', headers: { 'ngrok-skip-browser-warning': 'true' } }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return {
+          total:    Number(data.pipelineValue) || 0,
+          count:    Number(data.activeLeads)   || 0,
+          isCapped: false   // aggregation is always exact — no cap
+        };
+      } catch (e) {
+        console.warn('[evoAIDesk] Pipeline value hook failed — falling back to Firestore', e);
+      }
+    }
+
+    // ── FALLBACK: direct Firestore read (capped at 500, used if hook is unreachable) ──
+    const ref = collection(db, 'leads');
     const pipelineStatuses = ['New','Contacted','Discovery Call','Qualified','Proposal Sent','Negotiation'];
     const PIPELINE_LIMIT = 500;
     const snap = await getDocs(query(ref,
@@ -3147,11 +3170,11 @@ async function refreshCounts() {
       // Pipeline value
       document.getElementById('s-pipeline').textContent = pipeline.total > 0 ? fmtCurrency(pipeline.total) : '—';
       document.getElementById('s-pipeline').title       = pipeline.isCapped
-        ? 'Estimated from first 500 active leads (excl. Won / Lost)'
-        : 'Sum of all active pipeline deal values (excl. Won / Lost)';
+        ? 'Estimated from first 500 active leads (excl. Won / Lost) — configure API.n8n_pipeline_value in config.js for exact totals'
+        : 'Exact sum of all active pipeline deal values (excl. Won / Lost)';
       document.getElementById('s-pipeline-sub').textContent = pipeline.isCapped
         ? 'Active deals · est. 500 leads'
-        : `Active deals · ${pipeline.count} lead${pipeline.count !== 1 ? 's' : ''}`;
+        : `Active deals · ${pipeline.count.toLocaleString()} lead${pipeline.count !== 1 ? 's' : ''}`;
 
       // Overdue & My Leads — server-side counts, no client-side filtering needed
       document.getElementById('cnt-overdue').textContent = overdueCount;

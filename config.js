@@ -8,4 +8,5 @@ const API = {
   n8n_company_intel_webhook: "https://n8n.evoaiglobal.ai/webhook/evoaidesk_company_intel",
   n8n_assignment_report_workflow: "https://n8n.evoaiglobal.ai/webhook/evoaidesk_lead_assignments_report",
   n8n_send_report_email: "https://n8n.evoaiglobal.ai/webhook/evoaidesk_email_selected_report",
+  n8n_pipeline_value: 'https://n8n.evoaiglobal.ai/webhook/webhook/evoaidesk_pipeline_value',
 };
