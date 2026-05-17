@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>evoAIDesk — Privacy &amp; Security</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/x-icon" href="https://evoaiglobal.ai/images/favicon.ico"/>
+<style>
+  :root {
+    --bg:       #080c10;
+    --surface:  #0e1420;
+    --surface2: #141c2a;
+    --border:   #1e2d42;
+    --accent:   #00e5a0;
+    --accent2:  #00b8ff;
+    --warn:     #ffb730;
+    --text:     #e8f0fe;
+    --muted:    #6b7fa3;
+    --font:     'Sora', sans-serif;
+    --mono:     'DM Mono', monospace;
+    --nav-h:    60px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,12,16,.92); backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px; height: var(--nav-h);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo img { height: 26px; }
+  .nav-badge {
+    font-family: var(--font); font-size: .78rem; letter-spacing: .01em;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 4px 10px; border-radius: 6px;
+  }
+  .nav-back {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .75rem; color: var(--muted); font-family: var(--mono);
+    text-decoration: none; transition: color .15s;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  /* ── MAIN CENTERED LAYOUT ── */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-eyebrow {
+    font-family: var(--mono); font-size: .63rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .eyebrow-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.7)} }
+
+  .page-title { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 14px; }
+
+  .page-meta {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .meta-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: .67rem; color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3px 10px;
+  }
+
+  .summary-box {
+    background: rgba(0,229,160,.05); border: 1px solid rgba(0,229,160,.16);
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 48px;
+  }
+  .summary-box-label {
+    font-family: var(--mono); font-size: .6rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px;
+  }
+  .summary-item {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: .76rem; color: var(--muted); line-height: 1.5;
+  }
+  .summary-item svg { flex-shrink: 0; color: var(--accent); margin-top: 2px; }
+
+  .header-divider { height: 1px; background: var(--border); margin-bottom: 48px; }
+
+  /* ── SECTIONS ── */
+  .policy-section { margin-bottom: 48px; scroll-margin-top: 24px; }
+  .policy-section:last-child { margin-bottom: 0; }
+
+  .section-heading {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .section-num {
+    font-family: var(--mono); font-size: .65rem; font-weight: 700;
+    color: var(--accent); background: rgba(0,229,160,.1);
+    border: 1px solid rgba(0,229,160,.2); border-radius: 5px;
+    padding: 3px 8px; flex-shrink: 0; letter-spacing: .05em;
+  }
+  .section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .section-divider { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── PROSE ── */
+  .prose { font-size: .84rem; color: var(--muted); line-height: 1.8; }
+  .prose p { margin-bottom: 12px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { color: var(--text); font-weight: 600; }
+  .prose a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(0,229,160,.3); }
+  .prose a:hover { border-color: var(--accent); }
+
+  /* ── INFRA TABLE ── */
+  .infra-table {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+  }
+  .infra-row {
+    display: grid; grid-template-columns: 190px 1fr;
+    border-bottom: 1px solid var(--border); font-size: .78rem;
+  }
+  .infra-row:last-child { border-bottom: none; }
+  .infra-label {
+    padding: 12px 16px; color: var(--muted); font-weight: 500;
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,.015);
+  }
+  .infra-value {
+    padding: 12px 16px; color: var(--text);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+
+  /* ── CHIPS ── */
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    font-family: var(--mono); letter-spacing: .03em; flex-shrink: 0;
+  }
+  .chip.green  { background: rgba(0,229,160,.1);   color: var(--accent);  border: 1px solid rgba(0,229,160,.2); }
+  .chip.blue   { background: rgba(0,184,255,.1);   color: var(--accent2); border: 1px solid rgba(0,184,255,.2); }
+  .chip.purple { background: rgba(167,139,250,.1); color: #a78bfa;        border: 1px solid rgba(167,139,250,.2); }
+  .chip.warn   { background: rgba(255,183,48,.1);  color: var(--warn);    border: 1px solid rgba(255,183,48,.2); }
+  .infra-note { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+
+  /* ── RIGHTS GRID ── */
+  .rights-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  }
+  .right-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 9px; padding: 14px 15px;
+    display: flex; align-items: flex-start; gap: 9px;
+    transition: border-color .16s;
+  }
+  .right-item:hover { border-color: rgba(0,229,160,.22); }
+  .right-check {
+    width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+    background: rgba(0,229,160,.1); display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .right-label { font-size: .76rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .right-desc  { font-size: .68rem; color: var(--muted); line-height: 1.45; }
+
+  /* ── BREACH CARD ── */
+  .breach-card {
+    background: rgba(255,183,48,.04); border: 1px solid rgba(255,183,48,.18);
+    border-radius: 10px; padding: 18px 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .breach-icon {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(255,183,48,.1); display: flex; align-items: center; justify-content: center;
+    color: var(--warn);
+  }
+  .breach-title { font-size: .82rem; font-weight: 700; color: var(--warn); margin-bottom: 5px; }
+  .breach-desc  { font-size: .76rem; color: var(--muted); line-height: 1.65; }
+  .breach-timer {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: .72rem; font-weight: 700;
+    color: var(--warn); background: rgba(255,183,48,.08);
+    border: 1px solid rgba(255,183,48,.22); border-radius: 20px;
+    padding: 3px 10px; margin-top: 8px;
+  }
+
+  /* ── CONTACT CARD ── */
+  .contact-card {
+    background: rgba(0,229,160,.04); border: 1px solid rgba(0,229,160,.15);
+    border-radius: 10px; padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    flex-wrap: wrap;
+  }
+  .contact-left { display: flex; align-items: center; gap: 12px; }
+  .contact-icon {
+    width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(0,229,160,.1); display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .contact-title { font-size: .84rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .contact-desc  { font-size: .72rem; color: var(--muted); }
+  .contact-email {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 8px 14px;
+    font-family: var(--mono); font-size: .78rem; color: var(--accent);
+    text-decoration: none; font-weight: 500; transition: border-color .16s;
+    white-space: nowrap;
+  }
+  .contact-email:hover { border-color: var(--accent); }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .footer-left { font-size: .7rem; color: var(--muted); line-height: 1.6; }
+  .footer-left a { color: var(--accent); text-decoration: none; }
+  .footer-right {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: .65rem; color: var(--muted);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 680px) {
+    main { padding: 36px 20px 60px; }
+    nav  { padding: 0 16px; }
+    .rights-grid { grid-template-columns: repeat(2, 1fr); }
+    .infra-row   { grid-template-columns: 130px 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .rights-grid { grid-template-columns: 1fr; }
+    .infra-row { grid-template-columns: 1fr; }
+    .infra-label { border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .contact-card { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="https://desk.evoaiglobal.ai/">
+    <img src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk"/>
+  </a>
+  <a class="nav-back" href="https://desk.evoaiglobal.ai/">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- PAGE HEADER -->
+  <div class="page-eyebrow">
+    <span class="eyebrow-dot"></span>
+    Legal · Trust &amp; Compliance
+  </div>
+  <h1 class="page-title">Privacy &amp; Security</h1>
+  <div class="page-meta">
+    <span class="meta-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Last updated: May 2026
+    </span>
+    <span class="meta-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      evoAIDesk · desk.evoaiglobal.ai
+    </span>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-box-label">Summary</div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        We collect only what is needed to run your CRM
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        We never sell your data or your leads' data
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        You can export or delete your data at any time
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        All data encrypted in transit and at rest
+      </div>
+    </div>
+  </div>
+
+  <div class="header-divider"></div>
+
+  <!-- 1. WHO WE ARE -->
+  <div class="policy-section" id="who-we-are">
+    <div class="section-heading">
+      <span class="section-num">01</span>
+      <span class="section-title">Who we are</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose">
+      <p>evoAIDesk is a CRM product built and operated by <strong>evoAI</strong> ("we", "us", "our") — an AI consultancy and technology company. This page explains how evoAIDesk collects, uses, stores, and protects the personal data of its users and the lead contacts they manage within the platform.</p>
+      <p>For questions about this policy, contact us at <a href="mailto:info@evoaiglobal.ai">info@evoaiglobal.ai</a>.</p>
+    </div>
+  </div>
+
+  <!-- 2. DATA WE COLLECT -->
+  <div class="policy-section" id="data-we-collect">
+    <div class="section-heading">
+      <span class="section-num">02</span>
+      <span class="section-title">Data we collect</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose">
+      <p><strong>Account data</strong> — your name, email address, and Google account details used to sign in via Firebase Authentication.</p>
+      <p><strong>Lead &amp; contact data</strong> — names, email addresses, phone numbers, company names, job titles, deal values, and any notes or messages you enter for your leads. This data is provided by you and stored on your behalf.</p>
+      <p><strong>Usage data</strong> — basic activity within the app such as page interactions, used only to operate the service. We do not run third-party advertising or behavioural tracking.</p>
+    </div>
+  </div>
+
+  <!-- 3. HOW WE USE IT -->
+  <div class="policy-section" id="how-we-use">
+    <div class="section-heading">
+      <span class="section-num">03</span>
+      <span class="section-title">How we use your data</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose">
+      <p>Data collected is used solely to provide and improve the evoAIDesk service — including displaying your leads, running automations, sending follow-up reminders, and maintaining your account.</p>
+      <p>We will never use your data or your leads' data for unsolicited marketing, nor share it with third parties for their own commercial purposes.</p>
+    </div>
+  </div>
+
+  <!-- 4. INFRASTRUCTURE -->
+  <div class="policy-section" id="infrastructure">
+    <div class="section-heading">
+      <span class="section-num">04</span>
+      <span class="section-title">Infrastructure &amp; storage</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="infra-table">
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          App hosting
+        </div>
+        <div class="infra-value">
+          <span class="chip blue">Cloudflare</span>
+          <span class="infra-note">Global edge network</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Database
+        </div>
+        <div class="infra-value">
+          <span class="chip green">Google Cloud · Firebase</span>
+          <span class="infra-note">asia-south1 · Mumbai</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          Automation (n8n)
+        </div>
+        <div class="infra-value">
+          <span class="chip blue">DigitalOcean</span>
+          <span class="infra-note">Toronto · tor1</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Encryption in transit
+        </div>
+        <div class="infra-value">
+          <span class="chip green">TLS 1.3</span>
+          <span class="infra-note">All browser–server traffic</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Encryption at rest
+        </div>
+        <div class="infra-value">
+          <span class="chip purple">AES-256</span>
+          <span class="infra-note">Applied by Google Cloud at storage layer</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Tenant isolation
+        </div>
+        <div class="infra-value" style="font-family:var(--font);font-size:.76rem;color:var(--text);">
+          Logical separation by <code style="font-family:var(--mono);font-size:.71rem;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent);">tenant_id</code>, enforced at application layer
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+          Data export
+        </div>
+        <div class="infra-value">
+          <span class="chip green">CSV · available anytime</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Full deletion
+        </div>
+        <div class="infra-value">
+          <span class="chip warn">Within 30 days of request</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. SUB-PROCESSORS -->
+  <div class="policy-section" id="sub-processors">
+    <div class="section-heading">
+      <span class="section-num">05</span>
+      <span class="section-title">Sub-processors</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose" style="margin-bottom:14px;">
+      <p>We use the following third-party services to operate evoAIDesk. Each may process personal data on our behalf.</p>
+    </div>
+    <div class="infra-table">
+      <div class="infra-row">
+        <div class="infra-label">Google Cloud (Firebase)</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">Database storage, authentication · Mumbai (asia-south1)</div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">Cloudflare</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">Application delivery, DDoS protection · Global edge</div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">DigitalOcean (n8n)</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">Workflow automation, follow-up triggers · Toronto (tor1)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. YOUR RIGHTS -->
+  <div class="policy-section" id="your-rights">
+    <div class="section-heading">
+      <span class="section-num">06</span>
+      <span class="section-title">Your rights</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose" style="margin-bottom:16px;">
+      <p>Under GDPR and applicable data protection law, you have the following rights regarding your personal data. To exercise any of them, email <a href="mailto:info@evoaiglobal.ai">info@evoaiglobal.ai</a>. We respond within 30 days.</p>
+    </div>
+    <div class="rights-grid">
+      <div class="right-item">
+        <div class="right-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="right-label">Access</div>
+          <div class="right-desc">Request a copy of all personal data we hold about you.</div>
+        </div>
+      </div>
+      <div class="right-item">
+        <div class="right-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="right-label">Rectification</div>
+          <div class="right-desc">Ask us to correct inaccurate or incomplete data.</div>
+        </div>
+      </div>
+      <div class="right-item">
+        <div class="right-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="right-label">Erasure</div>
+          <div class="right-desc">Request full deletion — completed within 30 days.</div>
+        </div>
+      </div>
+      <div class="right-item">
+        <div class="right-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="right-label">Portability</div>
+          <div class="right-desc">Export your data anytime in CSV format.</div>
+        </div>
+      </div>
+      <div class="right-item">
+        <div class="right-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="right-label">Restriction</div>
+          <div class="right-desc">Ask us to limit how we use your data.</div>
+        </div>
+      </div>
+      <div class="right-item">
+        <div class="right-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="right-label">Objection</div>
+          <div class="right-desc">Object to processing based on legitimate interests.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. BREACH NOTIFICATION -->
+  <div class="policy-section" id="breach">
+    <div class="section-heading">
+      <span class="section-num">07</span>
+      <span class="section-title">Breach notification</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="breach-card">
+      <div class="breach-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div class="breach-title">72-Hour Notification Commitment</div>
+        <div class="breach-desc">In the event of a confirmed data breach, evoAIDesk will notify all affected customers and the relevant supervisory authority within 72 hours of becoming aware of the incident, in line with GDPR Article 33. Notifications will include the nature of the breach, categories of data affected, likely consequences, and measures taken.</div>
+        <div class="breach-timer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Within 72 hrs of confirmed incident
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. CONTACT -->
+  <div class="policy-section" id="contact">
+    <div class="section-heading">
+      <span class="section-num">08</span>
+      <span class="section-title">Contact us</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="contact-card">
+      <div class="contact-left">
+        <div class="contact-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div>
+          <div class="contact-title">Privacy &amp; data questions</div>
+          <div class="contact-desc">Our team responds to all privacy enquiries within 2 business days.</div>
+        </div>
+      </div>
+      <a class="contact-email" href="mailto:info@evoaiglobal.ai">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        info@evoaiglobal.ai
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="page-footer">
+    <div class="footer-left">
+      © 2026 evoAI. All rights reserved. &nbsp;·&nbsp;
+      <a href="https://evoaiglobal.ai/privacy-policy">evoAI Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="https://evoaiglobal.ai/terms">Terms &amp; Conditions</a>
+    </div>
+    <div class="footer-right">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      desk.evoaiglobal.ai
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
