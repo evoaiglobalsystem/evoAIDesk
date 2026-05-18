@@ -719,12 +719,13 @@
               <th>Plan</th>
               <th>Status</th>
               <th>Users</th>
+              <th>Leads</th>
               <th>Created</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="tenantsTableBody">
-            <tr><td colspan="7"><div class="empty-state">
+            <tr><td colspan="8"><div class="empty-state">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
               <p>No tenants yet</p><p class="empty-sub">Click "New Tenant" to create your first workspace.</p>
             </div></td></tr>
@@ -1352,8 +1353,43 @@
      All Neon queries are proxied through n8n webhooks to avoid CORS.
      Paste your webhook URLs below after creating them in n8n.
   ═════════════════════════════════════════════════ */
-  const N8N_LOG_WRITE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
-  const N8N_LOG_READ  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
+  const N8N_LOG_WRITE   = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
+  const N8N_LOG_READ    = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
+  const N8N_LEADS_COUNT = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/tenant/tenant_leads_count'; // POST
+  const LEADS_SECRET    = 'evo_pipe_9f3a2c8d1e4b7f5a';
+
+  // Cache: tenantSlug -> { count, loading, error }
+  const _leadsCache = {};
+
+  async function fetchLeadsCount(tenantId) {
+    if (_leadsCache[tenantId]?.loading) return;          // already in-flight
+    if (_leadsCache[tenantId]?.count !== undefined) return; // already cached
+    _leadsCache[tenantId] = { loading: true };
+    try {
+      const res  = await fetch(N8N_LEADS_COUNT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId, secret: LEADS_SECRET })
+      });
+      const data = await res.json();
+      _leadsCache[tenantId] = { count: data.totalLeads ?? 0 };
+    } catch(e) {
+      _leadsCache[tenantId] = { error: true };
+    }
+    // Re-render the single cell without a full table repaint
+    const cell = document.getElementById(`leads-${tenantId}`);
+    if (cell) cell.innerHTML = leadsCell(tenantId);
+  }
+
+  function leadsCell(slug) {
+    const s = _leadsCache[slug];
+    if (!s || s.loading) {
+      return `<span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:.7rem;color:var(--muted);">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>—</span>`;
+    }
+    if (s.error) return `<span style="font-family:var(--mono);font-size:.7rem;color:var(--danger);">err</span>`;
+    return `<span style="font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--accent2);">${s.count}</span>`;
+  }
 
   async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null }) {
     try {
@@ -1796,6 +1832,9 @@
       tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>${msg}</div></td></tr>`;
       return;
     }
+    // Trigger leads fetch for all visible rows (non-blocking)
+    rows.forEach(t => fetchLeadsCount(t.slug));
+
     tbody.innerHTML = rows.map(t => {
       const created   = fmt(t.createdAt);
       const planBadge = `<span class="badge badge-${t.plan||'free'}">${cap(t.plan||'free')}</span>`;
@@ -1811,6 +1850,7 @@
             ${userCount} user${userCount!==1?'s':''}
           </button>
         </td>
+        <td id="leads-${esc(t.slug)}">${leadsCell(t.slug)}</td>
         <td><span class="mono">${created}</span></td>
         <td>
           <div class="row-actions">
