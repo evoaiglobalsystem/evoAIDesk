@@ -1355,40 +1355,56 @@
   ═════════════════════════════════════════════════ */
   const N8N_LOG_WRITE   = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
   const N8N_LOG_READ    = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
-  const N8N_LEADS_COUNT = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/tenant/tenant_leads_count'; // POST
-  const LEADS_SECRET    = 'evo_pipe_9f3a2c8d1e4b7f5a';
+  const N8N_ALL_LEADS_COUNT = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/all-tenants-leads-count'; // POST
+  const LEADS_SECRET        = 'evo_pipe_9f3a2c8d1e4b7f5a';
 
-  // Cache: tenantSlug -> { count, loading, error }
-  const _leadsCache = {};
+  // Single flat map populated by one bulk call: { tenantSlug: count }
+  let _leadsCounts  = null;  // null = not yet fetched
+  let _leadsLoading = false;
+  let _leadsError   = false;
 
-  async function fetchLeadsCount(tenantId) {
-    if (_leadsCache[tenantId]?.loading) return;          // already in-flight
-    if (_leadsCache[tenantId]?.count !== undefined) return; // already cached
-    _leadsCache[tenantId] = { loading: true };
+  async function fetchAllLeadsCounts() {
+    if (_leadsLoading) return;          // already in-flight
+    if (_leadsCounts !== null) return;  // already have data — won't re-fetch on re-renders
+    _leadsLoading = true;
+    _leadsError   = false;
     try {
-      const res  = await fetch(N8N_LEADS_COUNT, {
+      // Pass all known tenant slugs so n8n runs one aggregation per tenant in parallel
+      // Cost: exactly 1 Firestore read per tenant (same as fetching individually)
+      const tenantIds = _tenants.map(t => t.slug).filter(Boolean);
+      if (!tenantIds.length) { _leadsCounts = {}; _leadsLoading = false; return; }
+
+      const res  = await fetch(N8N_ALL_LEADS_COUNT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenantId, secret: LEADS_SECRET })
+        body: JSON.stringify({ secret: LEADS_SECRET, tenantIds })
       });
       const data = await res.json();
-      _leadsCache[tenantId] = { count: data.totalLeads ?? 0 };
+      // data.counts = { "EVOWEB-xxx": 42, "EVOWEB-yyy": 17, ... }
+      _leadsCounts = data.counts || {};
     } catch(e) {
-      _leadsCache[tenantId] = { error: true };
+      console.error('[fetchAllLeadsCounts]', e);
+      _leadsCounts = {};
+      _leadsError  = true;
     }
-    // Re-render the single cell without a full table repaint
-    const cell = document.getElementById(`leads-${tenantId}`);
-    if (cell) cell.innerHTML = leadsCell(tenantId);
+    _leadsLoading = false;
+    // Patch every visible leads cell in-place — no full table repaint
+    document.querySelectorAll('[id^="leads-"]').forEach(cell => {
+      const slug = cell.id.replace('leads-', '');
+      cell.innerHTML = leadsCell(slug);
+    });
   }
 
   function leadsCell(slug) {
-    const s = _leadsCache[slug];
-    if (!s || s.loading) {
+    if (_leadsLoading || _leadsCounts === null) {
       return `<span style="display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:.7rem;color:var(--muted);">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>—</span>`;
     }
-    if (s.error) return `<span style="font-family:var(--mono);font-size:.7rem;color:var(--danger);">err</span>`;
-    return `<span style="font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--accent2);">${s.count}</span>`;
+    if (_leadsError && _leadsCounts[slug] === undefined) {
+      return `<span style="font-family:var(--mono);font-size:.7rem;color:var(--danger);">err</span>`;
+    }
+    const count = _leadsCounts[slug] ?? 0;
+    return `<span style="font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--accent2);">${count}</span>`;
   }
 
   async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null }) {
@@ -1832,8 +1848,8 @@
       tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>${msg}</div></td></tr>`;
       return;
     }
-    // Trigger leads fetch for all visible rows (non-blocking)
-    rows.forEach(t => fetchLeadsCount(t.slug));
+    // Single bulk fetch — fires once, patches all cells when done
+    fetchAllLeadsCounts();
 
     tbody.innerHTML = rows.map(t => {
       const created   = fmt(t.createdAt);
