@@ -1355,8 +1355,7 @@
   ═════════════════════════════════════════════════ */
   const N8N_LOG_WRITE   = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
   const N8N_LOG_READ    = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
-  const N8N_ALL_LEADS_COUNT = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/all-tenants-leads-count'; // POST
-  const LEADS_SECRET        = 'evo_pipe_9f3a2c8d1e4b7f5a';
+  const N8N_ALL_LEADS_COUNT = 'https://evoaidesk-tenant-setup-api.evoaiglobal-system.workers.dev/api/all-tenants-leads-count';
 
   // Single flat map populated by one bulk call: { tenantSlug: count }
   let _leadsCounts  = null;  // null = not yet fetched
@@ -1377,7 +1376,7 @@
       const res  = await fetch(N8N_ALL_LEADS_COUNT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secret: LEADS_SECRET, tenantIds })
+        body: JSON.stringify({ tenantIds })  // Worker adds the secret server-side
       });
       const data = await res.json();
       // data.counts = { "EVOWEB-xxx": 42, "EVOWEB-yyy": 17, ... }
