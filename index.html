@@ -628,6 +628,183 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════════
+     PRODUCT PREVIEW  — replace src="" on each
+     <img> with your real screenshot path.
+     Recommended sizes noted in alt text.
+═══════════════════════════════════════════ -->
+<section id="product-preview" style="background:#07090f;padding:88px 24px 100px;overflow:hidden;position:relative;">
+
+  <!-- background grid -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(76,222,60,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(76,222,60,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;"></div>
+
+  <style>
+    /* ── placeholder box shown until real image is dropped in ── */
+    .evopv-placeholder {
+      width:100%;aspect-ratio:16/9;
+      background:linear-gradient(135deg,#111520 0%,#161b26 100%);
+      border:1.5px dashed rgba(76,222,60,0.35);
+      border-radius:12px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:10px;color:rgba(76,222,60,0.55);font-size:.8rem;font-weight:500;
+      letter-spacing:.04em;
+    }
+    .evopv-placeholder svg { opacity:.5; }
+    .evopv-placeholder span { opacity:.7; }
+
+    /* hide placeholder once img loads */
+    .evopv-img-wrap img { display:block;width:100%;border-radius:12px;
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 24px 64px rgba(0,0,0,0.55);
+    }
+    .evopv-img-wrap img[src=""] { display:none; }
+    .evopv-img-wrap img:not([src=""]) + .evopv-placeholder { display:none; }
+
+    .evopv-tab-btn {
+      padding:8px 20px;border-radius:100px;font-size:.82rem;font-weight:600;
+      cursor:pointer;border:1px solid rgba(255,255,255,0.1);
+      background:transparent;color:#6b7280;transition:all .2s;
+    }
+    .evopv-tab-btn.active {
+      background:rgba(76,222,60,0.12);border-color:rgba(76,222,60,0.4);color:#4cde3c;
+    }
+  </style>
+
+  <div style="position:relative;z-index:1;max-width:1060px;margin:0 auto;">
+
+    <!-- heading -->
+    <div style="text-align:center;margin-bottom:48px;">
+      <span style="display:inline-block;background:rgba(76,222,60,0.1);border:1px solid rgba(76,222,60,0.3);color:#4cde3c;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 16px;border-radius:100px;">See It In Action</span>
+      <h2 style="color:#e8eaf0;font-size:clamp(1.75rem,3.5vw,2.6rem);font-weight:800;margin:18px 0 12px;line-height:1.2;letter-spacing:-.02em;">
+        Everything your team needs,<br><span style="background:linear-gradient(135deg,#7dff6b,#2196f3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">in one clean view.</span>
+      </h2>
+      <p style="color:#6b7280;font-size:.98rem;max-width:480px;margin:0 auto;line-height:1.7;">
+        Switch between the Dashboard, Pipeline, and Lead Card to see exactly what your team will work with every day.
+      </p>
+    </div>
+
+    <!-- tab buttons -->
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:32px;flex-wrap:wrap;">
+      <button class="evopv-tab-btn active" onclick="evoPvSwitch(0,this)">📊 Dashboard</button>
+      <button class="evopv-tab-btn"        onclick="evoPvSwitch(1,this)">📈 Pipeline View</button>
+      <button class="evopv-tab-btn"        onclick="evoPvSwitch(2,this)">🗂️ Lead Card</button>
+    </div>
+
+    <!-- ── TAB 0 · DASHBOARD ── -->
+    <div class="evopv-panel" id="evopv-0">
+      <div class="evopv-img-wrap" style="position:relative;">
+
+        <!--
+          ★ REPLACE THIS SCREENSHOT ★
+          Recommended: 1280×720 px, PNG or WebP
+          Shows: main dashboard — KPI tiles, recent leads list, score summary
+          Path example:  src="images/dashboard.png"
+        -->
+        <img src="images/dashboard.png" alt="evoAIDesk Dashboard — 1280×720 recommended" loading="lazy">
+
+        <!-- placeholder shown until src is filled -->
+        <div class="evopv-placeholder" style="aspect-ratio:16/9;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>📸 Add your Dashboard screenshot here</span>
+          <span style="opacity:.4;font-size:.72rem;">images/dashboard.png · 1280 × 720 px recommended</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">KPI Tiles</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Total leads, hot leads, follow-ups due today — all at a glance.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Overdue Alerts</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">One-click filter surfaces every lead your team hasn't touched in time.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Team Activity Feed</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">See who did what, when — full audit trail for managers.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 1 · PIPELINE ── -->
+    <div class="evopv-panel" id="evopv-1" style="display:none;">
+      <div class="evopv-img-wrap" style="position:relative;">
+
+        <!--
+          ★ REPLACE THIS SCREENSHOT ★
+          Recommended: 1280×720 px, PNG or WebP
+          Shows: Kanban pipeline board — columns per stage, lead cards with score badges
+          Path example:  src="images/pipeline.png"
+        -->
+        <img src="images/pipeine.png" alt="evoAIDesk Pipeline View — 1280×720 recommended" loading="lazy">
+
+        <div class="evopv-placeholder" style="aspect-ratio:16/9;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="5" height="18" rx="1"/><rect x="9.5" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+          <span>📸 Add your Pipeline View screenshot here</span>
+          <span style="opacity:.4;font-size:.72rem;">images/pipeline.png · 1280 × 720 px recommended</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Drag-and-Drop Kanban</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Move deals between stages instantly — no spreadsheet juggling.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Stage-by-Stage Totals</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Deal value and lead count shown per column so you see where revenue is sitting.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Score Badges</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Hot / Warm / Cold tag on every card so reps prioritise at a glance.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 2 · LEAD CARD ── -->
+    <div class="evopv-panel" id="evopv-2" style="display:none;">
+      <div class="evopv-img-wrap" style="position:relative;">
+
+        <!--
+          ★ REPLACE THIS SCREENSHOT ★
+          Recommended: 1280×720 px, PNG or WebP
+          Shows: Single lead detail card — score, timeline, one-click automation buttons
+          Path example:  src="images/lead-card.png"
+        -->
+        <img src="images/lead-card.png" alt="evoAIDesk Lead Card — 1280×720 recommended" loading="lazy">
+
+        <div class="evopv-placeholder" style="aspect-ratio:16/9;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg>
+          <span>📸 Add your Lead Card screenshot here</span>
+          <span style="opacity:.4;font-size:.72rem;">images/lead-card.png · 1280 × 720 px recommended</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Smart Score (0–100)</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Auto-calculated from deal value, profile completeness, and pipeline stage.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">One-Click Actions</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Send intro email, proposal, or WhatsApp follow-up without leaving the card.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Full Activity Timeline</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Every email, call note, and status change logged chronologically.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /max-width -->
+</section>
+
+<script>
+  function evoPvSwitch(idx, btn) {
+    document.querySelectorAll('.evopv-panel').forEach((p,i) => p.style.display = i===idx ? '' : 'none');
+    document.querySelectorAll('.evopv-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+<!-- ═══════════════════════════════════════ end PRODUCT PREVIEW ═══ -->
+
 <!-- PROBLEM -->
 <section class="bg-white py-20 px-6 text-center">
   <h2 class="text-3xl font-bold mb-6">Losing Leads? Missing Follow-Ups?</h2>
