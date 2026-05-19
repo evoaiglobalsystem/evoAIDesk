@@ -1575,9 +1575,14 @@
 
   /* ── Trial Requests (Neon via n8n) ── */
   const N8N_TRIAL_READ   = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/read';   // GET
-  const N8N_TRIAL_WRITE  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/write';  // POST
-  const N8N_TRIAL_UPDATE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/update'; // POST
-  const N8N_TRIAL_DELETE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/delete'; // POST
+  
+  const N8N_TRIAL_WRITE  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/manage';
+  const N8N_TRIAL_UPDATE  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/manage';
+  const N8N_TRIAL_DELETE  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/manage';
+  
+  //const N8N_TRIAL_WRITE  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/write';  // POST
+  //const N8N_TRIAL_UPDATE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/update'; // POST
+  //const N8N_TRIAL_DELETE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/delete'; // POST
 
   // Single flat map populated by one bulk call: { tenantSlug: count }
   let _leadsCounts  = null;  // null = not yet fetched
