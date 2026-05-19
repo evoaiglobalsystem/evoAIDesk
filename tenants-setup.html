@@ -2601,7 +2601,12 @@
       const text = await res.text();
       let data = [];
       if (text && text.trim()) {
-        try { data = JSON.parse(text); } catch(e) { data = []; }
+        try {
+          let parsed = JSON.parse(text);
+          // n8n Text mode double-encodes: the outer parse gives a string, parse again
+          if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+          data = parsed;
+        } catch(e) { data = []; }
       }
       _trials = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
       _trialsLoaded = true;
