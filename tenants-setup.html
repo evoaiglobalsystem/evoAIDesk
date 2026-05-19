@@ -532,6 +532,11 @@
     border-radius: 4px; padding: 1px 7px; font-family: var(--mono);
     font-size: .68rem; color: var(--accent); font-weight: 600;
   }
+  .badge-new       { background: rgba(0,184,255,.12); color: var(--accent2); border: 1px solid rgba(0,184,255,.25); }
+  .badge-approved  { background: rgba(0,229,160,.12); color: var(--accent); border: 1px solid rgba(0,229,160,.25); }
+  .badge-rejected  { background: rgba(255,77,109,.12); color: var(--danger); border: 1px solid rgba(255,77,109,.25); }
+  .badge-expired   { background: rgba(107,127,163,.1); color: var(--muted); border: 1px solid var(--border); }
+  .badge-converted { background: rgba(192,132,252,.14); color: #c084fc; border: 1px solid rgba(192,132,252,.28); }
 </style>
 </head>
 <body>
@@ -593,6 +598,11 @@
           Schedules
           <span class="aside-count" id="cntSchedules">—</span>
         </a>
+        <a class="aside-item" href="#" onclick="switchTab('trials');return false;" id="sideTrialsLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Trial Requests
+          <span class="aside-count" id="cntTrials">—</span>
+        </a>
         <a class="aside-item" href="#" onclick="switchTab('logs');return false;" id="sideLogsLink">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           Logs
@@ -650,6 +660,11 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Schedules
         <span class="tab-count" id="tabCntSchedules">—</span>
+      </button>
+      <button class="tab-btn" id="tabBtnTrials" onclick="switchTab('trials')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Trial Requests
+        <span class="tab-count" id="tabCntTrials">—</span>
       </button>
       <button class="tab-btn" id="tabBtnLogs" onclick="switchTab('logs')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -888,6 +903,101 @@
         </table>
       </div>
     </div><!-- /panelSchedules -->
+
+    <!-- ════════════════════════════════════ TRIAL REQUESTS TAB ════════════ -->
+    <div class="tab-panel" id="panelTrials">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Trial Requests</div>
+          <div class="page-sub">Manage incoming trial requests from the evoAIDesk Login Page — powered by Neon via n8n.</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="pill-btn outline" onclick="loadTrials(true)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+            Refresh
+          </button>
+          <button class="pill-btn primary" onclick="openTrialModal(null)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Request
+          </button>
+        </div>
+      </div>
+
+      <!-- Trial stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value" id="trialStatTotal">—</div>
+          <div class="stat-sub">All trial requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">New</div>
+          <div class="stat-value" style="color:var(--accent2);" id="trialStatNew">—</div>
+          <div class="stat-sub">Awaiting review</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" style="color:var(--accent);" id="trialStatApproved">—</div>
+          <div class="stat-sub">Active trials</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Rejected</div>
+          <div class="stat-value" style="color:var(--danger);" id="trialStatRejected">—</div>
+          <div class="stat-sub">Declined requests</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head-bar">
+          <div>
+            <h3>Trial Requests</h3>
+            <p>From <span style="font-family:var(--mono);color:var(--accent);font-size:.68rem;">trial_requests</span> table in Neon — managed via n8n webhook</p>
+          </div>
+          <div class="table-head-bar-right" style="gap:8px;flex-wrap:wrap;">
+            <!-- Status filter -->
+            <select id="trialStatusFilter" onchange="resetTrialsPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Statuses</option>
+              <option value="new">New</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="expired">Expired</option>
+              <option value="converted">Converted</option>
+            </select>
+            <!-- Search -->
+            <div class="search-wrap">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" id="trialSearch" placeholder="Search name, email, company…" oninput="resetTrialsPage()" style="width:220px;"/>
+            </div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Company</th>
+              <th>Phone</th>
+              <th>Team Size</th>
+              <th>Status</th>
+              <th>Trial Period</th>
+              <th>Source</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="trialsTableBody">
+            <tr><td colspan="10"><div class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              <p>No trial requests loaded</p><p class="empty-sub">Click "Refresh" to fetch from Neon.</p>
+            </div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination-bar" id="trialsPagBar" style="display:none;">
+          <span class="pagination-info" id="trialsPagInfo"></span>
+          <div class="pagination-btns" id="trialsPagBtns"></div>
+        </div>
+      </div>
+    </div><!-- /panelTrials -->
 
     <!-- ════════════════════════════════════ LOGS TAB ════════════════════ -->
     <div class="tab-panel" id="panelLogs">
@@ -1227,6 +1337,101 @@
   </div>
 </div>
 
+<!-- ════════════════════════════ TRIAL REQUEST MODAL ═══════════════════ -->
+<div class="overlay" id="trialModal">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTrialTitle">Trial Request</div>
+      <button class="modal-close" onclick="closeTrialModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-section-title">Applicant Details</div>
+        <div class="field">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="trName" placeholder="e.g. Jane Smith" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="trEmail" placeholder="e.g. jane@company.com" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Company <span class="req">*</span></label>
+          <input type="text" id="trCompany" placeholder="e.g. Acme Corp" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Phone</label>
+          <input type="text" id="trPhone" placeholder="e.g. +1 555 0100" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Team Size</label>
+          <select id="trTeamSize">
+            <option value="">— Select —</option>
+            <option value="1-5">1–5</option>
+            <option value="6-20">6–20</option>
+            <option value="21-50">21–50</option>
+            <option value="51-200">51–200</option>
+            <option value="200+">200+</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="trStatus">
+            <option value="new">New</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="expired">Expired</option>
+            <option value="converted">Converted</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Use Case</label>
+          <input type="text" id="trUseCase" placeholder="e.g. Customer support automation" autocomplete="off"/>
+        </div>
+
+        <div class="form-section-title">Trial Period</div>
+        <div class="field">
+          <label>Trial Start Date</label>
+          <div class="date-input-wrap">
+            <input type="date" id="trStartDate"/>
+            <button type="button" class="date-cal-btn" onclick="document.getElementById('trStartDate').showPicker()" title="Open calendar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Trial End Date</label>
+          <div class="date-input-wrap">
+            <input type="date" id="trEndDate"/>
+            <button type="button" class="date-cal-btn" onclick="document.getElementById('trEndDate').showPicker()" title="Open calendar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Source</label>
+          <input type="text" id="trSource" value="evoAIDesk Login Page" autocomplete="off"/>
+        </div>
+
+        <div class="form-section-title">Notes</div>
+        <div class="field full">
+          <label>Comments</label>
+          <textarea id="trComments" rows="3" placeholder="Internal notes, follow-up reminders…" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;padding:9px 11px;outline:none;resize:vertical;width:100%;transition:border-color .18s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeTrialModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveTrialBtn" onclick="saveTrial()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Request
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════ CONFIRM MODAL ═════════════════════════ -->
 <div class="overlay" id="confirmModal">
   <div class="modal confirm-modal">
@@ -1349,6 +1554,14 @@
   let _filter   = 'all';
   let _activeTab = 'tenants';
 
+  /* ── Trial Requests State ── */
+  let _trials        = [];
+  let _trialsLoaded  = false;
+  let _trialsLoading = false;
+  let _trialsPage    = 1;
+  let _editTrialId   = null;
+  const TRIALS_PER_PAGE = 20;
+
   /* ══════════════ N8N WEBHOOK CONFIG ══════════════
      All Neon queries are proxied through n8n webhooks to avoid CORS.
      Paste your webhook URLs below after creating them in n8n.
@@ -1356,6 +1569,12 @@
   const N8N_LOG_WRITE   = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
   const N8N_LOG_READ    = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
   const N8N_ALL_LEADS_COUNT = 'https://evoaidesk-tenant-setup-api.evoaiglobal-system.workers.dev/api/all-tenants-leads-count';
+
+  /* ── Trial Requests (Neon via n8n) ── */
+  const N8N_TRIAL_READ   = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/read';   // GET
+  const N8N_TRIAL_WRITE  = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/write';  // POST
+  const N8N_TRIAL_UPDATE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/update'; // POST
+  const N8N_TRIAL_DELETE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/trials/delete'; // POST
 
   // Single flat map populated by one bulk call: { tenantSlug: count }
   let _leadsCounts  = null;  // null = not yet fetched
@@ -1471,15 +1690,19 @@
     document.getElementById('panelTenants').classList.toggle('active', tab === 'tenants');
     document.getElementById('panelUsers').classList.toggle('active', tab === 'users');
     document.getElementById('panelSchedules').classList.toggle('active', tab === 'schedules');
+    document.getElementById('panelTrials').classList.toggle('active', tab === 'trials');
     document.getElementById('panelLogs').classList.toggle('active', tab === 'logs');
     document.getElementById('tabBtnTenants').classList.toggle('active', tab === 'tenants');
     document.getElementById('tabBtnUsers').classList.toggle('active', tab === 'users');
     document.getElementById('tabBtnSchedules').classList.toggle('active', tab === 'schedules');
+    document.getElementById('tabBtnTrials').classList.toggle('active', tab === 'trials');
     document.getElementById('tabBtnLogs').classList.toggle('active', tab === 'logs');
     document.getElementById('sideTenantsLink').classList.toggle('active', tab === 'tenants');
     document.getElementById('sideSchedulesLink').classList.toggle('active', tab === 'schedules');
+    document.getElementById('sideTrialsLink').classList.toggle('active', tab === 'trials');
     document.getElementById('sideLogsLink').classList.toggle('active', tab === 'logs');
-    if (tab === 'logs') loadLogs(false);
+    if (tab === 'logs')   loadLogs(false);
+    if (tab === 'trials') loadTrials(false);
   }
 
   function updateSidebarUserHighlights() {
@@ -2357,6 +2580,297 @@
     }
     _logsLoading = false;
   }
+
+  /* ══════════════════════════════════════════════════════════
+     TRIAL REQUESTS — Neon via n8n
+  ══════════════════════════════════════════════════════════ */
+
+  async function loadTrials(force = false) {
+    if (_trialsLoading) return;
+    if (_trialsLoaded && !force) return;
+    _trialsLoading = true;
+    const tbody = document.getElementById('trialsTableBody');
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
+      <div style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+        Loading trial requests…
+      </div>
+    </div></td></tr>`;
+    try {
+      const res  = await fetch(N8N_TRIAL_READ);
+      const text = await res.text();
+      let data = [];
+      if (text && text.trim()) {
+        try { data = JSON.parse(text); } catch(e) { data = []; }
+      }
+      _trials = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
+      _trialsLoaded = true;
+      _trialsPage   = 1;
+      renderTrialsTable();
+      renderTrialStats();
+      const cnt = _trials.length;
+      document.getElementById('cntTrials').textContent    = cnt;
+      document.getElementById('tabCntTrials').textContent = cnt;
+    } catch(e) {
+      console.error('loadTrials', e);
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
+        <p>Failed to load trial requests</p><p class="empty-sub">${esc(e.message)}</p>
+      </div></td></tr>`;
+    }
+    _trialsLoading = false;
+  }
+
+  function renderTrialStats() {
+    const total     = _trials.length;
+    const newCount  = _trials.filter(t => t.status === 'new').length;
+    const approved  = _trials.filter(t => t.status === 'approved').length;
+    const rejected  = _trials.filter(t => t.status === 'rejected').length;
+    document.getElementById('trialStatTotal').textContent    = total;
+    document.getElementById('trialStatNew').textContent      = newCount;
+    document.getElementById('trialStatApproved').textContent = approved;
+    document.getElementById('trialStatRejected').textContent = rejected;
+  }
+
+  function resetTrialsPage() { _trialsPage = 1; renderTrialsTable(); }
+  function goTrialsPage(p)   { _trialsPage = p; renderTrialsTable(); }
+
+  function renderTrialsTable() {
+    const tbody      = document.getElementById('trialsTableBody');
+    const statusFilt = document.getElementById('trialStatusFilter').value;
+    const search     = (document.getElementById('trialSearch').value || '').toLowerCase();
+
+    let rows = _trials;
+    if (statusFilt) rows = rows.filter(t => t.status === statusFilt);
+    if (search)     rows = rows.filter(t =>
+      (t.name    || '').toLowerCase().includes(search) ||
+      (t.email   || '').toLowerCase().includes(search) ||
+      (t.company || '').toLowerCase().includes(search) ||
+      (t.use_case|| '').toLowerCase().includes(search)
+    );
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <p>No trial requests match</p><p class="empty-sub">Try adjusting filters or search.</p>
+      </div></td></tr>`;
+      document.getElementById('trialsPagBar').style.display = 'none';
+      return;
+    }
+
+    const totalPages = Math.ceil(rows.length / TRIALS_PER_PAGE);
+    if (_trialsPage > totalPages) _trialsPage = totalPages;
+    const start = (_trialsPage - 1) * TRIALS_PER_PAGE;
+    const page  = rows.slice(start, start + TRIALS_PER_PAGE);
+
+    tbody.innerHTML = page.map(t => {
+      const submitted = t.submitted_at
+        ? new Date(t.submitted_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+        : '—';
+      const statusCls = {new:'new',approved:'approved',rejected:'rejected',expired:'expired',converted:'converted'}[t.status] || 'muted';
+      const statusBadge = t.status
+        ? `<span class="badge badge-${statusCls}">${esc(t.status)}</span>`
+        : '<span class="mono">—</span>';
+      const startD = t.trial_start_date ? new Date(t.trial_start_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;
+      const endD   = t.trial_end_date   ? new Date(t.trial_end_date  ).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : null;
+      const trialPeriod = (startD || endD)
+        ? `<span style="font-family:var(--mono);font-size:.69rem;">${startD||'?'} → ${endD||'?'}</span>`
+        : '<span class="mono" style="color:var(--muted);font-size:.7rem;">—</span>';
+      return `<tr>
+        <td><span class="mono" style="font-size:.7rem;">${submitted}</span></td>
+        <td><span style="font-weight:600;font-size:.8rem;">${esc(t.name||'—')}</span></td>
+        <td><span style="font-size:.77rem;">${esc(t.email||'—')}</span></td>
+        <td><span style="font-size:.78rem;font-weight:500;">${esc(t.company||'—')}</span></td>
+        <td><span class="mono" style="font-size:.7rem;">${esc(t.phone||'—')}</span></td>
+        <td><span style="font-size:.75rem;">${esc(t.team_size||'—')}</span></td>
+        <td>${statusBadge}</td>
+        <td>${trialPeriod}</td>
+        <td><span class="mono" style="font-size:.68rem;color:var(--muted);">${esc(t.source||'—')}</span></td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn" title="Edit" onclick="openTrialModal(${t.id})">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="icon-btn" title="Approve" style="color:var(--accent);border-color:rgba(0,229,160,.2);" onclick="quickStatusTrial(${t.id},'approved')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="icon-btn danger" title="Reject" onclick="quickStatusTrial(${t.id},'rejected')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <button class="icon-btn danger" title="Delete" onclick="deleteTrial(${t.id}, ${JSON.stringify(esc(t.name||t.email))})">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    /* Pagination */
+    const bar  = document.getElementById('trialsPagBar');
+    const info = document.getElementById('trialsPagInfo');
+    const btns = document.getElementById('trialsPagBtns');
+    bar.style.display = 'flex';
+    info.textContent  = `${start + 1}–${Math.min(start + TRIALS_PER_PAGE, rows.length)} of ${rows.length}`;
+
+    let pages = [];
+    if (totalPages <= 7) {
+      pages = Array.from({length: totalPages}, (_, i) => i + 1);
+    } else {
+      pages = [1];
+      if (_trialsPage > 3) pages.push('…');
+      for (let i = Math.max(2, _trialsPage - 1); i <= Math.min(totalPages - 1, _trialsPage + 1); i++) pages.push(i);
+      if (_trialsPage < totalPages - 2) pages.push('…');
+      pages.push(totalPages);
+    }
+
+    btns.innerHTML =
+      `<button class="page-btn" onclick="goTrialsPage(${_trialsPage - 1})" ${_trialsPage === 1 ? 'disabled' : ''}>‹</button>` +
+      pages.map(p => p === '…'
+        ? `<span class="page-btn" style="cursor:default;opacity:.4;">…</span>`
+        : `<button class="page-btn ${p === _trialsPage ? 'active' : ''}" onclick="goTrialsPage(${p})">${p}</button>`
+      ).join('') +
+      `<button class="page-btn" onclick="goTrialsPage(${_trialsPage + 1})" ${_trialsPage === totalPages ? 'disabled' : ''}>›</button>`;
+  }
+
+  /* ── Trial Modal ── */
+  function openTrialModal(id) {
+    _editTrialId = id;
+    document.getElementById('modalTrialTitle').textContent = id ? 'Edit Trial Request' : 'New Trial Request';
+    if (id) {
+      const t = _trials.find(x => x.id == id);
+      if (!t) return;
+      document.getElementById('trName').value    = t.name    || '';
+      document.getElementById('trEmail').value   = t.email   || '';
+      document.getElementById('trCompany').value = t.company || '';
+      document.getElementById('trPhone').value   = t.phone   || '';
+      document.getElementById('trTeamSize').value= t.team_size || '';
+      document.getElementById('trStatus').value  = t.status  || 'new';
+      document.getElementById('trUseCase').value = t.use_case|| '';
+      document.getElementById('trSource').value  = t.source  || 'evoAIDesk Login Page';
+      document.getElementById('trComments').value= t.comments|| '';
+      document.getElementById('trStartDate').value = t.trial_start_date ? t.trial_start_date.slice(0,10) : '';
+      document.getElementById('trEndDate').value   = t.trial_end_date   ? t.trial_end_date.slice(0,10)   : '';
+    } else {
+      document.getElementById('trName').value    = '';
+      document.getElementById('trEmail').value   = '';
+      document.getElementById('trCompany').value = '';
+      document.getElementById('trPhone').value   = '';
+      document.getElementById('trTeamSize').value= '';
+      document.getElementById('trStatus').value  = 'new';
+      document.getElementById('trUseCase').value = '';
+      document.getElementById('trSource').value  = 'evoAIDesk Login Page';
+      document.getElementById('trComments').value= '';
+      document.getElementById('trStartDate').value = '';
+      document.getElementById('trEndDate').value   = '';
+    }
+    document.getElementById('trialModal').classList.add('open');
+    setTimeout(() => document.getElementById('trName').focus(), 100);
+  }
+
+  function closeTrialModal() { document.getElementById('trialModal').classList.remove('open'); }
+
+  async function saveTrial() {
+    const name    = document.getElementById('trName').value.trim();
+    const email   = document.getElementById('trEmail').value.trim();
+    const company = document.getElementById('trCompany').value.trim();
+    if (!name)    { toast('Full name is required', 'error'); return; }
+    if (!email)   { toast('Email is required', 'error'); return; }
+    if (!company) { toast('Company is required', 'error'); return; }
+
+    const payload = {
+      name, email, company,
+      phone:           document.getElementById('trPhone').value.trim()   || null,
+      team_size:       document.getElementById('trTeamSize').value        || null,
+      status:          document.getElementById('trStatus').value,
+      use_case:        document.getElementById('trUseCase').value.trim()  || null,
+      source:          document.getElementById('trSource').value.trim()   || 'evoAIDesk Login Page',
+      comments:        document.getElementById('trComments').value.trim() || null,
+      trial_start_date:document.getElementById('trStartDate').value       || null,
+      trial_end_date:  document.getElementById('trEndDate').value         || null,
+    };
+
+    const btn = document.getElementById('saveTrialBtn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const url    = _editTrialId ? N8N_TRIAL_UPDATE : N8N_TRIAL_WRITE;
+      if (_editTrialId) payload.id = _editTrialId;
+      const res    = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const action = _editTrialId ? 'updated' : 'created';
+      toast(`Trial request ${action}`, 'success');
+      writeLog({
+        level: 'info', status: 'success',
+        module: 'trial', source: 'saveTrial',
+        message: `Trial ${action}: ${name} — ${company}`,
+        meta: { email, company, status: payload.status }
+      });
+      closeTrialModal();
+      _trialsLoaded = false;
+      await loadTrials(true);
+    } catch(e) {
+      console.error(e);
+      toast('Error: ' + e.message, 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save Request';
+  }
+
+  async function quickStatusTrial(id, status) {
+    const t = _trials.find(x => x.id == id);
+    if (!t) return;
+    try {
+      const res = await fetch(N8N_TRIAL_UPDATE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast(`Trial marked as ${status}`, 'success');
+      writeLog({
+        level: 'info', status: 'success',
+        module: 'trial', source: 'quickStatusTrial',
+        message: `Trial status → ${status}: ${t.name} (${t.email})`,
+        meta: { id, status }
+      });
+      _trialsLoaded = false;
+      await loadTrials(true);
+    } catch(e) {
+      toast('Error: ' + e.message, 'error');
+    }
+  }
+
+  function deleteTrial(id, name) {
+    showConfirm(
+      'Delete Trial Request',
+      `<p>Permanently delete the trial request for <strong>${name}</strong>?</p><p>This cannot be undone.</p>`,
+      async () => {
+        try {
+          const res = await fetch(N8N_TRIAL_DELETE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          toast('Trial request deleted', 'success');
+          writeLog({
+            level: 'info', status: 'success',
+            module: 'trial', source: 'deleteTrial',
+            message: `Trial deleted: id=${id}`,
+            meta: { id }
+          });
+          _trialsLoaded = false;
+          await loadTrials(true);
+        } catch(e) {
+          toast('Error: ' + e.message, 'error');
+        }
+      }
+    );
+  }
+
+  /* ═════════════════════════════════════════════════════════ */
 
   function renderLogStats() {
     const total    = _logs.length;
