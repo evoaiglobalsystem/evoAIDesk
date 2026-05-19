@@ -501,6 +501,139 @@
   .footer-links a:hover { color: var(--accent); }
   .footer-links span { opacity: .4; }
 
+  /* ── Trial request link ── */
+  .trial-link {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    margin-top: 10px; width: 100%; white-space: nowrap;
+    font-size: .72rem; font-family: var(--mono); font-weight: 500; letter-spacing: .03em;
+    color: var(--accent2); text-decoration: none;
+    background: rgba(0,184,255,.07); border: 1px solid rgba(0,184,255,.22);
+    border-radius: 8px; padding: 10px 16px; cursor: pointer;
+    transition: background .18s, border-color .18s, transform .18s, box-shadow .18s;
+  }
+  .trial-link:hover {
+    background: rgba(0,184,255,.13); border-color: rgba(0,184,255,.45);
+    box-shadow: 0 0 20px rgba(0,184,255,.08); transform: translateY(-1px);
+  }
+  .trial-link:hover svg:last-child { transform: translateX(3px); }
+  .trial-link svg { transition: transform .18s; }
+
+  /* ── Modal overlay ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(4,8,20,.82); backdrop-filter: blur(6px);
+    align-items: center; justify-content: center; padding: 20px 16px;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn .22s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 36px 40px 32px; width: 100%; max-width: 560px;
+    box-shadow: 0 40px 100px rgba(0,0,0,.7), 0 0 0 1px rgba(0,184,255,.06);
+    animation: cardIn .3s cubic-bezier(.22,1,.36,1);
+    max-height: 90vh; overflow-y: auto;
+  }
+
+  .modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    margin-bottom: 0;
+  }
+  .modal-header-left { display: flex; align-items: center; gap: 14px; }
+  .modal-icon {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    background: rgba(0,184,255,.1); border: 1px solid rgba(0,184,255,.22);
+    display: flex; align-items: center; justify-content: center; color: var(--accent2);
+  }
+  .modal-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 3px; }
+  .modal-sub   { font-size: .76rem; color: var(--muted); line-height: 1.5; }
+  .modal-close {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    width: 34px; height: 34px; flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); transition: all .18s;
+  }
+  .modal-close:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,77,109,.08); }
+  .modal-divider { height: 1px; background: var(--border); margin: 24px -40px 24px; }
+
+  /* Modal message */
+  .modal-msg {
+    display: none; padding: 11px 14px; border-radius: 8px; font-size: .82rem;
+    background: rgba(255,77,109,.08); border: 1px solid rgba(255,77,109,.22);
+    color: #ff8099; margin-bottom: 16px; line-height: 1.5;
+  }
+  .modal-msg.visible { display: block; }
+
+  /* Success state */
+  .modal-success {
+    display: none; flex-direction: column; align-items: center; text-align: center;
+    padding: 12px 0 8px; gap: 14px;
+  }
+  .modal-success.visible { display: flex; }
+  .success-icon {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: rgba(0,229,160,.1); border: 1px solid rgba(0,229,160,.25);
+    display: flex; align-items: center; justify-content: center; color: var(--accent);
+    animation: popIn .4s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes popIn { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .success-title { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .success-body  { font-size: .84rem; color: var(--muted); line-height: 1.7; max-width: 380px; }
+  .success-body strong { color: var(--text); }
+  .modal-close-btn {
+    margin-top: 8px; padding: 11px 32px; border-radius: 8px; font-size: .88rem; font-weight: 600;
+    font-family: var(--font); background: rgba(0,229,160,.1); border: 1px solid rgba(0,229,160,.3);
+    color: var(--accent); cursor: pointer; transition: all .18s;
+  }
+  .modal-close-btn:hover { background: rgba(0,229,160,.18); transform: translateY(-1px); }
+
+  /* Form grid */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group--full { grid-column: 1 / -1; }
+
+  .form-label {
+    font-size: .72rem; font-family: var(--mono); font-weight: 500;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+  }
+  .req { color: var(--accent2); }
+  .form-hint { font-size: .68rem; color: var(--muted); opacity: .7; margin-top: -2px; }
+
+  .form-input {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 11px 14px; font-size: .88rem; font-family: var(--font); color: var(--text);
+    outline: none; transition: border-color .18s, box-shadow .18s; width: 100%;
+  }
+  .form-input::placeholder { color: var(--muted); opacity: .6; }
+  .form-input:focus {
+    border-color: rgba(0,184,255,.45);
+    box-shadow: 0 0 0 3px rgba(0,184,255,.08);
+  }
+  .form-input.error { border-color: rgba(255,77,109,.5); box-shadow: 0 0 0 3px rgba(255,77,109,.06); }
+  .form-select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .form-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+  .form-submit {
+    width: 100%; padding: 14px 20px; border-radius: 10px; font-size: .92rem; font-weight: 600;
+    font-family: var(--font); cursor: pointer; transition: all .2s;
+    background: linear-gradient(135deg, rgba(0,184,255,.18), rgba(0,229,160,.12));
+    border: 1px solid rgba(0,184,255,.35); color: var(--accent2);
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    box-shadow: 0 4px 20px rgba(0,184,255,.1);
+  }
+  .form-submit:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(0,184,255,.26), rgba(0,229,160,.18));
+    border-color: rgba(0,184,255,.55); transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(0,184,255,.18);
+  }
+  .form-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+  .form-privacy {
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    margin-top: 12px; font-size: .68rem; color: var(--muted); opacity: .65;
+    font-family: var(--mono);
+  }
+
   @media (max-width: 640px) {
     body { padding: 20px 12px 100px; }
     .card { padding: 36px 24px 32px; max-width: 100%; }
@@ -512,6 +645,9 @@
     .dest-vdivider { display: none; }
     .dest-right { padding: 0; width: 100%; }
     .dest-grid { grid-template-columns: 1fr 1fr; }
+    .modal-card { padding: 28px 20px 24px; }
+    .modal-divider { margin: 20px -20px; }
+    .form-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -561,6 +697,16 @@
         <path d="M5 12h14M12 5l7 7-7 7"/>
       </svg>
     </a>
+
+    <button class="trial-link" onclick="openTrialModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      Request a free trial — talk to evoAI
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </button>
 
     <div class="secure-note">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -647,6 +793,111 @@
 
 </div>
 
+<!-- ══ TRIAL REQUEST MODAL ══ -->
+<div class="modal-overlay" id="trialModal" onclick="handleOverlayClick(event)">
+  <div class="modal-card" id="trialCard">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="modal-title">Request a Free Trial</div>
+          <div class="modal-sub">evoAI team will set up your workspace within 24 hrs</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeTrialModal()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-divider"></div>
+
+    <!-- Message box -->
+    <div class="modal-msg" id="modalMsg"></div>
+
+    <!-- Success state -->
+    <div class="modal-success" id="modalSuccess">
+      <div class="success-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="success-title">Request Sent!</div>
+      <div class="success-body">Thank you, <strong id="successName"></strong>! We've received your trial request and sent a confirmation to <strong id="successEmail"></strong>.<br/><br/>Our team will reach out within <strong>24 hours</strong> to set up your evoAIDesk workspace.</div>
+      <button class="modal-close-btn" onclick="closeTrialModal()">Close</button>
+    </div>
+
+    <!-- Form -->
+    <div id="trialForm">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label class="form-label" for="tf-name">Full Name <span class="req">*</span></label>
+          <input class="form-input" id="tf-name" type="text" placeholder="Jane Smith" autocomplete="name" required/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tf-email">Work Email <span class="req">*</span></label>
+          <input class="form-input" id="tf-email" type="email" placeholder="jane@company.com" autocomplete="email" required/>
+          <span class="form-hint">This will be used to sign in via Google</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tf-company">Company / Organisation <span class="req">*</span></label>
+          <input class="form-input" id="tf-company" type="text" placeholder="Acme Corp" autocomplete="organization" required/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="tf-phone">Phone / WhatsApp</label>
+          <input class="form-input" id="tf-phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel"/>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label class="form-label" for="tf-team">Team Size <span class="req">*</span></label>
+          <select class="form-input form-select" id="tf-team" required>
+            <option value="" disabled selected>Select team size…</option>
+            <option value="1–5">1 – 5 people</option>
+            <option value="6–20">6 – 20 people</option>
+            <option value="21–50">21 – 50 people</option>
+            <option value="51–100">51 – 100 people</option>
+            <option value="100+">100+ people</option>
+          </select>
+        </div>
+
+        <div class="form-group form-group--full">
+          <label class="form-label" for="tf-usecase">What are you looking to solve? <span class="req">*</span></label>
+          <textarea class="form-input form-textarea" id="tf-usecase" placeholder="E.g. We want to manage our sales pipeline, automate follow-ups, and track opportunities across the team…" rows="3" required></textarea>
+        </div>
+
+      </div>
+
+      <button class="form-submit" id="trialSubmitBtn" onclick="submitTrialRequest()">
+        <span id="trialBtnLabel">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+          Send Trial Request
+        </span>
+        <span class="btn-spinner" id="trialBtnSpinner" style="display:none"></span>
+      </button>
+
+      <p class="form-privacy">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Your details are only used to set up your evoAIDesk trial. No spam, ever.
+      </p>
+    </div>
+
+  </div>
+</div>
+
 <!-- ── Footer ── -->
 <footer class="site-footer">
   <div class="footer-top">
@@ -693,6 +944,143 @@
     // Already defined in module via closure — the getElementById calls inside the
     // module reference elements by ID so they work fine after DOM is ready.
   })();
+</script>
+
+<script>
+  /* ══════════════════════════════════════════════
+     FREE TRIAL MODAL — evoAIDesk
+     n8n webhook: replace N8N_WEBHOOK_URL below
+     with your live webhook endpoint.
+  ══════════════════════════════════════════════ */
+  const N8N_WEBHOOK_URL = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk-trial';
+  // ↑ REPLACE with your actual n8n webhook URL
+
+  function openTrialModal() {
+    document.getElementById('trialModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('tf-name').focus(), 100);
+  }
+
+  function closeTrialModal() {
+    document.getElementById('trialModal').classList.remove('open');
+    document.body.style.overflow = '';
+    // Reset form after close animation
+    setTimeout(resetTrialForm, 250);
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('trialModal')) closeTrialModal();
+  }
+
+  function resetTrialForm() {
+    ['tf-name','tf-email','tf-company','tf-phone','tf-team','tf-usecase'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.classList.remove('error'); }
+    });
+    document.getElementById('modalMsg').classList.remove('visible');
+    document.getElementById('modalSuccess').classList.remove('visible');
+    document.getElementById('trialForm').style.display = '';
+    resetTrialBtn();
+  }
+
+  function resetTrialBtn() {
+    const btn = document.getElementById('trialSubmitBtn');
+    btn.disabled = false;
+    document.getElementById('trialBtnLabel').style.display = 'flex';
+    document.getElementById('trialBtnSpinner').style.display = 'none';
+  }
+
+  function showModalError(msg) {
+    const box = document.getElementById('modalMsg');
+    box.textContent = msg;
+    box.classList.add('visible');
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function clearModalError() {
+    document.getElementById('modalMsg').classList.remove('visible');
+  }
+
+  async function submitTrialRequest() {
+    clearModalError();
+
+    // Gather values
+    const name    = document.getElementById('tf-name').value.trim();
+    const email   = document.getElementById('tf-email').value.trim();
+    const company = document.getElementById('tf-company').value.trim();
+    const phone   = document.getElementById('tf-phone').value.trim();
+    const team    = document.getElementById('tf-team').value;
+    const useCase = document.getElementById('tf-usecase').value.trim();
+
+    // Basic validation
+    let valid = true;
+    const required = [
+      { id: 'tf-name',    val: name,    label: 'Full Name' },
+      { id: 'tf-email',   val: email,   label: 'Work Email' },
+      { id: 'tf-company', val: company, label: 'Company' },
+      { id: 'tf-team',    val: team,    label: 'Team Size' },
+      { id: 'tf-usecase', val: useCase, label: 'Use Case' },
+    ];
+    required.forEach(({ id, val }) => {
+      const el = document.getElementById(id);
+      if (!val) { el.classList.add('error'); valid = false; }
+      else el.classList.remove('error');
+    });
+    if (!valid) { showModalError('Please fill in all required fields.'); return; }
+
+    // Email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('tf-email').classList.add('error');
+      showModalError('Please enter a valid email address.');
+      return;
+    }
+
+    // Disable button, show spinner
+    const btn = document.getElementById('trialSubmitBtn');
+    btn.disabled = true;
+    document.getElementById('trialBtnLabel').style.display = 'none';
+    document.getElementById('trialBtnSpinner').style.display = 'inline-block';
+
+    const payload = {
+      name, email, company, phone, teamSize: team, useCase,
+      submittedAt: new Date().toISOString(),
+      source: 'evoAIDesk Login Page'
+    };
+
+    try {
+      const res = await fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+
+      // Show success
+      document.getElementById('successName').textContent  = name.split(' ')[0];
+      document.getElementById('successEmail').textContent = email;
+      document.getElementById('trialForm').style.display  = 'none';
+      document.getElementById('modalSuccess').classList.add('visible');
+
+    } catch (err) {
+      console.error('Trial submission error:', err);
+      resetTrialBtn();
+      showModalError('Something went wrong. Please try again or email us directly at info@evoaiglobal.ai');
+    }
+  }
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('trialModal').classList.contains('open')) {
+      closeTrialModal();
+    }
+  });
+
+  // Clear error on input
+  ['tf-name','tf-email','tf-company','tf-team','tf-usecase'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => { el.classList.remove('error'); clearModalError(); });
+  });
 </script>
 
 </body>
