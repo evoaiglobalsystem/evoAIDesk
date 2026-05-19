@@ -161,6 +161,7 @@
 
     /* ── Footer shared styles ── */
     .footer-bottom{width:80%;margin:64px auto 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    @media (max-width: 640px) { .footer-bottom { width: 100%; padding: 0 16px; } }
     .footer-logo{font-size:1.35rem;font-weight:600;letter-spacing:-0.3px}
     .footer-logo .evo{color:var(--green);font-weight:300}
     .footer-logo .ai{color:var(--blue);font-weight:700}
@@ -668,6 +669,13 @@
     .evopv-tab-btn.active {
       background:rgba(76,222,60,0.12);border-color:rgba(76,222,60,0.4);color:#4cde3c;
     }
+    /* ── Mobile fixes for product preview ── */
+    @media (max-width: 600px) {
+      #product-preview { padding: 48px 16px 64px !important; }
+      .evopv-caption-row { flex-direction: column !important; }
+      .evopv-caption-row > div { min-width: unset !important; width: 100% !important; }
+      #compare-swipe-hint { display: block !important; }
+    }
   </style>
 
   <div style="position:relative;z-index:1;max-width:1060px;margin:0 auto;">
@@ -710,7 +718,7 @@
           <span style="opacity:.4;font-size:.72rem;">images/dashboard.png · 1280 × 720 px recommended</span>
         </div>
       </div>
-      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+      <div class="evopv-caption-row" style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
         <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
 		  <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">KPI Tiles</div>
 		  <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Total leads, stage-wise counts, deal value, and follow-ups due — your pipeline health at a glance.</div>
@@ -744,7 +752,7 @@
           <span style="opacity:.4;font-size:.72rem;">images/pipeline.png · 1280 × 720 px recommended</span>
         </div>
       </div>
-      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+      <div class="evopv-caption-row" style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
         <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
           <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Drag-and-Drop Kanban</div>
           <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Move deals between stages instantly — no spreadsheet juggling.</div>
@@ -778,7 +786,7 @@
           <span style="opacity:.4;font-size:.72rem;">images/lead-card.png · 1280 × 720 px recommended</span>
         </div>
       </div>
-      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+      <div class="evopv-caption-row" style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
         <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
           <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Smart Score (0–100)</div>
           <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Auto-calculated from deal value, profile completeness, and pipeline stage.</div>
@@ -812,7 +820,7 @@
           <span style="opacity:.4;font-size:.72rem;">images/deskbot.png · 1280 × 720 px recommended</span>
         </div>
       </div>
-      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+      <div class="evopv-caption-row" style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
         <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
           <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Works in Telegram</div>
           <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Query pipeline, add leads, and check follow-ups — no dashboard login needed.</div>
@@ -1217,6 +1225,7 @@
       <div class="section-label">vs competitors</div>
       <div class="section-title">Why evoAIDesk wins</div>
       <div class="section-sub">Build the same stack elsewhere and pay 10× more.</div>
+      <p style="display:none;text-align:right;font-size:.72rem;color:#6b7280;margin-bottom:8px;letter-spacing:.04em;" id="compare-swipe-hint">← swipe to see more →</p>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
         <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
         <table class="compare-table" style="min-width:600px;">
