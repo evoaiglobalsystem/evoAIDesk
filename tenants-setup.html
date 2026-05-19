@@ -912,9 +912,6 @@
           <div class="page-sub">Manage incoming trial requests from the evoAIDesk Login Page — powered by Neon via n8n.</div>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="pill-btn outline" onclick="debugTrials()" style="border-color:#ffb730;color:#ffb730;">
-            🔍 Debug
-          </button>
           <button class="pill-btn outline" onclick="loadTrials(true)">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
             Refresh
@@ -2593,34 +2590,6 @@
      TRIAL REQUESTS — Neon via n8n
   ══════════════════════════════════════════════════════════ */
 
-  async function debugTrials() {
-    try {
-      const res  = await fetch(N8N_TRIAL_READ);
-      const text = await res.text();
-	  console.log('loadTrials raw:', text.slice(0, 200));  // ADD THIS
-	  
-      let parsed1, parsed2 = null, isArr = false;
-      try { parsed1 = JSON.parse(text); } catch(e) { parsed1 = 'PARSE ERROR: ' + e.message; }
-      if (typeof parsed1 === 'string') {
-        try { parsed2 = JSON.parse(parsed1); } catch(e) { parsed2 = 'DOUBLE-PARSE ERROR: ' + e.message; }
-      }
-      const final = parsed2 ?? parsed1;
-      isArr = Array.isArray(final);
-      alert(
-        `STATUS: ${res.status}\n` +
-        `RAW LENGTH: ${text.length} chars\n` +
-        `RAW (first 300): ${text.slice(0,300)}\n\n` +
-        `AFTER 1st parse type: ${typeof parsed1}\n` +
-        `AFTER 2nd parse type: ${parsed2 !== null ? typeof parsed2 : 'N/A'}\n` +
-        `IS ARRAY: ${isArr}\n` +
-        `ITEM COUNT: ${isArr ? final.length : 'N/A'}\n` +
-        `FIRST ITEM KEYS: ${isArr && final.length ? Object.keys(final[0]).join(', ') : 'N/A'}`
-      );
-    } catch(e) {
-      alert('FETCH ERROR: ' + e.message);
-    }
-  }
-
   async function loadTrials(force = false) {
     if (_trialsLoading) return;
     if (_trialsLoaded && !force) return;
@@ -2828,7 +2797,12 @@
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
       const url    = _editTrialId ? N8N_TRIAL_UPDATE : N8N_TRIAL_WRITE;
-      if (_editTrialId) payload.id = _editTrialId;
+      if (_editTrialId) {
+        payload.id     = _editTrialId;
+        payload.action = 'update';
+      } else {
+        payload.action = 'write';
+      }
       const res    = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2861,7 +2835,7 @@
       const res = await fetch(N8N_TRIAL_UPDATE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status })
+        body: JSON.stringify({ action: 'update', id, status })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast(`Trial marked as ${status}`, 'success');
@@ -2887,7 +2861,7 @@
           const res = await fetch(N8N_TRIAL_DELETE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
+            body: JSON.stringify({ action: 'delete', id })
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           toast('Trial request deleted', 'success');
