@@ -2592,6 +2592,8 @@
     try {
       const res  = await fetch(N8N_TRIAL_READ);
       const text = await res.text();
+	  console.log('loadTrials raw:', text.slice(0, 200));  // ADD THIS
+	  
       let parsed1, parsed2 = null, isArr = false;
       try { parsed1 = JSON.parse(text); } catch(e) { parsed1 = 'PARSE ERROR: ' + e.message; }
       if (typeof parsed1 === 'string') {
