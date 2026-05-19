@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Case Study – BrightSpark Digital | evoAIDesk</title>
+  <meta name="description" content="How BrightSpark Digital went from leaky pipelines to 3× more conversions in 60 days using evoAIDesk Smart CRM." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --brand-dark:   #0d1117;
+      --brand-mid:    #161c26;
+      --brand-border: #1f2b3e;
+      --brand-accent: #3b82f6;
+      --brand-accent2: #60a5fa;
+      --brand-green:  #22c55e;
+      --brand-text:   #e2e8f0;
+      --brand-muted:  #94a3b8;
+      --brand-card:   #111827;
+      --brand-card2:  #0f1923;
+      --hot:  #ef4444;
+      --warm: #f59e0b;
+      --cold: #64748b;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--brand-dark);
+      color: var(--brand-text);
+      line-height: 1.7;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HERO (KnowMore style) ───────────── */
+    .hero {
+      border: 1px solid var(--brand-border);
+      border-radius: 16px;
+      background: #0e1420;
+      padding: 36px 40px;
+      margin: 24px auto;
+      max-width: 1120px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -40px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 30%;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96,165,250,.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    /* top row: logo + badge + divider + label + back btn */
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+    }
+    .logo-img { height: 36px; width: auto; display: block; object-fit: contain; }
+    .logo-badge {
+      font-family: 'Sora', sans-serif;
+      font-size: .6rem;
+      letter-spacing: .08em;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.25);
+      color: var(--brand-accent2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .hero-divider { flex: 1; height: 1px; background: var(--brand-border); min-width: 20px; }
+    .product-tag {
+      font-family: 'Sora', sans-serif;
+      font-size: .6rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--brand-muted);
+    }
+    .hero-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.95rem;
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-title .g {
+      background: linear-gradient(90deg, var(--brand-accent), var(--brand-accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: .9rem;
+      color: var(--brand-muted);
+      line-height: 1.65;
+      max-width: 580px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .disclaimer {
+      display: inline-block;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--brand-border);
+      border-radius: 8px;
+      font-size: .75rem;
+      color: var(--brand-muted);
+      padding: .5rem 1rem;
+      font-style: italic;
+      line-height: 1.55;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+    /* pills */
+    .hero-pills { display: flex; flex-wrap: wrap; gap: 7px; position: relative; z-index: 2; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #141c2a;
+      border: 1px solid var(--brand-border);
+      border-radius: 20px; padding: 5px 12px;
+      font-size: .7rem; font-weight: 600; color: var(--brand-muted);
+    }
+    .pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .pill.green .dot { background: var(--brand-green); }
+    .pill.blue  .dot { background: var(--brand-accent2); }
+    .pill.purple .dot{ background: #c084fc; }
+    .pill.orange .dot{ background: #f59e0b; }
+    .pill.red    .dot{ background: #ef4444; }
+
+    /* ── STATS BAR ───────────────────────── */
+    .stats-bar {
+      background: var(--brand-mid);
+      border-top: 1px solid var(--brand-border);
+      border-bottom: 1px solid var(--brand-border);
+      padding: 2.5rem 2rem;
+    }
+    .stats-grid {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--brand-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .stat {
+      background: var(--brand-card);
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Sora', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      color: var(--brand-accent);
+      line-height: 1;
+      margin-bottom: .35rem;
+    }
+    .stat-label {
+      font-size: .82rem;
+      color: var(--brand-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* ── MAIN CONTENT ────────────────────── */
+    .content {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    /* ── SECTION HEADER ──────────────────── */
+    .section-header {
+      margin-bottom: 2rem;
+    }
+    .section-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--brand-accent);
+      margin-bottom: .5rem;
+    }
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.25;
+    }
+
+    /* ── COMPANY PROFILE ─────────────────── */
+    .profile-card {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .profile-intro p { color: var(--brand-muted); font-size: .95rem; line-height: 1.75; }
+    .profile-details { display: flex; flex-direction: column; gap: .75rem; }
+    .detail-row {
+      display: flex;
+      gap: .75rem;
+      font-size: .88rem;
+    }
+    .detail-key {
+      color: var(--brand-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      min-width: 110px;
+    }
+    .detail-val { color: var(--brand-text); }
+
+    /* ── PROBLEM SECTION ─────────────────── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .pain-list {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+    }
+    .pain-list h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      color: var(--brand-text);
+    }
+    .pain-item {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      padding: .6rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      font-size: .88rem;
+      color: var(--brand-muted);
+      line-height: 1.55;
+    }
+    .pain-item:last-child { border-bottom: none; }
+    .pain-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(239,68,68,.15);
+      border: 1px solid rgba(239,68,68,.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      font-size: .6rem;
+      color: #ef4444;
+    }
+    .quote-card {
+      background: linear-gradient(135deg, rgba(59,130,246,.08) 0%, rgba(59,130,246,.03) 100%);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .quote-mark {
+      font-family: Georgia, serif;
+      font-size: 4rem;
+      line-height: .8;
+      color: var(--brand-accent);
+      opacity: .4;
+      margin-bottom: .5rem;
+    }
+    .quote-text {
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--brand-text);
+      line-height: 1.65;
+      margin-bottom: 1.2rem;
+    }
+    .quote-author {
+      font-size: .8rem;
+      color: var(--brand-muted);
+      font-weight: 500;
+    }
+
+    /* ── SOLUTION STEPS ──────────────────── */
+    .steps { margin-bottom: 3rem; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+    .step-card {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s, transform .2s;
+    }
+    .step-card:hover {
+      border-color: rgba(59,130,246,.4);
+      transform: translateY(-2px);
+    }
+    .step-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--brand-accent), transparent);
+    }
+    .step-num {
+      font-family: 'Sora', sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--brand-accent);
+      margin-bottom: .6rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .step-num::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--brand-border);
+    }
+    .step-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: .75rem;
+      letter-spacing: -.02em;
+    }
+    .step-card p { font-size: .88rem; color: var(--brand-muted); margin-bottom: .9rem; line-height: 1.65; }
+    .bullet-list {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+    .bullet-item {
+      display: flex;
+      gap: .6rem;
+      align-items: flex-start;
+      font-size: .82rem;
+      color: var(--brand-muted);
+    }
+    .bullet-item::before {
+      content: '→';
+      color: var(--brand-accent);
+      flex-shrink: 0;
+      margin-top: .05rem;
+    }
+
+    /* ── BEFORE / AFTER ──────────────────── */
+    .ba-section { margin-bottom: 3rem; }
+    .ba-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--brand-border);
+    }
+    .ba-table thead th {
+      font-family: 'Sora', sans-serif;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 1rem 1.5rem;
+    }
+    .ba-table thead .col-before {
+      background: rgba(239,68,68,.08);
+      color: #ef4444;
+      border-right: 1px solid var(--brand-border);
+    }
+    .ba-table thead .col-after {
+      background: rgba(34,197,94,.08);
+      color: var(--brand-green);
+    }
+    .ba-table tbody tr:nth-child(odd) td { background: var(--brand-card); }
+    .ba-table tbody tr:nth-child(even) td { background: var(--brand-card2); }
+    .ba-table tbody td {
+      padding: .9rem 1.5rem;
+      font-size: .88rem;
+      vertical-align: top;
+      line-height: 1.55;
+    }
+    .ba-table tbody td:first-child {
+      color: #f87171;
+      border-right: 1px solid var(--brand-border);
+    }
+    .ba-table tbody td:last-child { color: #86efac; }
+
+    /* ── RESULTS ─────────────────────────── */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+    .result-card {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      transition: border-color .25s;
+    }
+    .result-card:hover { border-color: rgba(34,197,94,.35); }
+    .result-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(34,197,94,.12);
+      border: 1px solid rgba(34,197,94,.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+    .result-body {}
+    .result-metric {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--brand-green);
+      letter-spacing: -.03em;
+      line-height: 1;
+      margin-bottom: .3rem;
+    }
+    .result-desc {
+      font-size: .88rem;
+      color: var(--brand-muted);
+      line-height: 1.55;
+    }
+
+    /* ── COST COMPARISON ─────────────────── */
+    .comparison { margin-bottom: 3rem; }
+    .comp-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--brand-border);
+      font-size: .88rem;
+    }
+    .comp-table thead th {
+      background: var(--brand-mid);
+      padding: .9rem 1.25rem;
+      text-align: left;
+      font-family: 'Sora', sans-serif;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--brand-muted);
+      border-bottom: 1px solid var(--brand-border);
+    }
+    .comp-table tbody tr { transition: background .15s; }
+    .comp-table tbody tr:hover td { background: rgba(255,255,255,.025); }
+    .comp-table tbody td {
+      padding: .9rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      color: var(--brand-muted);
+      vertical-align: middle;
+    }
+    .comp-table tbody tr:last-child td { border-bottom: none; }
+    .comp-table .row-evo td {
+      background: rgba(59,130,246,.05) !important;
+      color: var(--brand-text);
+      font-weight: 600;
+    }
+    .comp-table .row-evo td:first-child { color: var(--brand-accent); }
+    .check { color: var(--brand-green); font-weight: 700; }
+    .cross { color: #ef4444; font-weight: 700; }
+    .price-highlight { color: var(--brand-accent); font-weight: 700; }
+
+    /* ── WHY IT WORKED ───────────────────── */
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+    .why-card {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      text-align: center;
+      transition: border-color .25s, transform .2s;
+    }
+    .why-card:hover {
+      border-color: rgba(59,130,246,.35);
+      transform: translateY(-3px);
+    }
+    .why-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin: 0 auto 1rem;
+    }
+    .why-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      margin-bottom: .5rem;
+    }
+    .why-card p { font-size: .85rem; color: var(--brand-muted); line-height: 1.6; }
+
+    /* ── CTA ─────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(59,130,246,.1) 0%, rgba(59,130,246,.04) 100%);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: var(--radius);
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .cta-section h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      margin-bottom: .75rem;
+    }
+    .cta-section p { color: var(--brand-muted); font-size: .95rem; margin-bottom: 1.75rem; }
+    .cta-btn {
+      display: inline-block;
+      background: var(--brand-accent);
+      color: #fff;
+      text-decoration: none;
+      padding: .85rem 2.2rem;
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      letter-spacing: -.01em;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(59,130,246,.3);
+    }
+    .cta-btn:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(59,130,246,.45);
+    }
+    .cta-note {
+      display: block;
+      margin-top: .9rem;
+      font-size: .78rem;
+      color: var(--brand-muted);
+    }
+
+    /* ── FOOTER ──────────────────────────── */
+    footer {
+      border-top: 1px solid var(--brand-border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: .8rem;
+      color: var(--brand-muted);
+    }
+    footer a { color: var(--brand-muted); text-decoration: none; }
+    footer a:hover { color: var(--brand-text); }
+
+    /* ── RESPONSIVE ──────────────────────── */
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .profile-card,
+      .problem-grid,
+      .steps-grid,
+      .results-grid,
+      .why-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── BACK LINK ───────────────────────── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--brand-accent2);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(96,165,250,0.08);
+      border: 1px solid rgba(96,165,250,0.2);
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+    .back-link:hover {
+      background: rgba(96,165,250,0.18);
+      color: #fff;
+      transform: translateX(-2px);
+    }
+
+    /* ── FOOTER ──────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--brand-border);
+      padding-top: 18px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      max-width: 1120px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      padding-bottom: 2rem;
+    }
+    .footer-brand {
+      font-family: 'Sora', sans-serif;
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+    .footer-brand .evo { color: var(--brand-accent2); }
+    .footer-brand .ai  { color: var(--brand-green); }
+    .footer-brand .rest{ color: var(--brand-text); }
+    .footer-meta {
+      font-size: .6rem;
+      color: var(--brand-muted);
+      margin-top: 4px;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: .04em;
+    }
+    .footer-powered {
+      font-size: .65rem;
+      color: var(--brand-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: right;
+    }
+    .footer-powered a { color: var(--brand-accent2); text-decoration: none; font-weight: 600; }
+    .footer-copy {
+      font-size: .6rem;
+      color: var(--brand-muted);
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    /* ── RESPONSIVE ──────────────────────── */
+    @media (max-width: 768px) {
+      .hero { padding: 22px 18px; margin: 12px; }
+      .hero-top { gap: 10px; margin-bottom: 16px; }
+      .hero-divider { display: none; }
+      .product-tag { display: none; }
+      .hero-title { font-size: 1.45rem; }
+      .logo-img { height: 28px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .profile-card,
+      .problem-grid,
+      .steps-grid,
+      .results-grid,
+      .why-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── FADE-IN ANIMATION ───────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp .6s ease forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .delay-1 { animation-delay: .1s; }
+    .delay-2 { animation-delay: .2s; }
+    .delay-3 { animation-delay: .3s; }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- top row: logo · badge · divider · label · back btn -->
+  <div class="hero-top">
+    <img class="logo-img" src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk" />
+    <span class="logo-badge">Case Study</span>
+    <div class="hero-divider"></div>
+    <span class="product-tag">Illustrative Case Study</span>
+    <a href="index.html" class="back-link">← Back to Home</a>
+  </div>
+
+  <!-- title -->
+  <div class="hero-title">
+    From Leaky Pipelines to <span class="g">3× More Conversions</span><br />in 60 Days
+  </div>
+
+  <!-- sub -->
+  <div class="hero-sub">
+    How BrightSpark Digital — a 3-person marketing agency — used evoAIDesk to eliminate manual chaos and automate their entire lead pipeline.
+  </div>
+
+  <!-- disclaimer -->
+  <div class="disclaimer">
+    BrightSpark Digital is a fictional company created to illustrate realistic results achievable with evoAIDesk.<br />All numbers are based on documented product capabilities and industry benchmarks.
+  </div>
+
+  <!-- pills -->
+  <div class="hero-pills">
+    <span class="pill green"><span class="dot"></span>3× More Leads</span>
+    <span class="pill blue"><span class="dot"></span>68% Time Saved</span>
+    <span class="pill purple"><span class="dot"></span>Zero Dropped Leads</span>
+    <span class="pill orange"><span class="dot"></span>$39 Flat / Month</span>
+    <span class="pill red"><span class="dot"></span>Live in 2 Hours</span>
+    <span class="pill green"><span class="dot"></span>100% Follow-ups Automated</span>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<section class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat fade-in">
+      <div class="stat-num">3×</div>
+      <div class="stat-label">More leads contacted/week</div>
+    </div>
+    <div class="stat fade-in delay-1">
+      <div class="stat-num">68%</div>
+      <div class="stat-label">Reduction in follow-up time</div>
+    </div>
+    <div class="stat fade-in delay-2">
+      <div class="stat-num">$0</div>
+      <div class="stat-label">Extra headcount added</div>
+    </div>
+    <div class="stat fade-in">
+      <div class="stat-num">2 hrs</div>
+      <div class="stat-label">Setup time to go live</div>
+    </div>
+    <div class="stat fade-in delay-1">
+      <div class="stat-num">500+</div>
+      <div class="stat-label">Leads managed in 60 days</div>
+    </div>
+    <div class="stat fade-in delay-2">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Follow-ups automated</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- THE COMPANY -->
+  <section style="margin-bottom:3rem;">
+    <div class="section-header">
+      <div class="section-label">The Company</div>
+      <h2 class="section-title">Meet BrightSpark Digital</h2>
+    </div>
+    <div class="profile-card">
+      <div class="profile-intro">
+        <p>BrightSpark Digital is a 3-person digital marketing agency serving local small businesses — restaurants, salons, and retail shops. They run paid ad campaigns and generate a steady stream of inbound enquiries every week.</p>
+        <p style="margin-top:1rem;">With no dedicated CRM and leads scattered across spreadsheets, WhatsApp, and email drafts, the team was flying blind — and losing deals without knowing it.</p>
+      </div>
+      <div class="profile-details">
+        <div class="detail-row">
+          <span class="detail-key">Team Size</span>
+          <span class="detail-val">3 people — 1 founder, 1 account manager, 1 content lead</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Lead Volume</span>
+          <span class="detail-val">~80–120 new leads per month</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Lead Sources</span>
+          <span class="detail-val">Website forms, LinkedIn Lead Gen, referrals</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Industry</span>
+          <span class="detail-val">B2B digital marketing services</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Before evoAIDesk</span>
+          <span class="detail-val">Google Sheets + email drafts + WhatsApp (manual)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE PROBLEM -->
+  <section style="margin-bottom:3rem;">
+    <div class="section-header">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title">Leads Were Slipping Through the Cracks</h2>
+    </div>
+    <div class="problem-grid">
+      <div class="pain-list">
+        <h3>What their average week looked like</h3>
+        <div class="pain-item">
+          <div class="pain-icon">✕</div>
+          <span>Spend 4–6 hours per week manually copying leads from forms into spreadsheets</span>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">✕</div>
+          <span>Miss follow-ups because there was no system to track who needed to be contacted</span>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">✕</div>
+          <span>No visibility into which leads were hot vs cold — everyone got the same attention</span>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">✕</div>
+          <span>Send follow-up WhatsApps manually, one by one, when the team remembered</span>
+        </div>
+        <div class="pain-item">
+          <div class="pain-icon">✕</div>
+          <span>Lose leads entirely when the account manager was on leave</span>
+        </div>
+      </div>
+      <div class="quote-card">
+        <div class="quote-mark">"</div>
+        <p class="quote-text">We knew we were losing deals. We just didn't know how many or why.</p>
+        <div class="quote-author">— Founder, BrightSpark Digital</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE SOLUTION -->
+  <section class="steps">
+    <div class="section-header">
+      <div class="section-label">The Solution</div>
+      <h2 class="section-title">evoAIDesk in 4 Steps</h2>
+    </div>
+    <p style="color:var(--brand-muted);font-size:.95rem;margin-bottom:1.75rem;">BrightSpark signed up for the evoAIDesk Starter plan ($39/mo) and was live in under 2 hours. Here's exactly how they used each feature:</p>
+    <div class="steps-grid">
+
+      <div class="step-card">
+        <div class="step-num">Step 01</div>
+        <h3>🔗 Unified Lead Capture</h3>
+        <p>They connected their website contact form and LinkedIn Lead Gen Forms to evoAIDesk. Every new enquiry now flows automatically into one pipeline — no manual copying, no missed entries.</p>
+        <div class="bullet-list">
+          <div class="bullet-item">Website form → auto-imported and tagged by source</div>
+          <div class="bullet-item">LinkedIn Lead Gen Form → synced directly into the pipeline</div>
+          <div class="bullet-item">Walk-in or referral leads added instantly via DeskBot on Telegram</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">Step 02</div>
+        <h3>🎯 Smart Lead Scoring</h3>
+        <p>evoAIDesk's Smart Lead Scoring instantly ranked every lead as Hot, Warm, or Cold based on activity, response behaviour, and engagement signals. The team stopped wasting time on cold leads.</p>
+        <div class="bullet-list">
+          <div class="bullet-item">Hot leads flagged immediately for same-day follow-up</div>
+          <div class="bullet-item">Warm leads put into a nurture sequence</div>
+          <div class="bullet-item">Cold leads de-prioritised without being lost</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">Step 03</div>
+        <h3>⚙️ Automated Follow-Ups</h3>
+        <p>One click sent an intro email or triggered a WhatsApp follow-up link — pre-written, consistent, and instant. The account manager's job shifted from writing follow-ups to reviewing responses.</p>
+        <div class="bullet-list">
+          <div class="bullet-item">Intro email automated within 5 minutes of lead capture</div>
+          <div class="bullet-item">WhatsApp follow-up link sent with one click — message opens ready to send</div>
+          <div class="bullet-item">Proposal email template fired from pipeline view without leaving the dashboard</div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">Step 04</div>
+        <h3>🤖 DeskBot for On-the-Go</h3>
+        <p>The founder used DeskBot on Telegram to check the pipeline, review leads needing follow-up, and add new contacts — all without opening the dashboard. Even while at a client meeting.</p>
+        <div class="bullet-list">
+          <div class="bullet-item">"Which leads need follow-up today?" → instant answer via Telegram</div>
+          <div class="bullet-item">Add a referral lead on the spot, mid-conversation</div>
+          <div class="bullet-item">No app-switching, no dashboard login required</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BEFORE / AFTER -->
+  <section class="ba-section">
+    <div class="section-header">
+      <div class="section-label">Before vs After</div>
+      <h2 class="section-title">The Transformation at a Glance</h2>
+    </div>
+    <table class="ba-table">
+      <thead>
+        <tr>
+          <th class="col-before">Before evoAIDesk</th>
+          <th class="col-after">After evoAIDesk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Leads copied manually from 3 different sources</td>
+          <td>All leads captured automatically from forms + LinkedIn</td>
+        </tr>
+        <tr>
+          <td>No visibility into who was hot, warm, or cold</td>
+          <td>Every lead scored Hot / Warm / Cold instantly</td>
+        </tr>
+        <tr>
+          <td>Follow-ups tracked by memory or sticky notes</td>
+          <td>100% of follow-ups automated or one-click triggered</td>
+        </tr>
+        <tr>
+          <td>4–6 hours/week spent on admin</td>
+          <td>Under 30 minutes/week on lead admin</td>
+        </tr>
+        <tr>
+          <td>No way to manage pipeline on the go</td>
+          <td>Full pipeline access via DeskBot on Telegram</td>
+        </tr>
+        <tr>
+          <td>Leads dropped when team member was unavailable</td>
+          <td>Ownership and history tracked for every lead</td>
+        </tr>
+        <tr>
+          <td>Weekly report manually compiled by founder</td>
+          <td>Automated weekly report delivered to inbox</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- RESULTS -->
+  <section style="margin-bottom:3rem;">
+    <div class="section-header">
+      <div class="section-label">Results</div>
+      <h2 class="section-title">What Changed After 60 Days</h2>
+    </div>
+    <div class="results-grid">
+      <div class="result-card">
+        <div class="result-icon">🚀</div>
+        <div class="result-body">
+          <div class="result-metric">3× More Leads</div>
+          <div class="result-desc">With automation handling first contact, the team reached 3× the leads in the same time, with no extra headcount.</div>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-icon">⏱</div>
+        <div class="result-body">
+          <div class="result-metric">68% Time Saved</div>
+          <div class="result-desc">What took 4–6 hours a week on follow-up admin dropped to under 30 minutes.</div>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-icon">✅</div>
+        <div class="result-body">
+          <div class="result-metric">Zero Dropped Leads</div>
+          <div class="result-desc">Ownership and full activity history visible to everyone at all times — no lead lost during team absence.</div>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-icon">📊</div>
+        <div class="result-body">
+          <div class="result-metric">Pipeline Clarity</div>
+          <div class="result-desc">The founder checked pipeline health every morning via DeskBot in under 2 minutes — no login required.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COST COMPARISON -->
+  <section class="comparison">
+    <div class="section-header">
+      <div class="section-label">Cost Comparison</div>
+      <h2 class="section-title">evoAIDesk vs the Alternatives</h2>
+    </div>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Tool</th>
+          <th>Monthly Cost</th>
+          <th>Smart Scoring</th>
+          <th>No Feature Gates</th>
+          <th>No Per-Seat</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="row-evo">
+          <td>⚡ evoAIDesk</td>
+          <td class="price-highlight">$39 flat</td>
+          <td class="check">✔ Included</td>
+          <td class="check">✔ All features</td>
+          <td class="check">✔ Yes</td>
+        </tr>
+        <tr>
+          <td>HubSpot</td>
+          <td>$500+/mo</td>
+          <td class="cross">✘ Pro only</td>
+          <td class="cross">✘ Heavy gates</td>
+          <td class="cross">✘ Per seat</td>
+        </tr>
+        <tr>
+          <td>Pipedrive</td>
+          <td>$42/mo (3 users)</td>
+          <td class="cross">✘ Add-on</td>
+          <td class="cross">✘ Add-ons</td>
+          <td class="cross">✘ Per seat</td>
+        </tr>
+        <tr>
+          <td>Zoho CRM</td>
+          <td>$42/mo (3 users)</td>
+          <td class="cross">✘ Higher tier</td>
+          <td class="cross">✘ Gated</td>
+          <td class="cross">✘ Per seat</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- WHY IT WORKED -->
+  <section style="margin-bottom:3rem;">
+    <div class="section-header">
+      <div class="section-label">Key Takeaways</div>
+      <h2 class="section-title">Why It Worked</h2>
+    </div>
+    <p style="color:var(--brand-muted);font-size:.95rem;margin-bottom:1.75rem;">BrightSpark didn't change their sales approach. They just stopped losing leads to chaos. Three things made the biggest difference:</p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">📥</div>
+        <h3>One Unified Inbox</h3>
+        <p>No more checking three places for new leads. Everything flows into one dashboard automatically — no manual effort required.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🎯</div>
+        <h3>Smart Scoring</h3>
+        <p>The team knew exactly who to call first, every day. No more equal attention for unequal leads — time went where it counted.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">💬</div>
+        <h3>Human-Feeling Automation</h3>
+        <p>Follow-ups went out instantly but felt personal. Consistency without the manual grind. Every lead contacted, every time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Could Your Team Get the Same Results?</h2>
+    <p>evoAIDesk gives small sales teams everything they need to stop losing leads and start closing more — from $39/mo with all features included, no per-seat pricing.</p>
+    <a href="https://desk.evoaiglobal.ai/login.html" class="cta-btn">Start Your 30-Day Free Trial</a>
+    <span class="cta-note">No credit card required · All features included · Up and running in 2 hours</span>
+  </section>
+
+</div><!-- /.content -->
+
+<!-- FOOTER -->
+<div class="site-footer">
+  <div>
+    <div class="footer-brand"><span class="evo">evo</span><span class="ai">AI</span><span class="rest">Desk</span> &nbsp;·&nbsp; <span style="font-weight:400;color:var(--brand-muted);">For Small &amp; Medium Business</span></div>
+    <div class="footer-meta">Secure · Real-time · Automation Ready</div>
+  </div>
+  <div>
+    <div class="footer-powered">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand-green)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Powered by <a href="https://evoaiglobal.ai" target="_blank">evoaiglobal.ai</a>
+    </div>
+    <div class="footer-copy">© 2026 evoAI Global. All rights reserved.</div>
+  </div>
+</div>
+
+</body>
+</html>
