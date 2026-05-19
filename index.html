@@ -679,7 +679,7 @@
         Everything your team needs,<br><span style="background:linear-gradient(135deg,#7dff6b,#2196f3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">in one clean view.</span>
       </h2>
       <p style="color:#6b7280;font-size:.98rem;max-width:480px;margin:0 auto;line-height:1.7;">
-        Switch between the Dashboard, Pipeline, and Lead Card to see exactly what your team will work with every day.
+        Switch between the Dashboard, Pipeline, Lead Card, and DeskBot to see exactly what your team will work with every day.
       </p>
     </div>
 
@@ -688,6 +688,7 @@
       <button class="evopv-tab-btn active" onclick="evoPvSwitch(0,this)">📊 Dashboard</button>
       <button class="evopv-tab-btn"        onclick="evoPvSwitch(1,this)">📈 Pipeline View</button>
       <button class="evopv-tab-btn"        onclick="evoPvSwitch(2,this)">🗂️ Lead Card</button>
+      <button class="evopv-tab-btn"        onclick="evoPvSwitch(3,this)">🤖 DeskBot</button>
     </div>
 
     <!-- ── TAB 0 · DASHBOARD ── -->
@@ -789,6 +790,40 @@
         <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
           <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Full Activity Timeline</div>
           <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Every email, call note, and status change logged chronologically.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 3 · DESKBOT ── -->
+    <div class="evopv-panel" id="evopv-3" style="display:none;">
+      <div class="evopv-img-wrap" style="position:relative;">
+
+        <!--
+          ★ REPLACE THIS SCREENSHOT ★
+          Recommended: 1280×720 px, PNG or WebP
+          Shows: DeskBot in Telegram — a command conversation querying pipeline / adding a lead
+          Path example:  src="images/deskbot.png"
+        -->
+        <img src="images/deskbot.png" alt="evoAIDesk DeskBot Telegram — 1280×720 recommended" loading="lazy">
+
+        <div class="evopv-placeholder" style="aspect-ratio:16/9;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/><circle cx="12" cy="7" r="1" fill="currentColor" stroke="none"/></svg>
+          <span>📸 Add your DeskBot (Telegram) screenshot here</span>
+          <span style="opacity:.4;font-size:.72rem;">images/deskbot.png · 1280 × 720 px recommended</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Works in Telegram</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Query pipeline, add leads, and check follow-ups — no dashboard login needed.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">Zero AI Cost</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Rule-based logic only — no per-query AI fees, ever. Your data never leaves your system.</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px 18px;">
+          <div style="color:#4cde3c;font-weight:700;margin-bottom:4px;">For the Whole Team</div>
+          <div style="color:#6b7280;font-size:.82rem;line-height:1.6;">Agents update lead status on the go — managers get pipeline summaries on demand.</div>
         </div>
       </div>
     </div>
