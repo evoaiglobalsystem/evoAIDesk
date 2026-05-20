@@ -2853,31 +2853,32 @@
   }
 
   function deleteTrial(id, name) {
-    showConfirm(
-      'Delete Trial Request',
-      `<p>Permanently delete the trial request for <strong>${name}</strong>?</p><p>This cannot be undone.</p>`,
-      async () => {
-        try {
-          const res = await fetch(N8N_TRIAL_DELETE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete', id })
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          toast('Trial request deleted', 'success');
-          writeLog({
-            level: 'info', status: 'success',
-            module: 'trial', source: 'deleteTrial',
-            message: `Trial deleted: id=${id}`,
-            meta: { id }
-          });
-          _trialsLoaded = false;
-          await loadTrials(true);
-        } catch(e) {
-          toast('Error: ' + e.message, 'error');
-        }
+    document.getElementById('confirmTitle').textContent = 'Delete Trial Request';
+    document.getElementById('confirmBody').innerHTML = `Permanently delete the trial request for <strong>${name}</strong>? This cannot be undone.`;
+    const btn = document.getElementById('confirmOkBtn');
+    btn.onclick = async () => {
+      try {
+        const res = await fetch(N8N_TRIAL_DELETE, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        toast('Trial request deleted', 'success');
+        writeLog({
+          level: 'info', status: 'success',
+          module: 'trial', source: 'deleteTrial',
+          message: `Trial deleted: id=${id}`,
+          meta: { id }
+        });
+        closeConfirm();
+        _trialsLoaded = false;
+        await loadTrials(true);
+      } catch(e) {
+        toast('Error: ' + e.message, 'error');
       }
-    );
+    };
+    document.getElementById('confirmModal').classList.add('open');
   }
 
   /* ═════════════════════════════════════════════════════════ */
