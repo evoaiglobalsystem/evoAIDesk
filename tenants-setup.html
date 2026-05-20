@@ -977,14 +977,16 @@
               <th>Name</th>
               <th>Email</th>
               <th>Company</th>
+              <th>Phone</th>
               <th>Team Size</th>
               <th>Status</th>
               <th>Trial Period</th>
+              <th>Source</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="trialsTableBody">
-            <tr><td colspan="8"><div class="empty-state">
+            <tr><td colspan="10"><div class="empty-state">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
               <p>No trial requests loaded</p><p class="empty-sub">Click "Refresh" to fetch from Neon.</p>
             </div></td></tr>
@@ -1345,33 +1347,41 @@
       </button>
     </div>
     <div class="modal-body">
+      <!-- Inline error message box (login.html pattern) -->
+      <div id="trialModalMsg" style="display:none;padding:11px 14px;border-radius:8px;font-size:.82rem;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.22);color:#ff8099;margin-bottom:16px;line-height:1.5;"></div>
+
       <div class="form-grid">
         <div class="form-section-title">Applicant Details</div>
         <div class="field">
           <label>Full Name <span class="req">*</span></label>
-          <input type="text" id="trName" placeholder="e.g. Jane Smith" autocomplete="off"/>
+          <input type="text" id="trName" placeholder="e.g. Jane Smith" autocomplete="off"
+            oninput="trClearError(this,'trialModalMsg')"/>
         </div>
         <div class="field">
           <label>Email <span class="req">*</span></label>
-          <input type="email" id="trEmail" placeholder="e.g. jane@company.com" autocomplete="off"/>
+          <input type="email" id="trEmail" placeholder="e.g. jane@company.com" autocomplete="off"
+            oninput="trClearError(this,'trialModalMsg')"/>
+          <div class="field-hint">Used to sign in via Google — must be a valid work email</div>
         </div>
         <div class="field">
           <label>Company <span class="req">*</span></label>
-          <input type="text" id="trCompany" placeholder="e.g. Acme Corp" autocomplete="off"/>
+          <input type="text" id="trCompany" placeholder="e.g. Acme Corp" autocomplete="off"
+            oninput="trClearError(this,'trialModalMsg')"/>
         </div>
         <div class="field">
-          <label>Phone</label>
-          <input type="text" id="trPhone" placeholder="e.g. +1 555 0100" autocomplete="off"/>
+          <label>Phone / WhatsApp</label>
+          <input type="tel" id="trPhone" placeholder="e.g. +91 98765 43210" autocomplete="tel"
+            oninput="trClearError(this,'trialModalMsg')"/>
         </div>
         <div class="field">
-          <label>Team Size</label>
-          <select id="trTeamSize">
-            <option value="">— Select —</option>
-            <option value="1-5">1–5</option>
-            <option value="6-20">6–20</option>
-            <option value="21-50">21–50</option>
-            <option value="51-200">51–200</option>
-            <option value="200+">200+</option>
+          <label>Team Size <span class="req">*</span></label>
+          <select id="trTeamSize" oninput="trClearError(this,'trialModalMsg')" onchange="trClearError(this,'trialModalMsg')">
+            <option value="">— Select team size —</option>
+            <option value="1-5">1 – 5 people</option>
+            <option value="6-20">6 – 20 people</option>
+            <option value="21-50">21 – 50 people</option>
+            <option value="51-200">51 – 200 people</option>
+            <option value="200+">200+ people</option>
           </select>
         </div>
         <div class="field">
@@ -1385,8 +1395,12 @@
           </select>
         </div>
         <div class="field full">
-          <label>Use Case</label>
-          <input type="text" id="trUseCase" placeholder="e.g. Customer support automation" autocomplete="off"/>
+          <label>What are you looking to solve? <span class="req">*</span></label>
+          <textarea id="trUseCase" rows="3" placeholder="e.g. We want to manage our sales pipeline, automate follow-ups, and track opportunities…"
+            style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;padding:9px 11px;outline:none;resize:vertical;width:100%;transition:border-color .18s, box-shadow .18s;"
+            onfocus="this.style.borderColor='var(--accent)';this.style.boxShadow='0 0 0 3px rgba(0,229,160,.08)'"
+            onblur="this.style.borderColor=this.value.trim()?'var(--accent)':(this.dataset.err?'rgba(255,77,109,.5)':' var(--border)');this.style.boxShadow=''"
+            oninput="trClearError(this,'trialModalMsg')"></textarea>
         </div>
 
         <div class="form-section-title">Trial Period</div>
@@ -1416,15 +1430,20 @@
         <div class="form-section-title">Notes</div>
         <div class="field full">
           <label>Comments</label>
-          <textarea id="trComments" rows="3" placeholder="Internal notes, follow-up reminders…" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;padding:9px 11px;outline:none;resize:vertical;width:100%;transition:border-color .18s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+          <textarea id="trComments" rows="3" placeholder="Internal notes, follow-up reminders…"
+            style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;padding:9px 11px;outline:none;resize:vertical;width:100%;transition:border-color .18s;"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
         </div>
       </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeTrialModal()">Cancel</button>
       <button class="btn btn-primary" id="saveTrialBtn" onclick="saveTrial()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        Save Request
+        <span id="saveTrialBtnLabel" style="display:flex;align-items:center;gap:6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Request
+        </span>
+        <span id="saveTrialBtnSpinner" style="display:none;" class="auth-spinner" style="width:14px;height:14px;border-color:rgba(8,12,16,.3);border-top-color:#080c10;"></span>
       </button>
     </div>
   </div>
@@ -2593,10 +2612,10 @@
     if (_trialsLoaded && !force) return;
     _trialsLoading = true;
     const tbody = document.getElementById('trialsTableBody');
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite;color:var(--accent)"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
-        <span style="font-size:.8rem;color:var(--muted);">Loading trial requests…</span>
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
+      <div style="display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .7s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+        Loading trial requests…
       </div>
     </div></td></tr>`;
     try {
@@ -2616,7 +2635,7 @@
       document.getElementById('tabCntTrials').textContent = cnt;
     } catch(e) {
       console.error('loadTrials', e);
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
         <p>Failed to load trial requests</p><p class="empty-sub">${esc(e.message)}</p>
       </div></td></tr>`;
     }
@@ -2652,7 +2671,7 @@
     );
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <p>No trial requests match</p><p class="empty-sub">Try adjusting filters or search.</p>
       </div></td></tr>`;
@@ -2683,9 +2702,11 @@
         <td><span style="font-weight:600;font-size:.8rem;">${esc(t.name||'—')}</span></td>
         <td><span style="font-size:.77rem;">${esc(t.email||'—')}</span></td>
         <td><span style="font-size:.78rem;font-weight:500;">${esc(t.company||'—')}</span></td>
+        <td><span class="mono" style="font-size:.7rem;">${esc(t.phone||'—')}</span></td>
         <td><span style="font-size:.75rem;">${esc(t.team_size||'—')}</span></td>
         <td>${statusBadge}</td>
         <td>${trialPeriod}</td>
+        <td><span class="mono" style="font-size:.68rem;color:var(--muted);">${esc(t.source||'—')}</span></td>
         <td>
           <div class="row-actions">
             <button class="icon-btn" title="Edit" onclick="openTrialModal(${t.id})">
@@ -2767,30 +2788,94 @@
     setTimeout(() => document.getElementById('trName').focus(), 100);
   }
 
-  function closeTrialModal() { document.getElementById('trialModal').classList.remove('open'); }
+  function closeTrialModal() {
+    document.getElementById('trialModal').classList.remove('open');
+    // Reset field error states and message box
+    ['trName','trEmail','trCompany','trTeamSize','trUseCase'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.style.borderColor=''; el.style.boxShadow=''; delete el.dataset.err; }
+    });
+    const box = document.getElementById('trialModalMsg');
+    if (box) box.style.display = 'none';
+    // Reset spinner
+    const lbl = document.getElementById('saveTrialBtnLabel');
+    const spn = document.getElementById('saveTrialBtnSpinner');
+    if (lbl) lbl.style.display = 'flex';
+    if (spn) spn.style.display = 'none';
+    const btn = document.getElementById('saveTrialBtn');
+    if (btn) btn.disabled = false;
+  }
+
+  /* ── Trial modal: clear error + highlight field (login.html pattern) ── */
+  function trShowError(msg) {
+    const box = document.getElementById('trialModalMsg');
+    box.textContent = msg;
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function trClearError(el, msgId) {
+    el.style.borderColor = '';
+    el.style.boxShadow   = '';
+    delete el.dataset.err;
+    const box = document.getElementById(msgId);
+    if (box) box.style.display = 'none';
+  }
+  function trMarkError(el) {
+    el.style.borderColor = 'rgba(255,77,109,.5)';
+    el.style.boxShadow   = '0 0 0 3px rgba(255,77,109,.06)';
+    el.dataset.err = '1';
+  }
 
   async function saveTrial() {
     const name    = document.getElementById('trName').value.trim();
     const email   = document.getElementById('trEmail').value.trim();
     const company = document.getElementById('trCompany').value.trim();
-    if (!name)    { toast('Full name is required', 'error'); return; }
-    if (!email)   { toast('Email is required', 'error'); return; }
-    if (!company) { toast('Company is required', 'error'); return; }
+    const team    = document.getElementById('trTeamSize').value;
+    const useCase = document.getElementById('trUseCase').value.trim();
+
+    // Validate all required fields — highlight in red like login.html
+    let valid = true;
+    const required = [
+      { id: 'trName',    val: name,    label: 'Full Name' },
+      { id: 'trEmail',   val: email,   label: 'Work Email' },
+      { id: 'trCompany', val: company, label: 'Company' },
+      { id: 'trTeamSize',val: team,    label: 'Team Size' },
+      { id: 'trUseCase', val: useCase, label: 'Use Case' },
+    ];
+    required.forEach(({ id, val }) => {
+      const el = document.getElementById(id);
+      if (!val) { trMarkError(el); valid = false; }
+      else { el.style.borderColor = ''; el.style.boxShadow = ''; delete el.dataset.err; }
+    });
+    if (!valid) { trShowError('Please fill in all required fields.'); return; }
+
+    // Email format check (login.html pattern)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      trMarkError(document.getElementById('trEmail'));
+      trShowError('Please enter a valid email address.');
+      return;
+    }
 
     const payload = {
       name, email, company,
       phone:           document.getElementById('trPhone').value.trim()   || null,
-      team_size:       document.getElementById('trTeamSize').value        || null,
+      team_size:       team || null,
       status:          document.getElementById('trStatus').value,
-      use_case:        document.getElementById('trUseCase').value.trim()  || null,
+      use_case:        useCase || null,
       source:          document.getElementById('trSource').value.trim()   || 'evoAIDesk Login Page',
       comments:        document.getElementById('trComments').value.trim() || null,
       trial_start_date:document.getElementById('trStartDate').value       || null,
       trial_end_date:  document.getElementById('trEndDate').value         || null,
     };
 
-    const btn = document.getElementById('saveTrialBtn');
-    btn.disabled = true; btn.textContent = 'Saving…';
+    // Show spinner (login.html pattern)
+    const btn     = document.getElementById('saveTrialBtn');
+    const lblEl   = document.getElementById('saveTrialBtnLabel');
+    const spinEl  = document.getElementById('saveTrialBtnSpinner');
+    btn.disabled  = true;
+    lblEl.style.display  = 'none';
+    spinEl.style.display = 'inline-block';
+
     try {
       const url    = _editTrialId ? N8N_TRIAL_UPDATE : N8N_TRIAL_WRITE;
       if (_editTrialId) {
@@ -2818,10 +2903,15 @@
       await loadTrials(true);
     } catch(e) {
       console.error(e);
-      toast('Error: ' + e.message, 'error');
+      trShowError('Error: ' + e.message);
+      btn.disabled = false;
+      lblEl.style.display  = 'flex';
+      spinEl.style.display = 'none';
+      return;
     }
     btn.disabled = false;
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Save Request';
+    lblEl.style.display  = 'flex';
+    spinEl.style.display = 'none';
   }
 
   async function quickStatusTrial(id, status) {
