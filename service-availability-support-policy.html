@@ -185,7 +185,7 @@
       max-width: 1120px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 1px;
       background: var(--brand-border);
       border-radius: var(--radius);
@@ -600,7 +600,7 @@
 
   <div class="hero-pills">
     <span class="pill green"><span class="dot"></span>99.9% Uptime Target</span>
-    <span class="pill blue"><span class="dot"></span>24hr First Response</span>
+    <span class="pill blue"><span class="dot"></span>48hr First Response</span>
     <span class="pill purple"><span class="dot"></span>24hr Critical SLA</span>
     <span class="pill orange"><span class="dot"></span>Mon–Fri 9–6 IST</span>
     <span class="pill green"><span class="dot"></span>Enterprise Custom SLA</span>
@@ -616,13 +616,9 @@
     </div>
     <div class="stat fade-in delay-1">
       <div class="stat-num">≤ 24h</div>
-      <div class="stat-label">First Response — All Plans</div>
-    </div>
-    <div class="stat fade-in delay-2">
-      <div class="stat-num">≤ 24h</div>
       <div class="stat-label">Response — Critical (P1)</div>
     </div>
-    <div class="stat fade-in delay-3">
+    <div class="stat fade-in delay-2">
       <div class="stat-num">5 days</div>
       <div class="stat-label">Support Days per Week</div>
     </div>
@@ -706,9 +702,9 @@
       </div>
       <div class="hours-card fade-in delay-1">
         <div class="hours-icon">⚡</div>
-        <div class="hours-value">≤ 24 hrs</div>
+        <div class="hours-value">24h – 5 days</div>
         <div class="hours-label">First Response Guarantee</div>
-        <div class="hours-note">All support requests acknowledged within one business day on any paid plan.</div>
+        <div class="hours-note">Response times vary by priority — from 24 hrs for Critical (P1) to 5 business days for Low (P4). Every request is acknowledged.</div>
       </div>
       <div class="hours-card fade-in delay-2">
         <div class="hours-icon">🚨</div>
@@ -747,19 +743,19 @@
         <tr>
           <td><span class="tag-warn">P2 — High</span></td>
           <td>Core feature broken, workaround not available</td>
-          <td style="color:var(--brand-text);font-weight:600;">8 business hours</td>
+          <td style="color:var(--brand-text);font-weight:600;">36 business hours</td>
           <td>48 hours</td>
         </tr>
         <tr>
           <td><span class="tag-green" style="background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:var(--brand-accent2);">P3 — Normal</span></td>
           <td>Feature degraded, workaround available</td>
-          <td style="color:var(--brand-text);font-weight:600;">24 business hours</td>
+          <td style="color:var(--brand-text);font-weight:600;">72 business hours</td>
           <td>5 business days</td>
         </tr>
         <tr>
           <td><span class="tag-green">P4 — Low</span></td>
           <td>Question, cosmetic issue, feature request</td>
-          <td style="color:var(--brand-text);font-weight:600;">24 business hours</td>
+          <td style="color:var(--brand-text);font-weight:600;">5 business days</td>
           <td>Best effort</td>
         </tr>
       </tbody>
