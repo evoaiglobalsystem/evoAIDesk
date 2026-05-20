@@ -1354,6 +1354,12 @@
       <!-- Inline error message box (login.html pattern) -->
       <div id="trialModalMsg" style="display:none;padding:11px 14px;border-radius:8px;font-size:.82rem;background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.22);color:#ff8099;margin-bottom:16px;line-height:1.5;"></div>
 
+      <!-- Approved-mode notice — shown only when editing an approved trial -->
+      <div id="trialApprovedBanner" style="display:none;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;font-size:.81rem;background:rgba(255,183,48,.07);border:1px solid rgba(255,183,48,.22);color:var(--warn);margin-bottom:16px;line-height:1.5;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>This trial is <strong>Approved</strong>. All fields are locked — you can only update the status to <strong>Expired</strong> or <strong>Converted</strong>.</span>
+      </div>
+
       <div class="form-grid">
         <div class="form-section-title">Applicant Details</div>
         <div class="field">
@@ -2733,10 +2739,10 @@
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
             <button class="icon-btn"
-              title="${(t.status === 'approved' || t.status === 'rejected') ? 'Locked — cannot edit ' + t.status + ' trial' : 'Edit'}"
-              style="${(t.status === 'approved' || t.status === 'rejected') ? 'opacity:.35;cursor:not-allowed;' : ''}"
+              title="${t.status === 'rejected' ? 'Locked — cannot edit rejected trial' : 'Edit'}"
+              style="${t.status === 'rejected' ? 'opacity:.35;cursor:not-allowed;' : ''}"
               onclick="openTrialModal(${t.id})"
-              ${(t.status === 'approved' || t.status === 'rejected') ? 'disabled' : ''}>
+              ${t.status === 'rejected' ? 'disabled' : ''}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
             <button class="icon-btn"
@@ -2792,52 +2798,111 @@
   function openTrialModal(id) {
     _editTrialId = id;
     document.getElementById('modalTrialTitle').textContent = id ? 'Edit Trial Request' : 'New Trial Request';
+
+    const _approvedLockFields = ['trName','trEmail','trCompany','trPhone','trTeamSize','trUseCase','trSource','trComments','trStartDate','trEndDate'];
+
     if (id) {
       const t = _trials.find(x => x.id == id);
       if (!t) return;
-      if (t.status === 'approved') {
-        toast('Cannot edit — approved trials are locked and cannot be modified.', 'warn');
-        return;
-      }
       if (t.status === 'rejected') {
         toast('Cannot edit — rejected trials are locked and cannot be modified.', 'warn');
         return;
       }
-      document.getElementById('trName').value    = t.name    || '';
-      document.getElementById('trEmail').value   = t.email   || '';
-      document.getElementById('trCompany').value = t.company || '';
-      document.getElementById('trPhone').value   = t.phone   || '';
-      document.getElementById('trTeamSize').value= t.team_size || '';
-      document.getElementById('trStatus').value  = t.status  || 'new';
-      document.getElementById('trUseCase').value = t.use_case|| '';
-      document.getElementById('trSource').value  = t.source  || 'evoAIDesk Tenant Manager';
-      document.getElementById('trComments').value= t.comments|| '';
+
+      document.getElementById('trName').value      = t.name         || '';
+      document.getElementById('trEmail').value     = t.email        || '';
+      document.getElementById('trCompany').value   = t.company      || '';
+      document.getElementById('trPhone').value     = t.phone        || '';
+      document.getElementById('trTeamSize').value  = t.team_size    || '';
+      document.getElementById('trStatus').value    = t.status       || 'new';
+      document.getElementById('trUseCase').value   = t.use_case     || '';
+      document.getElementById('trSource').value    = t.source       || 'evoAIDesk Tenant Manager';
+      document.getElementById('trComments').value  = t.comments     || '';
       document.getElementById('trStartDate').value = t.trial_start_date ? t.trial_start_date.slice(0,10) : '';
       document.getElementById('trEndDate').value   = t.trial_end_date   ? t.trial_end_date.slice(0,10)   : '';
+
+      if (t.status === 'approved') {
+        // Lock all fields except Status — only Expired / Converted are valid next states
+        _approvedLockFields.forEach(fid => {
+          const el = document.getElementById(fid);
+          if (el) { el.disabled = true; el.style.opacity = '.45'; el.style.cursor = 'not-allowed'; }
+        });
+        const sel = document.getElementById('trStatus');
+        sel.innerHTML = [
+          '<option value="approved">Approved</option>',
+          '<option value="expired">Expired</option>',
+          '<option value="converted">Converted</option>'
+        ].join('');
+        sel.value = 'approved';
+        const banner = document.getElementById('trialApprovedBanner');
+        if (banner) banner.style.display = 'flex';
+      } else {
+        // Normal edit — all fields enabled, full status list
+        _approvedLockFields.forEach(fid => {
+          const el = document.getElementById(fid);
+          if (el) { el.disabled = false; el.style.opacity = ''; el.style.cursor = ''; }
+        });
+        const sel = document.getElementById('trStatus');
+        sel.innerHTML = [
+          '<option value="new">New</option>',
+          '<option value="approved">Approved</option>',
+          '<option value="rejected">Rejected</option>',
+          '<option value="expired">Expired</option>',
+          '<option value="converted">Converted</option>'
+        ].join('');
+        sel.value = t.status || 'new';
+        const banner = document.getElementById('trialApprovedBanner');
+        if (banner) banner.style.display = 'none';
+      }
     } else {
-      document.getElementById('trName').value    = '';
-      document.getElementById('trEmail').value   = '';
-      document.getElementById('trCompany').value = '';
-      document.getElementById('trPhone').value   = '';
-      document.getElementById('trTeamSize').value= '';
-      document.getElementById('trStatus').value  = 'new';
-      document.getElementById('trUseCase').value = '';
-      document.getElementById('trSource').value  = 'evoAIDesk Tenant Manager';
-      document.getElementById('trComments').value= '';
+      document.getElementById('trName').value      = '';
+      document.getElementById('trEmail').value     = '';
+      document.getElementById('trCompany').value   = '';
+      document.getElementById('trPhone').value     = '';
+      document.getElementById('trTeamSize').value  = '';
+      document.getElementById('trUseCase').value   = '';
+      document.getElementById('trSource').value    = 'evoAIDesk Tenant Manager';
+      document.getElementById('trComments').value  = '';
       document.getElementById('trStartDate').value = '';
       document.getElementById('trEndDate').value   = '';
+      _approvedLockFields.forEach(fid => {
+        const el = document.getElementById(fid);
+        if (el) { el.disabled = false; el.style.opacity = ''; el.style.cursor = ''; }
+      });
+      const sel = document.getElementById('trStatus');
+      sel.innerHTML = [
+        '<option value="new">New</option>',
+        '<option value="approved">Approved</option>',
+        '<option value="rejected">Rejected</option>',
+        '<option value="expired">Expired</option>',
+        '<option value="converted">Converted</option>'
+      ].join('');
+      sel.value = 'new';
+      const banner = document.getElementById('trialApprovedBanner');
+      if (banner) banner.style.display = 'none';
     }
+
     document.getElementById('trialModal').classList.add('open');
-    setTimeout(() => document.getElementById('trName').focus(), 100);
+    setTimeout(() => {
+      const t = id ? _trials.find(x => x.id == id) : null;
+      const firstFocus = (t && t.status === 'approved')
+        ? document.getElementById('trStatus')
+        : document.getElementById('trName');
+      if (firstFocus) firstFocus.focus();
+    }, 100);
   }
 
   function closeTrialModal() {
     document.getElementById('trialModal').classList.remove('open');
-    // Reset field error states and message box
-    ['trName','trEmail','trCompany','trTeamSize','trUseCase','trStartDate','trEndDate'].forEach(id => {
+    // Re-enable any fields that may have been locked in approved-mode
+    ['trName','trEmail','trCompany','trPhone','trTeamSize','trUseCase','trSource','trComments','trStartDate','trEndDate'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) { el.style.borderColor=''; el.style.boxShadow=''; delete el.dataset.err; }
+      if (el) { el.disabled = false; el.style.opacity = ''; el.style.cursor = ''; el.style.borderColor=''; el.style.boxShadow=''; delete el.dataset.err; }
     });
+    // Hide approved banner
+    const banner = document.getElementById('trialApprovedBanner');
+    if (banner) banner.style.display = 'none';
+    // Hide error box
     const box = document.getElementById('trialModalMsg');
     if (box) box.style.display = 'none';
     // Reset spinner
@@ -2870,6 +2935,58 @@
   }
 
   async function saveTrial() {
+    const status = document.getElementById('trStatus').value;
+
+    // ── Approved-mode: only status change allowed (expired / converted) ──
+    if (_editTrialId) {
+      const existing = _trials.find(x => x.id == _editTrialId);
+      if (existing && existing.status === 'approved') {
+        if (status === 'approved') {
+          trShowError('Please change the status to Expired or Converted before saving.');
+          return;
+        }
+        const btn    = document.getElementById('saveTrialBtn');
+        const lblEl  = document.getElementById('saveTrialBtnLabel');
+        const spinEl = document.getElementById('saveTrialBtnSpinner');
+        btn.disabled = true; lblEl.style.display = 'none'; spinEl.style.display = 'inline-block';
+        try {
+          const res = await fetch(N8N_TRIAL_UPDATE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'update', id: _editTrialId, status,
+              name:             existing.name             || null,
+              email:            existing.email            || null,
+              company:          existing.company          || null,
+              phone:            existing.phone            || null,
+              team_size:        existing.team_size        || null,
+              use_case:         existing.use_case         || null,
+              source:           existing.source           || null,
+              comments:         existing.comments         || null,
+              trial_start_date: existing.trial_start_date || null,
+              trial_end_date:   existing.trial_end_date   || null,
+            })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          toast(`Trial marked as ${status}`, 'success');
+          writeLog({
+            level: 'info', status: 'success',
+            module: 'trial', source: 'saveTrial',
+            message: `Trial status → ${status}: ${existing.name} (${existing.email})`,
+            meta: { id: _editTrialId, status }
+          });
+          closeTrialModal();
+          _trialsLoaded = false;
+          await loadTrials(true);
+        } catch(e) {
+          trShowError('Error: ' + e.message);
+          btn.disabled = false; lblEl.style.display = 'flex'; spinEl.style.display = 'none';
+        }
+        return;
+      }
+    }
+
+    // ── Normal create / edit flow ──
     const name    = document.getElementById('trName').value.trim();
     const email   = document.getElementById('trEmail').value.trim();
     const company = document.getElementById('trCompany').value.trim();
@@ -2900,7 +3017,6 @@
     }
 
     // Approved status requires both trial dates
-    const status = document.getElementById('trStatus').value;
     if (status === 'approved') {
       const startDate = document.getElementById('trStartDate').value;
       const endDate   = document.getElementById('trEndDate').value;
