@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Availability &amp; Support Policy — evoAIDesk</title>
+  <meta name="description" content="evoAIDesk service uptime targets, support hours, response times, and how to reach the team." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://desk.evoaiglobal.ai/service-availability-policy.html" />
+  <link rel="icon" href="https://desk.evoaiglobal.ai/images/evoaidesk.png" type="image/png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Service Availability &amp; Support Policy — evoAIDesk" />
+  <meta property="og:description" content="evoAIDesk service uptime targets, support hours, response times, and how to reach the team." />
+  <meta property="og:url" content="https://desk.evoaiglobal.ai/service-availability-policy.html" />
+  <meta property="og:image" content="https://desk.evoaiglobal.ai/images/evoaidesk_og_image.png" />
+  <meta property="og:site_name" content="evoAIDesk" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --brand-dark:   #0d1117;
+      --brand-mid:    #161c26;
+      --brand-border: #1f2b3e;
+      --brand-accent: #3b82f6;
+      --brand-accent2: #60a5fa;
+      --brand-green:  #22c55e;
+      --brand-text:   #e2e8f0;
+      --brand-muted:  #94a3b8;
+      --brand-card:   #111827;
+      --brand-card2:  #0f1923;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--brand-dark);
+      color: var(--brand-text);
+      line-height: 1.7;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HERO ─────────────────────────────── */
+    .hero {
+      border: 1px solid var(--brand-border);
+      border-radius: 16px;
+      background: #0e1420;
+      padding: 36px 40px;
+      margin: 24px auto;
+      max-width: 1120px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -40px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59,130,246,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 30%;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96,165,250,.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+    }
+    .logo-img { height: 36px; width: auto; display: block; object-fit: contain; }
+    .logo-badge {
+      font-family: 'Sora', sans-serif;
+      font-size: .6rem;
+      letter-spacing: .08em;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.25);
+      color: var(--brand-accent2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .hero-divider { flex: 1; height: 1px; background: var(--brand-border); min-width: 20px; }
+    .product-tag {
+      font-family: 'Sora', sans-serif;
+      font-size: .6rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--brand-muted);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--brand-accent2);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(96,165,250,0.08);
+      border: 1px solid rgba(96,165,250,0.2);
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+    .back-link:hover { background: rgba(96,165,250,0.18); color: #fff; transform: translateX(-2px); }
+
+    .hero-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.95rem;
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-title .g {
+      background: linear-gradient(90deg, var(--brand-accent), var(--brand-accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: .9rem;
+      color: var(--brand-muted);
+      line-height: 1.65;
+      max-width: 580px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .disclaimer {
+      display: inline-block;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--brand-border);
+      border-radius: 8px;
+      font-size: .75rem;
+      color: var(--brand-muted);
+      padding: .5rem 1rem;
+      line-height: 1.55;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-pills { display: flex; flex-wrap: wrap; gap: 7px; position: relative; z-index: 2; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #141c2a;
+      border: 1px solid var(--brand-border);
+      border-radius: 20px; padding: 5px 12px;
+      font-size: .7rem; font-weight: 600; color: var(--brand-muted);
+    }
+    .pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .pill.green .dot  { background: var(--brand-green); }
+    .pill.blue  .dot  { background: var(--brand-accent2); }
+    .pill.purple .dot { background: #c084fc; }
+    .pill.orange .dot { background: #f59e0b; }
+
+    /* ── STATS BAR ────────────────────────── */
+    .stats-bar {
+      background: var(--brand-mid);
+      border-top: 1px solid var(--brand-border);
+      border-bottom: 1px solid var(--brand-border);
+      padding: 2.5rem 2rem;
+    }
+    .stats-grid {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--brand-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .stat {
+      background: var(--brand-card);
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: 'Sora', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      color: var(--brand-accent);
+      line-height: 1;
+      margin-bottom: .35rem;
+    }
+    .stat-label {
+      font-size: .82rem;
+      color: var(--brand-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* ── MAIN CONTENT ─────────────────────── */
+    .content {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    /* ── SECTION HEADER ───────────────────── */
+    .section-header { margin-bottom: 2rem; }
+    .section-label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--brand-accent);
+      margin-bottom: .5rem;
+    }
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.25;
+    }
+
+    /* ── AVAILABILITY TABLE ───────────────── */
+    .avail-section { margin-bottom: 3rem; }
+    .avail-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--brand-border);
+      font-size: .88rem;
+    }
+    .avail-table thead th {
+      background: var(--brand-mid);
+      padding: .9rem 1.25rem;
+      text-align: left;
+      font-family: 'Sora', sans-serif;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--brand-muted);
+      border-bottom: 1px solid var(--brand-border);
+    }
+    .avail-table tbody td {
+      padding: .9rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      color: var(--brand-muted);
+      vertical-align: middle;
+    }
+    .avail-table tbody tr:nth-child(odd) td  { background: var(--brand-card); }
+    .avail-table tbody tr:nth-child(even) td { background: var(--brand-card2); }
+    .avail-table tbody tr:last-child td { border-bottom: none; }
+    .avail-table tbody tr:hover td { background: rgba(255,255,255,.025); }
+    .tag-green {
+      display: inline-block;
+      background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.25);
+      color: var(--brand-green);
+      font-family: 'Sora', sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .tag-warn {
+      display: inline-block;
+      background: rgba(245,158,11,.1);
+      border: 1px solid rgba(245,158,11,.25);
+      color: #f59e0b;
+      font-family: 'Sora', sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── SUPPORT HOURS CARDS ──────────────── */
+    .hours-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+    .hours-card {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s, transform .2s;
+    }
+    .hours-card:hover {
+      border-color: rgba(59,130,246,.4);
+      transform: translateY(-2px);
+    }
+    .hours-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--brand-accent), transparent);
+    }
+    .hours-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .hours-value {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      color: var(--brand-accent);
+      line-height: 1;
+      margin-bottom: .3rem;
+    }
+    .hours-label {
+      font-family: 'Sora', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--brand-text);
+      margin-bottom: .4rem;
+    }
+    .hours-note { font-size: .82rem; color: var(--brand-muted); line-height: 1.55; }
+
+    /* ── PRIORITY TABLE ───────────────────── */
+    .priority-section { margin-bottom: 3rem; }
+    .priority-note {
+      font-size: .82rem;
+      color: var(--brand-muted);
+      margin-top: 1rem;
+      padding: .75rem 1rem;
+      background: rgba(255,255,255,.03);
+      border-left: 2px solid var(--brand-border);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    /* ── CONTACT SECTION ──────────────────── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+    .contact-card {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      transition: border-color .25s, transform .2s;
+    }
+    .contact-card:hover {
+      border-color: rgba(59,130,246,.35);
+      transform: translateY(-3px);
+    }
+    .contact-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .contact-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      margin-bottom: .4rem;
+    }
+    .contact-card p { font-size: .85rem; color: var(--brand-muted); line-height: 1.6; }
+    .contact-card a { color: var(--brand-accent2); text-decoration: none; }
+    .contact-card a:hover { text-decoration: underline; }
+
+    /* ── EXCLUSIONS ───────────────────────── */
+    .exclusions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .excl-list {
+      background: var(--brand-card);
+      border: 1px solid var(--brand-border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+    }
+    .excl-list h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+    .excl-item {
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+      padding: .6rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      font-size: .88rem;
+      color: var(--brand-muted);
+      line-height: 1.55;
+    }
+    .excl-item:last-child { border-bottom: none; }
+    .excl-item::before { content: '—'; color: var(--brand-muted); opacity: .5; flex-shrink: 0; }
+    .policy-note-card {
+      background: linear-gradient(135deg, rgba(59,130,246,.08) 0%, rgba(59,130,246,.03) 100%);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .policy-note-card .quote-mark {
+      font-family: Georgia, serif;
+      font-size: 3.5rem;
+      line-height: .8;
+      color: var(--brand-accent);
+      opacity: .35;
+      margin-bottom: .5rem;
+    }
+    .policy-note-card .quote-text {
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--brand-text);
+      line-height: 1.65;
+      margin-bottom: .75rem;
+    }
+    .policy-note-card .quote-author { font-size: .8rem; color: var(--brand-muted); }
+
+    /* ── CTA ──────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(59,130,246,.1) 0%, rgba(59,130,246,.04) 100%);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: var(--radius);
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .cta-section h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      margin-bottom: .75rem;
+    }
+    .cta-section p { color: var(--brand-muted); font-size: .95rem; margin-bottom: 1.75rem; }
+    .cta-btn {
+      display: inline-block;
+      background: var(--brand-accent);
+      color: #fff;
+      text-decoration: none;
+      padding: .85rem 2.2rem;
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      letter-spacing: -.01em;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(59,130,246,.3);
+    }
+    .cta-btn:hover { background: #2563eb; transform: translateY(-2px); box-shadow: 0 6px 28px rgba(59,130,246,.45); }
+    .cta-note { display: block; margin-top: .9rem; font-size: .78rem; color: var(--brand-muted); }
+
+    /* ── FOOTER ───────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--brand-border);
+      padding-top: 18px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      max-width: 1120px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      padding-bottom: 2rem;
+    }
+    .footer-brand {
+      font-family: 'Sora', sans-serif;
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+    .footer-brand .evo  { color: var(--brand-accent2); }
+    .footer-brand .ai   { color: var(--brand-green); }
+    .footer-brand .rest { color: var(--brand-text); }
+    .footer-meta { font-size: .6rem; color: var(--brand-muted); margin-top: 4px; letter-spacing: .04em; }
+    .footer-powered {
+      font-size: .65rem; color: var(--brand-muted);
+      display: flex; align-items: center; gap: 6px; text-align: right;
+    }
+    .footer-powered a { color: var(--brand-accent2); text-decoration: none; font-weight: 600; }
+    .footer-copy { font-size: .6rem; color: var(--brand-muted); margin-top: 3px; text-align: right; }
+
+    /* ── ANIMATIONS ───────────────────────── */
+    .fade-in { opacity: 0; transform: translateY(20px); animation: fadeUp .6s ease forwards; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+    .delay-1 { animation-delay: .1s; }
+    .delay-2 { animation-delay: .2s; }
+    .delay-3 { animation-delay: .3s; }
+
+    /* ── PULSE DOT ────────────────────────── */
+    .pulse-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: var(--brand-green);
+      border-radius: 50%;
+      margin-right: 6px;
+      box-shadow: 0 0 0 0 rgba(34,197,94,.5);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%  { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+      70% { box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+      100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+    }
+    .status-banner {
+      display: flex; align-items: center;
+      background: rgba(34,197,94,.06);
+      border: 1px solid rgba(34,197,94,.2);
+      border-radius: var(--radius-sm);
+      padding: .65rem 1rem;
+      font-size: .82rem;
+      color: #86efac;
+      margin-bottom: 3rem;
+      gap: 6px;
+    }
+
+    /* ── RESPONSIVE ───────────────────────── */
+    @media (max-width: 768px) {
+      .hero { padding: 22px 18px; margin: 12px; }
+      .hero-top { gap: 10px; margin-bottom: 16px; }
+      .hero-divider { display: none; }
+      .product-tag { display: none; }
+      .hero-title { font-size: 1.45rem; }
+      .logo-img { height: 28px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .hours-grid,
+      .contact-grid,
+      .exclusions-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HERO ════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-top">
+    <img class="logo-img" src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk" />
+    <span class="logo-badge">Support &amp; SLA</span>
+    <div class="hero-divider"></div>
+    <span class="product-tag">Legal &amp; Policy</span>
+    <a href="https://desk.evoaiglobal.ai/" class="back-link">← Back to Home</a>
+  </div>
+
+  <h1 class="hero-title">
+    Service Availability &amp;<br/><span class="g">Support Policy</span>
+  </h1>
+
+  <div class="hero-sub">
+    Our commitments to uptime, response times, and how we support you — across every evoAIDesk plan.
+  </div>
+
+  <div class="disclaimer">
+    Effective date: 1 June 2026 &nbsp;·&nbsp; Applies to all evoAIDesk plans (Starter, Growth, Team, Enterprise)
+  </div>
+
+  <div class="hero-pills">
+    <span class="pill green"><span class="dot"></span>99.9% Uptime Target</span>
+    <span class="pill blue"><span class="dot"></span>24hr First Response</span>
+    <span class="pill purple"><span class="dot"></span>4hr Critical SLA</span>
+    <span class="pill orange"><span class="dot"></span>Mon–Fri 9–6 IST</span>
+    <span class="pill green"><span class="dot"></span>Enterprise Custom SLA</span>
+  </div>
+</section>
+
+<!-- ═══ STATS BAR ════════════════════════════════════════════════════ -->
+<section class="stats-bar">
+  <div class="stats-grid">
+    <div class="stat fade-in">
+      <div class="stat-num">99.9%</div>
+      <div class="stat-label">Platform Uptime Target</div>
+    </div>
+    <div class="stat fade-in delay-1">
+      <div class="stat-num">≤ 24h</div>
+      <div class="stat-label">First Response — All Plans</div>
+    </div>
+    <div class="stat fade-in delay-2">
+      <div class="stat-num">≤ 4h</div>
+      <div class="stat-label">Response — Critical (P1)</div>
+    </div>
+    <div class="stat fade-in delay-3">
+      <div class="stat-num">5 days</div>
+      <div class="stat-label">Support Days per Week</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MAIN CONTENT ═════════════════════════════════════════════════ -->
+<div class="content">
+
+  <!-- Status Banner -->
+  <div class="status-banner">
+    <span class="pulse-dot"></span>
+    All systems operational — hosted on enterprise-grade cloud infrastructure with automated failover
+  </div>
+
+  <!-- 1. SERVICE AVAILABILITY -->
+  <section class="avail-section">
+    <div class="section-header">
+      <div class="section-label">Service Availability</div>
+      <h2 class="section-title">Uptime Commitments by Component</h2>
+    </div>
+    <p style="color:var(--brand-muted);font-size:.95rem;margin-bottom:1.75rem;">
+      evoAIDesk targets the uptime levels below, measured as a monthly rolling window. Scheduled maintenance, when required, is performed during low-traffic windows (typically weekends, 02:00–05:00 UTC) with at least 48 hours advance notice by email.
+    </p>
+    <table class="avail-table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Target Uptime</th>
+          <th>Measurement Window</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--brand-text);font-weight:500;">CRM Dashboard &amp; API</td>
+          <td><span class="tag-green">99.9%</span></td>
+          <td>Monthly rolling</td>
+          <td>Core platform, pipeline, lead management</td>
+        </tr>
+        <tr>
+          <td style="color:var(--brand-text);font-weight:500;">DeskBot (Telegram)</td>
+          <td><span class="tag-green">99.5%</span></td>
+          <td>Monthly rolling</td>
+          <td>Subject to Telegram platform availability</td>
+        </tr>
+        <tr>
+          <td style="color:var(--brand-text);font-weight:500;">Email &amp; WhatsApp Outreach</td>
+          <td><span class="tag-green">99.5%</span></td>
+          <td>Monthly rolling</td>
+          <td>Excludes third-party delivery provider outages</td>
+        </tr>
+        <tr>
+          <td style="color:var(--brand-text);font-weight:500;">LinkedIn Lead Sync</td>
+          <td><span class="tag-green">99.5%</span></td>
+          <td>Monthly rolling</td>
+          <td>Subject to LinkedIn API availability</td>
+        </tr>
+        <tr>
+          <td style="color:var(--brand-text);font-weight:500;">Scheduled Reports</td>
+          <td><span class="tag-warn">Best Effort</span></td>
+          <td>Per delivery</td>
+          <td>Target: within 2 hrs of scheduled time</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 2. SUPPORT HOURS -->
+  <section style="margin-bottom:3rem;">
+    <div class="section-header">
+      <div class="section-label">Support Hours</div>
+      <h2 class="section-title">When We're Here for You</h2>
+    </div>
+    <div class="hours-grid">
+      <div class="hours-card fade-in">
+        <div class="hours-icon">🕐</div>
+        <div class="hours-value">Mon – Fri</div>
+        <div class="hours-label">Standard Support Hours</div>
+        <div class="hours-note">09:00 – 18:00 IST. All paid plans via email and contact form.</div>
+      </div>
+      <div class="hours-card fade-in delay-1">
+        <div class="hours-icon">⚡</div>
+        <div class="hours-value">≤ 24 hrs</div>
+        <div class="hours-label">First Response Guarantee</div>
+        <div class="hours-note">All support requests acknowledged within one business day on any paid plan.</div>
+      </div>
+      <div class="hours-card fade-in delay-2">
+        <div class="hours-icon">🚨</div>
+        <div class="hours-value">≤ 4 hrs</div>
+        <div class="hours-label">Critical Incident Response</div>
+        <div class="hours-note">Service-down (P1) incidents receive a response within 4 business hours, including weekends for confirmed outages.</div>
+      </div>
+    </div>
+    <p style="color:var(--brand-muted);font-size:.88rem;">
+      Weekend and public holiday support is limited to critical (service-down) incidents only. Enterprise customers receive a dedicated account manager with a negotiated SLA.
+    </p>
+  </section>
+
+  <!-- 3. PRIORITY MATRIX -->
+  <section class="priority-section">
+    <div class="section-header">
+      <div class="section-label">Response &amp; Resolution Targets</div>
+      <h2 class="section-title">Priority Matrix</h2>
+    </div>
+    <table class="avail-table">
+      <thead>
+        <tr>
+          <th>Priority</th>
+          <th>Definition</th>
+          <th>First Response</th>
+          <th>Target Resolution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag-warn" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171;">P1 — Critical</span></td>
+          <td>Platform fully inaccessible / data loss risk</td>
+          <td style="color:var(--brand-text);font-weight:600;">4 business hours</td>
+          <td>24 hours</td>
+        </tr>
+        <tr>
+          <td><span class="tag-warn">P2 — High</span></td>
+          <td>Core feature broken, workaround not available</td>
+          <td style="color:var(--brand-text);font-weight:600;">8 business hours</td>
+          <td>48 hours</td>
+        </tr>
+        <tr>
+          <td><span class="tag-green" style="background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:var(--brand-accent2);">P3 — Normal</span></td>
+          <td>Feature degraded, workaround available</td>
+          <td style="color:var(--brand-text);font-weight:600;">24 business hours</td>
+          <td>5 business days</td>
+        </tr>
+        <tr>
+          <td><span class="tag-green">P4 — Low</span></td>
+          <td>Question, cosmetic issue, feature request</td>
+          <td style="color:var(--brand-text);font-weight:600;">24 business hours</td>
+          <td>Best effort</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="priority-note">
+      All times are business hours (Mon–Fri, 09:00–18:00 IST) unless the incident is confirmed P1, in which case response applies at all times.
+    </div>
+  </section>
+
+  <!-- 4. CONTACT -->
+  <section style="margin-bottom:3rem;">
+    <div class="section-header">
+      <div class="section-label">Get in Touch</div>
+      <h2 class="section-title">How to Reach Support</h2>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="contact-icon">✉️</div>
+        <h3>Email Support</h3>
+        <p>All paid plans. Include your account email and plan name for faster routing.<br/><br/><a href="mailto:support@evoaiglobal.ai">support@evoaiglobal.ai</a></p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">🌐</div>
+        <h3>Contact Form</h3>
+        <p>Use our website contact form for general enquiries, onboarding questions, or billing.<br/><br/><a href="https://evoaiglobal.ai/#contact">evoaiglobal.ai/#contact</a></p>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">🏢</div>
+        <h3>Enterprise &amp; Custom SLA</h3>
+        <p>Dedicated account manager, negotiated SLA, and priority escalation path. Contact sales to discuss.<br/><br/><a href="mailto:support@evoaiglobal.ai">Get in touch →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. EXCLUSIONS -->
+  <section class="exclusions-grid">
+    <div class="excl-list">
+      <h3>🚫 What's Excluded from Uptime SLA</h3>
+      <div class="excl-item">Scheduled maintenance windows (48 hrs notice given)</div>
+      <div class="excl-item">Outages caused by third-party services (Telegram, LinkedIn API, email delivery providers)</div>
+      <div class="excl-item">Force majeure events (natural disasters, internet infrastructure failures)</div>
+      <div class="excl-item">Actions by the customer that violate our Terms &amp; Conditions</div>
+      <div class="excl-item">Free trial periods</div>
+    </div>
+    <div class="policy-note-card">
+      <div class="quote-mark">"</div>
+      <div class="quote-text">We don't currently offer credits or refunds for downtime on Starter, Growth, or Team plans. Enterprise agreements may include negotiated SLA credits. We will always communicate proactively during any service disruption.</div>
+      <div class="quote-author">— evoAI Support Team</div>
+    </div>
+  </section>
+
+  <!-- 6. POLICY UPDATES -->
+  <section style="margin-bottom:3rem;margin-top:3rem;">
+    <div class="section-header">
+      <div class="section-label">Policy Updates</div>
+      <h2 class="section-title">How We Communicate Changes</h2>
+    </div>
+    <p style="color:var(--brand-muted);font-size:.95rem;max-width:680px;">
+      We may update this policy from time to time. Material changes will be communicated by email to your registered account address at least <strong style="color:var(--brand-text);">14 days before taking effect</strong>. The current effective date is always shown at the top of this page. Continued use of evoAIDesk after the effective date constitutes acceptance of the updated policy.
+    </p>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Questions About Your Plan or SLA?</h2>
+    <p>Our team is happy to walk you through options — from standard support on the Starter plan to a fully negotiated enterprise SLA with a named account manager.</p>
+    <a href="https://evoaiglobal.ai/#contact" class="cta-btn">Contact Support</a>
+    <span class="cta-note">Or email us directly at support@evoaiglobal.ai · We respond within one business day</span>
+  </section>
+
+</div><!-- /.content -->
+
+<!-- ═══ FOOTER ════════════════════════════════════════════════════════ -->
+<div class="site-footer">
+  <div>
+    <div class="footer-brand">
+      <span class="evo">evo</span><span class="ai">AI</span><span class="rest">Desk</span>
+      &nbsp;·&nbsp;
+      <span style="font-weight:400;color:var(--brand-muted);">For Small &amp; Medium Business</span>
+    </div>
+    <div class="footer-meta">Secure · Real-time · Automation Ready</div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:.72rem;color:var(--brand-muted);margin-bottom:6px;">
+      <a href="https://evoaiglobal.ai/privacy-policy.html" style="color:var(--brand-muted);text-decoration:none;margin-right:12px;">Privacy Policy</a>
+      <a href="https://evoaiglobal.ai/terms.html" style="color:var(--brand-muted);text-decoration:none;margin-right:12px;">Terms &amp; Conditions</a>
+      <a href="https://desk.evoaiglobal.ai/" style="color:var(--brand-muted);text-decoration:none;">Home</a>
+    </div>
+    <div class="footer-powered">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand-green)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Powered by <a href="https://evoaiglobal.ai" target="_blank">evoaiglobal.ai</a>
+    </div>
+    <div class="footer-copy">© 2026 evoAI Global. All rights reserved.</div>
+  </div>
+</div>
+
+</body>
+</html>
