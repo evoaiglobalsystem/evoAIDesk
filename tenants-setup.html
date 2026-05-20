@@ -1468,6 +1468,27 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════ VIEW TRIAL MODAL ══════════════════════ -->
+<div class="overlay" id="viewTrialModal">
+  <div class="modal meta-modal" style="max-width:540px;">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent)"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <div class="modal-title">Trial Request Details</div>
+      </div>
+      <button class="modal-close" onclick="closeViewTrialModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="meta-kv-list" id="viewTrialKvList"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeViewTrialModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════ SCHEDULE MODAL ════════════════════════ -->
 <div class="overlay" id="scheduleModal">
   <div class="modal" style="max-width:620px;">
@@ -2709,6 +2730,9 @@
         <td>${trialPeriod}</td>
         <td>
           <div class="row-actions">
+            <button class="icon-btn" title="View" onclick="viewTrial(${t.id})">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
             <button class="icon-btn"
               title="${(t.status === 'approved' || t.status === 'rejected') ? 'Locked — cannot edit ' + t.status + ' trial' : 'Edit'}"
               style="${(t.status === 'approved' || t.status === 'rejected') ? 'opacity:.35;cursor:not-allowed;' : ''}"
@@ -3024,6 +3048,50 @@
     };
     document.getElementById('confirmModal').classList.add('open');
   }
+
+  /* ── View Trial Modal ── */
+  function viewTrial(id) {
+    const t = _trials.find(x => x.id == id);
+    if (!t) return;
+    const fields = [
+      { key: 'Name',             val: t.name             || null },
+      { key: 'Email',            val: t.email            || null },
+      { key: 'Company',          val: t.company          || null },
+      { key: 'Phone',            val: t.phone            || null },
+      { key: 'Team Size',        val: t.team_size        || null },
+      { key: 'Status',           val: t.status           || null },
+      { key: 'Use Case',         val: t.use_case         || null },
+      { key: 'Source',           val: t.source           || null },
+      { key: 'Trial Start',      val: t.trial_start_date ? t.trial_start_date.slice(0,10) : null },
+      { key: 'Trial End',        val: t.trial_end_date   ? t.trial_end_date.slice(0,10)   : null },
+      { key: 'Submitted At',     val: t.submitted_at     ? new Date(t.submitted_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : null },
+      { key: 'Comments',         val: t.comments         || null },
+    ];
+    const statusBadgeMap = { new:'badge-new', approved:'badge-approved', rejected:'badge-rejected', expired:'badge-expired', converted:'badge-converted' };
+    const list = document.getElementById('viewTrialKvList');
+    list.innerHTML = fields.map(({ key, val }) => {
+      let valHtml;
+      if (val === null || val === undefined || val === '') {
+        valHtml = `<span class="meta-kv-val is-null">—</span>`;
+      } else if (key === 'Status') {
+        const cls = statusBadgeMap[val] || '';
+        valHtml = `<span class="badge ${cls}">${esc(val)}</span>`;
+      } else {
+        valHtml = `<span class="meta-kv-val">${esc(String(val))}</span>`;
+      }
+      return `<div class="meta-kv-row">
+        <div class="meta-kv-key">${esc(key)}</div>
+        <div style="flex:1;">${valHtml}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('viewTrialModal').classList.add('open');
+  }
+  function closeViewTrialModal() {
+    document.getElementById('viewTrialModal').classList.remove('open');
+  }
+  document.getElementById('viewTrialModal').addEventListener('click', function(e) {
+    if (e.target === this) closeViewTrialModal();
+  });
 
   /* ═════════════════════════════════════════════════════════ */
 
