@@ -1410,7 +1410,7 @@
         <div class="field">
           <label>Trial Start Date</label>
           <div class="date-input-wrap">
-            <input type="date" id="trStartDate" onchange="(function(){const s=document.getElementById('trStartDate').value;if(!s)return;const d=new Date(s);d.setDate(d.getDate()+30);document.getElementById('trEndDate').value=d.toISOString().slice(0,10);})()"/>
+            <input type="date" id="trStartDate" onchange="(function(){const s=document.getElementById('trStartDate').value;if(s){trClearError(document.getElementById('trStartDate'),'trialModalMsg');const d=new Date(s);d.setDate(d.getDate()+30);document.getElementById('trEndDate').value=d.toISOString().slice(0,10);trClearError(document.getElementById('trEndDate'),'trialModalMsg');}})()"/>
             <button type="button" class="date-cal-btn" onclick="document.getElementById('trStartDate').showPicker()" title="Open calendar">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
@@ -1419,7 +1419,7 @@
         <div class="field">
           <label>Trial End Date</label>
           <div class="date-input-wrap">
-            <input type="date" id="trEndDate"/>
+            <input type="date" id="trEndDate" onchange="if(this.value) trClearError(this,'trialModalMsg')"/>
             <button type="button" class="date-cal-btn" onclick="document.getElementById('trEndDate').showPicker()" title="Open calendar">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
@@ -2835,7 +2835,7 @@
   function closeTrialModal() {
     document.getElementById('trialModal').classList.remove('open');
     // Reset field error states and message box
-    ['trName','trEmail','trCompany','trTeamSize','trUseCase'].forEach(id => {
+    ['trName','trEmail','trCompany','trTeamSize','trUseCase','trStartDate','trEndDate'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.style.borderColor=''; el.style.boxShadow=''; delete el.dataset.err; }
     });
@@ -2900,11 +2900,24 @@
       return;
     }
 
+    // Approved status requires both trial dates
+    const status = document.getElementById('trStatus').value;
+    if (status === 'approved') {
+      const startDate = document.getElementById('trStartDate').value;
+      const endDate   = document.getElementById('trEndDate').value;
+      if (!startDate || !endDate) {
+        if (!startDate) trMarkError(document.getElementById('trStartDate'));
+        if (!endDate)   trMarkError(document.getElementById('trEndDate'));
+        trShowError('Both Trial Start Date and Trial End Date are required to save with Approved status.');
+        return;
+      }
+    }
+
     const payload = {
       name, email, company,
       phone:           document.getElementById('trPhone').value.trim()   || null,
       team_size:       team || null,
-      status:          document.getElementById('trStatus').value,
+      status:          status,
       use_case:        useCase || null,
       source:          document.getElementById('trSource').value.trim()   || 'evoAIDesk Login Page',
       comments:        document.getElementById('trComments').value.trim() || null,
