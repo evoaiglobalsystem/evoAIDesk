@@ -2701,7 +2701,7 @@
             <button class="icon-btn danger" title="Reject" onclick="quickStatusTrial(${t.id},'rejected')">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
-            <button class="icon-btn danger" title="Delete" onclick="deleteTrial(${t.id}, ${JSON.stringify(esc(t.name||t.email))})">
+            <button class="icon-btn danger" title="Delete" onclick="deleteTrial(${t.id}, '${esc(t.name||t.email)}')">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
             </button>
           </div>
@@ -2853,32 +2853,31 @@
   }
 
   function deleteTrial(id, name) {
-    document.getElementById('confirmTitle').textContent = 'Delete Trial Request';
-    document.getElementById('confirmBody').innerHTML = `Permanently delete the trial request for <strong>${name}</strong>? This cannot be undone.`;
-    const btn = document.getElementById('confirmOkBtn');
-    btn.onclick = async () => {
-      try {
-        const res = await fetch(N8N_TRIAL_DELETE, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'delete', id })
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        toast('Trial request deleted', 'success');
-        writeLog({
-          level: 'info', status: 'success',
-          module: 'trial', source: 'deleteTrial',
-          message: `Trial deleted: id=${id}`,
-          meta: { id }
-        });
-        closeConfirm();
-        _trialsLoaded = false;
-        await loadTrials(true);
-      } catch(e) {
-        toast('Error: ' + e.message, 'error');
+    showConfirm(
+      'Delete Trial Request',
+      `<p>Permanently delete the trial request for <strong>${name}</strong>?</p><p>This cannot be undone.</p>`,
+      async () => {
+        try {
+          const res = await fetch(N8N_TRIAL_DELETE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', id })
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          toast('Trial request deleted', 'success');
+          writeLog({
+            level: 'info', status: 'success',
+            module: 'trial', source: 'deleteTrial',
+            message: `Trial deleted: id=${id}`,
+            meta: { id }
+          });
+          _trialsLoaded = false;
+          await loadTrials(true);
+        } catch(e) {
+          toast('Error: ' + e.message, 'error');
+        }
       }
-    };
-    document.getElementById('confirmModal').classList.add('open');
+    );
   }
 
   /* ═════════════════════════════════════════════════════════ */
