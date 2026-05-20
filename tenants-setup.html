@@ -2921,7 +2921,20 @@
       const res = await fetch(N8N_TRIAL_UPDATE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'update', id, status })
+        body: JSON.stringify({
+            action: 'update', id, status,
+            name:             t.name             || null,
+            email:            t.email            || null,
+            company:          t.company          || null,
+            phone:            t.phone            || null,
+            team_size:        t.team_size        || null,
+            use_case:         t.use_case         || null,
+            source:           t.source           || null,
+            comments:         t.comments         || null,
+            trial_start_date: t.trial_start_date || null,
+            trial_end_date:   t.trial_end_date   || null,
+            submitted_at:     t.submitted_at     || null,
+          })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       toast(`Trial marked as ${status}`, 'success');
