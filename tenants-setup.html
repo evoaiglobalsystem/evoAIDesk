@@ -1427,7 +1427,7 @@
         </div>
         <div class="field full">
           <label>Source</label>
-          <input type="text" id="trSource" value="evoAIDesk Login Page" autocomplete="off"/>
+          <input type="text" id="trSource" value="evoAIDesk Tenant Manager" autocomplete="off"/>
         </div>
 
         <div class="form-section-title">Notes</div>
@@ -2811,7 +2811,7 @@
       document.getElementById('trTeamSize').value= t.team_size || '';
       document.getElementById('trStatus').value  = t.status  || 'new';
       document.getElementById('trUseCase').value = t.use_case|| '';
-      document.getElementById('trSource').value  = t.source  || 'evoAIDesk Login Page';
+      document.getElementById('trSource').value  = t.source  || 'evoAIDesk Tenant Manager';
       document.getElementById('trComments').value= t.comments|| '';
       document.getElementById('trStartDate').value = t.trial_start_date ? t.trial_start_date.slice(0,10) : '';
       document.getElementById('trEndDate').value   = t.trial_end_date   ? t.trial_end_date.slice(0,10)   : '';
@@ -2823,7 +2823,7 @@
       document.getElementById('trTeamSize').value= '';
       document.getElementById('trStatus').value  = 'new';
       document.getElementById('trUseCase').value = '';
-      document.getElementById('trSource').value  = 'evoAIDesk Login Page';
+      document.getElementById('trSource').value  = 'evoAIDesk Tenant Manager';
       document.getElementById('trComments').value= '';
       document.getElementById('trStartDate').value = '';
       document.getElementById('trEndDate').value   = '';
@@ -2919,7 +2919,7 @@
       team_size:       team || null,
       status:          status,
       use_case:        useCase || null,
-      source:          document.getElementById('trSource').value.trim()   || 'evoAIDesk Login Page',
+      source:          document.getElementById('trSource').value.trim()   || 'evoAIDesk Tenant Manager',
       comments:        document.getElementById('trComments').value.trim() || null,
       trial_start_date:document.getElementById('trStartDate').value       || null,
       trial_end_date:  document.getElementById('trEndDate').value         || null,
