@@ -390,12 +390,19 @@
   }
   .field label .req { color: var(--accent); margin-left: 2px; }
   .field input, .field select { width: 100%; padding: 9px 11px; }
-  input[type="text"], input[type="email"], input[type="password"], select {
+  input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select {
     background: var(--surface2); border: 1px solid var(--border);
     color: var(--text); font-family: var(--font); font-size: .82rem;
-    border-radius: 7px; outline: none; transition: border-color .18s;
+    border-radius: 7px; outline: none; transition: border-color .18s, box-shadow .18s;
   }
-  input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, select:focus { border-color: var(--accent); }
+  input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="tel"]:focus, select:focus {
+    border-color: rgba(0,184,255,.45);
+    box-shadow: 0 0 0 3px rgba(0,184,255,.08);
+  }
+  textarea:focus {
+    border-color: rgba(0,184,255,.45) !important;
+    box-shadow: 0 0 0 3px rgba(0,184,255,.08) !important;
+  }
   select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
   select option { background: var(--surface2); }
   .field-hint { font-size: .68rem; color: var(--muted); margin-top: 5px; font-family: var(--mono); }
@@ -1376,7 +1383,7 @@
         <div class="field">
           <label>Team Size <span class="req">*</span></label>
           <select id="trTeamSize" oninput="trClearError(this,'trialModalMsg')" onchange="trClearError(this,'trialModalMsg')">
-            <option value="">— Select team size —</option>
+            <option value="" disabled selected>— Select team size —</option>
             <option value="1-5">1 – 5 people</option>
             <option value="6-20">6 – 20 people</option>
             <option value="21-50">21 – 50 people</option>
@@ -1398,8 +1405,6 @@
           <label>What are you looking to solve? <span class="req">*</span></label>
           <textarea id="trUseCase" rows="3" placeholder="e.g. We want to manage our sales pipeline, automate follow-ups, and track opportunities…"
             style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;padding:9px 11px;outline:none;resize:vertical;width:100%;transition:border-color .18s, box-shadow .18s;"
-            onfocus="this.style.borderColor='var(--accent)';this.style.boxShadow='0 0 0 3px rgba(0,229,160,.08)'"
-            onblur="this.style.borderColor=this.value.trim()?'var(--accent)':(this.dataset.err?'rgba(255,77,109,.5)':' var(--border)');this.style.boxShadow=''"
             oninput="trClearError(this,'trialModalMsg')"></textarea>
         </div>
 
@@ -1431,8 +1436,7 @@
         <div class="field full">
           <label>Comments</label>
           <textarea id="trComments" rows="3" placeholder="Internal notes, follow-up reminders…"
-            style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;padding:9px 11px;outline:none;resize:vertical;width:100%;transition:border-color .18s;"
-            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+            style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.82rem;border-radius:7px;padding:9px 11px;outline:none;resize:vertical;width:100%;transition:border-color .18s, box-shadow .18s;"></textarea>
         </div>
       </div>
     </div>
