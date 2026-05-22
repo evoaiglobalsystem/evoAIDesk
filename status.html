@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>evoAIDesk — System Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/x-icon" href="https://evoaiglobal.ai/images/favicon.ico"/>
+<style>
+:root {
+  --bg:#080c10;--surface:#0e1420;--surface2:#141c2a;--border:#1e2d42;
+  --accent:#00e5a0;--accent2:#00b8ff;--danger:#ff4d6d;--warn:#ffb730;
+  --text:#e8f0fe;--muted:#6b7fa3;--font:'Sora',sans-serif;--mono:'DM Mono',monospace;
+  --nav-h:60px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* ── NAV (from privacy-security) ── */
+nav {
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,12,16,.92);backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:var(--nav-h);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo img{height:26px}
+.nav-badge{
+  font-family:var(--font);font-size:.78rem;letter-spacing:.01em;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:4px 10px;border-radius:6px;
+}
+.nav-back{
+  display:flex;align-items:center;gap:6px;
+  font-size:.75rem;color:var(--muted);font-family:var(--mono);
+  text-decoration:none;transition:color .15s;
+}
+.nav-back:hover{color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-ts{font-family:var(--mono);font-size:.63rem;color:var(--muted)}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(0,229,160,.4);animation:pulse-live 2s infinite;display:inline-block}
+.pulse-dot.checking{background:var(--warn);box-shadow:0 0 0 0 rgba(255,183,48,.4)}
+@keyframes pulse-live{0%{box-shadow:0 0 0 0 rgba(0,229,160,.4)}70%{box-shadow:0 0 0 6px rgba(0,229,160,0)}100%{box-shadow:0 0 0 0 rgba(0,229,160,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── PAGE LAYOUT ── */
+.page{max-width:880px;margin:0 auto;padding:32px 32px 80px}
+
+/* ── PAGE HEADER ── */
+.page-eyebrow{
+  font-family:var(--mono);font-size:.63rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:12px;
+  display:flex;align-items:center;gap:7px;
+}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.7)}}
+.page-title{font-size:2rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:14px}
+.page-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.meta-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:.67rem;color:var(--muted);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;padding:3px 10px;
+}
+.header-divider{height:1px;background:var(--border);margin-bottom:28px}
+
+/* ── SUMMARY STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;transition:border-color .2s}
+.stat-card:hover{border-color:rgba(0,229,160,.18)}
+.stat-label{font-size:.61rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat-value{font-size:1.45rem;font-weight:700;font-family:var(--mono);color:var(--accent);line-height:1}
+.stat-sub{font-size:.63rem;color:var(--muted);margin-top:5px}
+.stat-loading{opacity:.4;animation:statpulse 1.2s ease-in-out infinite}
+@keyframes statpulse{0%,100%{opacity:.4}50%{opacity:.8}}
+
+/* ── OVERALL BANNER ── */
+.overall-banner{display:flex;align-items:center;gap:12px;padding:13px 20px;border-radius:9px;border:1px solid;margin-bottom:22px;font-size:.83rem;font-weight:600}
+.overall-banner.ok{background:rgba(0,229,160,.06);border-color:rgba(0,229,160,.2);color:var(--accent)}
+.overall-banner.degraded{background:rgba(255,183,48,.06);border-color:rgba(255,183,48,.22);color:var(--warn)}
+.overall-banner.down{background:rgba(255,77,109,.06);border-color:rgba(255,77,109,.22);color:var(--danger)}
+.overall-banner.checking{background:rgba(107,127,163,.06);border-color:rgba(107,127,163,.2);color:var(--muted)}
+.overall-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(107,127,163,.1)}
+.overall-banner.ok .overall-icon{background:rgba(0,229,160,.12)}
+.overall-banner.degraded .overall-icon{background:rgba(255,183,48,.12)}
+.overall-banner.down .overall-icon{background:rgba(255,77,109,.12)}
+.overall-text{flex:1}
+.overall-sub{font-size:.7rem;opacity:.7;font-weight:400;margin-top:2px}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.tab{padding:8px 16px;font-size:.76rem;font-weight:500;font-family:var(--font);color:var(--muted);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .14s;margin-bottom:-1px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ── SERVICES ── */
+.services{display:flex;flex-direction:column;gap:8px}
+.svc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;transition:border-color .18s}
+.svc-card:hover{border-color:rgba(0,184,255,.18)}
+.svc-card.live-ok{border-left:3px solid var(--accent)}
+.svc-card.live-degraded{border-left:3px solid var(--warn)}
+.svc-card.live-down{border-left:3px solid var(--danger)}
+.svc-card.live-checking{border-left:3px solid var(--border)}
+.svc-card.live-manual{border-left:3px solid var(--muted)}
+.svc-card.live-unknown{border-left:3px solid var(--warn)}
+.svc-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.svc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.svc-name{font-size:.85rem;font-weight:600;flex:1}
+.svc-meta{font-size:.63rem;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.svc-check-type{font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:4px;border:1px solid;margin-top:3px;display:inline-block}
+.svc-check-type.live{background:rgba(0,229,160,.07);border-color:rgba(0,229,160,.2);color:var(--accent)}
+.svc-check-type.manual{background:rgba(107,127,163,.07);border-color:rgba(107,127,163,.2);color:var(--muted)}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:.64rem;font-weight:700;letter-spacing:.05em;white-space:nowrap;border:1px solid}
+.status-badge.ok{background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.25);color:var(--accent)}
+.status-badge.degraded{background:rgba(255,183,48,.1);border-color:rgba(255,183,48,.28);color:var(--warn)}
+.status-badge.down{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.28);color:var(--danger)}
+.status-badge.checking{background:rgba(107,127,163,.1);border-color:rgba(107,127,163,.25);color:var(--muted)}
+.status-badge.manual{background:rgba(107,127,163,.08);border-color:rgba(107,127,163,.2);color:var(--muted)}
+.status-badge.unknown{background:rgba(255,183,48,.08);border-color:rgba(255,183,48,.2);color:var(--warn)}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge-spinner{width:8px;height:8px;border:1.5px solid rgba(107,127,163,.3);border-top-color:var(--muted);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.live-detail{display:flex;align-items:center;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.live-metric{display:flex;flex-direction:column;gap:2px}
+.live-metric-val{font-family:var(--mono);font-size:.78rem;font-weight:500;color:var(--text)}
+.live-metric-lbl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.live-separator{width:1px;height:28px;background:var(--border)}
+.svc-note{font-size:.71rem;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:10px;line-height:1.5}
+.btn{padding:9px 18px;font-size:.78rem;font-weight:600;font-family:var(--font);border-radius:7px;border:1px solid;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{background:transparent;border-color:var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--text);color:var(--text)}
+.section-label{font-size:.61rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:.76rem;color:var(--text);transform:translateY(50px);opacity:0;transition:all .28s;z-index:999;pointer-events:none;font-family:var(--font)}
+.toast.show{transform:none;opacity:1}
+.check-btn{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;font-size:.62rem;font-weight:600;font-family:var(--font);border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;transition:all .14s;margin-left:8px}
+.check-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.corserr{font-size:.63rem;color:var(--warn);font-family:var(--mono);margin-top:6px;line-height:1.5;padding:6px 10px;background:rgba(255,183,48,.05);border:1px solid rgba(255,183,48,.15);border-radius:6px}
+
+/* ── HISTORY ── */
+.hist-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:10px}
+.hist-svc-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.hist-svc-name{font-size:.85rem;font-weight:600;flex:1}
+.hist-meta{font-size:.63rem;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.hist-stats{display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap}
+.hist-stat{display:flex;flex-direction:column;gap:2px}
+.hist-stat-val{font-family:var(--mono);font-size:.88rem;font-weight:600;color:var(--text)}
+.hist-stat-lbl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.timeline-wrap{margin-bottom:6px}
+.timeline-blocks{display:flex;gap:2px;height:28px}
+.t-block{flex:1;border-radius:2px;cursor:pointer;transition:opacity .12s;position:relative;min-width:4px}
+.t-block:hover{opacity:.75}
+.t-block.ok{background:var(--accent)}
+.t-block.degraded{background:var(--warn)}
+.t-block.down{background:var(--danger)}
+.t-block.empty{background:var(--border)}
+.timeline-labels{display:flex;justify-content:space-between;margin-top:4px}
+.t-lbl{font-size:.57rem;color:var(--muted);font-family:var(--mono)}
+.log-toggle{display:flex;align-items:center;gap:6px;font-size:.65rem;color:var(--muted);cursor:pointer;border:none;background:none;font-family:var(--font);padding:6px 0;margin-top:4px;border-top:1px solid var(--border);width:100%}
+.log-toggle:hover{color:var(--text)}
+.log-toggle svg{transition:transform .2s}
+.log-toggle.open svg{transform:rotate(180deg)}
+.log-list{display:none;margin-top:8px;max-height:280px;overflow-y:auto}
+.log-list.open{display:block}
+.log-row{display:flex;align-items:baseline;gap:10px;padding:5px 0;border-bottom:1px solid rgba(30,45,66,.6);font-size:.67rem}
+.log-row:last-child{border-bottom:none}
+.log-ts{font-family:var(--mono);color:var(--muted);min-width:130px;flex-shrink:0}
+.log-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.log-dot.ok{background:var(--accent)}
+.log-dot.degraded{background:var(--warn)}
+.log-dot.down{background:var(--danger)}
+.log-note{color:var(--text);line-height:1.4;flex:1}
+.log-lat{font-family:var(--mono);color:var(--muted);min-width:52px;text-align:right;flex-shrink:0}
+.hist-loading{text-align:center;padding:40px 0;color:var(--muted);font-size:.78rem}
+.hist-err{padding:14px 16px;background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);font-size:.73rem;font-family:var(--mono)}
+.tooltip{position:fixed;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.63rem;font-family:var(--mono);color:var(--text);pointer-events:none;z-index:200;display:none;line-height:1.6}
+.day-filter{display:flex;gap:6px;margin-bottom:16px}
+.day-btn{padding:4px 12px;font-size:.68rem;font-weight:600;font-family:var(--font);border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .14s}
+.day-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.day-btn.active{background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.3);color:var(--accent)}
+
+/* ── FOOTER (from privacy-security) ── */
+.page-footer {
+  margin-top:56px;padding-top:20px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+}
+.footer-left{font-size:.7rem;color:var(--muted);line-height:1.6}
+.footer-left a{color:var(--accent);text-decoration:none}
+.footer-right{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.65rem;color:var(--muted)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:680px){
+  .page{padding:24px 20px 60px}
+  nav{padding:0 16px}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<h2 class="sr-only">EvoAI Desk live health status</h2>
+
+<!-- ── NAV (from privacy-security) ── -->
+<nav>
+  <a class="nav-logo" href="https://desk.evoaiglobal.ai/">
+    <img src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk"/>
+  </a>
+  <a class="nav-back" href="https://desk.evoaiglobal.ai/">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-eyebrow">
+    <span class="eyebrow-dot"></span>
+    Live · System Status
+  </div>
+  <h1 class="page-title">System Status</h1>
+  <div class="page-meta">
+    <span class="meta-chip">
+      <span class="pulse-dot" id="pulse"></span>
+      <span id="nav-ts">Checking…</span>
+    </span>
+    <span class="meta-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      evoAIDesk · desk.evoaiglobal.ai
+    </span>
+    <button class="btn-ghost btn" style="padding:4px 12px;font-size:.7rem" onclick="runAllChecks()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.28-4.56"/></svg>
+      Refresh
+    </button>
+  </div>
+
+  <div class="header-divider"></div>
+
+  <!-- ── TOP SUMMARY STATS ── -->
+  <div class="stats-row" id="summary-stats">
+    <div class="stat-card">
+      <div class="stat-label">24h Uptime</div>
+      <div class="stat-value stat-loading" id="s-uptime">—</div>
+      <div class="stat-sub" id="s-uptime-sub">avg across all services</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Latency</div>
+      <div class="stat-value stat-loading" id="s-latency">—</div>
+      <div class="stat-sub" id="s-latency-sub">avg across all services</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Checks Today</div>
+      <div class="stat-value stat-loading" id="s-checks">—</div>
+      <div class="stat-sub" id="s-checks-sub">total in last 24h</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Incidents (24h)</div>
+      <div class="stat-value stat-loading" id="s-incidents">—</div>
+      <div class="stat-sub" id="s-incidents-sub">down or degraded events</div>
+    </div>
+  </div>
+
+  <!-- ── OVERALL BANNER ── -->
+  <div id="overall-banner" class="overall-banner checking">
+    <div class="overall-icon" id="overall-icon">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="overall-text">
+      <div id="overall-title">Running health checks…</div>
+      <div class="overall-sub" id="overall-sub">Contacting services</div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab active" id="tab-btn-status" onclick="switchTab('status')">Live Status</button>
+    <button class="tab" id="tab-btn-history" onclick="switchTab('history')">History</button>
+  </div>
+
+  <!-- STATUS TAB -->
+  <div id="tab-status">
+    <div class="section-label">Services</div>
+    <div class="services" id="services-list"></div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="tab-history" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="section-label" style="margin-bottom:0">Uptime history</div>
+      <button class="btn btn-ghost" style="padding:4px 12px;font-size:.68rem" onclick="loadHistory(currentDays)">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.28-4.56"/></svg>
+        Reload
+      </button>
+    </div>
+    <div class="day-filter" id="day-filter-btns">
+      <button class="day-btn active" onclick="loadHistory(1)">1d</button>
+      <button class="day-btn" onclick="loadHistory(7)">7d</button>
+      <button class="day-btn" onclick="loadHistory(30)">30d</button>
+    </div>
+    <div id="history-body"><div class="hist-loading">Loading history…</div></div>
+  </div>
+
+  <!-- FOOTER (from privacy-security) -->
+  <div class="page-footer">
+    <div class="footer-left">
+      © 2026 evoAI. All rights reserved. &nbsp;·&nbsp;
+      <a href="https://evoaiglobal.ai/privacy-policy">evoAI Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="https://evoaiglobal.ai/terms">Terms &amp; Conditions</a>
+    </div>
+    <div class="footer-right">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      desk.evoaiglobal.ai
+    </div>
+  </div>
+
+</div><!-- /.page -->
+
+<div class="tooltip" id="tooltip"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──
+const N8N_BASE         = 'https://n8n.evoaiglobal.ai';
+const LOKI_DIRECT_URL  = 'https://logs-prod-018.grafana.net/ready';
+const LOKI_WEBHOOK_URL = `${N8N_BASE}/webhook/loki-health`;
+const DESK_DIRECT_URL  = 'https://desk.evoaiglobal.ai/health';
+const DESK_WEBHOOK_URL = `${N8N_BASE}/webhook/desk-health`;
+const HEALTH_LOG_URL   = `${N8N_BASE}/webhook/health-log`;
+
+const SERVICES = [
+  { id:'api',      name:'EvoAI Desk',             meta:'desk.evoaiglobal.ai',           icon:'🔗', bg:'rgba(180,120,255,.1)', checkType:'live' },
+  { id:'n8n',      name:'n8n workflow automation', meta:'n8n.evoaiglobal.ai · Docker',   icon:'🔁', bg:'rgba(0,229,160,.1)',   checkType:'live' },
+  { id:'firebase', name:'Firebase',                meta:'Firestore · evoaidesk project', icon:'🔥', bg:'rgba(255,77,109,.08)', checkType:'live' },
+  { id:'loki',     name:'Grafana Loki (logs)',     meta:'logs-prod-018.grafana.net',     icon:'📊', bg:'rgba(0,184,255,.1)',   checkType:'live' },
+];
+
+let statusData = {
+  n8n:      { status:'checking', note:'', updatedAt:new Date(), latency:null, checkType:'live' },
+  loki:     { status:'checking', note:'', updatedAt:new Date(), latency:null, checkType:'live' },
+  firebase: { status:'checking', note:'', updatedAt:new Date(), latency:null, checkType:'live' },
+  api:      { status:'checking', note:'', updatedAt:new Date(), latency:null, checkType:'live' },
+};
+
+function normalizeStatus(s) {
+  if (!s) return 'unknown';
+  if (s === 'notok') return 'down';
+  return s;
+}
+
+function n8nIsDown() {
+  const s = statusData.n8n?.status;
+  return s === 'down' || s === 'degraded';
+}
+
+// ── LIVE CHECKS ──
+async function checkN8N() {
+  const WEBHOOK_URL = `${N8N_BASE}/webhook/n8n-health`;
+  const HEALTHZ_URL = `${N8N_BASE}/healthz`;
+  const t0 = Date.now();
+  try {
+    const res = await fetch(WEBHOOK_URL, { method:'GET', signal:AbortSignal.timeout(8000) });
+    const latency = Date.now() - t0;
+    if (res.ok) {
+      const json = await res.json().catch(() => ({}));
+      const ts = json.ts ? ` · server time ${json.ts.slice(11,19)}` : '';
+      return { status:'ok', latency, note:`Webhook OK · n8n processing normally · ${latency}ms${ts}` };
+    }
+    return { status:'degraded', latency, note:`Webhook returned HTTP ${res.status} · ${latency}ms` };
+  } catch (webhookErr) {
+    const latencyFinal = Date.now() - t0;
+    let healthzAlive = false;
+    try {
+      await fetch(HEALTHZ_URL, { method:'GET', mode:'no-cors', signal:AbortSignal.timeout(4000) });
+      healthzAlive = true;
+    } catch {}
+    const reason = (webhookErr.name === 'TimeoutError' || webhookErr.name === 'AbortError')
+      ? `Webhook timed out after ${latencyFinal}ms`
+      : `Webhook unreachable · ${latencyFinal}ms`;
+    const detail = healthzAlive
+      ? ` · /healthz process alive but workflow engine not responding — n8n likely needs restart`
+      : ` · /healthz also unreachable — n8n fully down`;
+    return { status:'down', latency:latencyFinal, note: reason + detail };
+  }
+}
+
+async function checkLoki() {
+  const t0 = Date.now();
+  let directReachable = false;
+  try {
+    await fetch(LOKI_DIRECT_URL, { method:'GET', mode:'no-cors', signal:AbortSignal.timeout(6000) });
+    directReachable = true;
+  } catch {}
+  const directLatency = Date.now() - t0;
+  if (directReachable) {
+    if (!n8nIsDown()) {
+      try {
+        const t1 = Date.now();
+        const res = await fetch(LOKI_WEBHOOK_URL, { method:'GET', signal:AbortSignal.timeout(8000) });
+        const enrichLatency = Date.now() - t1;
+        if (res.ok) {
+          const json = await res.json().catch(() => ({}));
+          return { status: json.status ?? 'ok', latency: directLatency,
+            note: `${json.summary ?? 'Loki reachable'} · direct ping ${directLatency}ms · n8n enrichment ${enrichLatency}ms` };
+        }
+      } catch {}
+    }
+    return { status:'ok', latency:directLatency, note:`Loki /ready responded · direct check ${directLatency}ms · n8n enrichment skipped${n8nIsDown()?' (n8n is down)':''}` };
+  }
+  if (n8nIsDown()) return { status:'unknown', latency:directLatency, note:`Loki direct check failed AND n8n is down — cannot confirm status · ${directLatency}ms` };
+  try {
+    const t2 = Date.now();
+    const res = await fetch(LOKI_WEBHOOK_URL, { method:'GET', signal:AbortSignal.timeout(10000) });
+    const latency2 = Date.now() - t2;
+    if (res.ok) {
+      const json = await res.json().catch(() => ({}));
+      return { status: json.status ?? 'degraded', latency:latency2, note:`Direct ping failed · ${json.summary ?? 'Loki checked via n8n fallback'} · ${latency2}ms` };
+    }
+    return { status:'down', latency:latency2, note:`Loki unreachable directly and via n8n (HTTP ${res.status}) · ${latency2}ms` };
+  } catch(e) {
+    const latency = Date.now() - t0;
+    return { status:'down', latency, note:`Loki unreachable via direct check and n8n webhook · ${latency}ms` };
+  }
+}
+
+async function checkDesk() {
+  const t0 = Date.now();
+  try {
+    const res = await fetch(DESK_DIRECT_URL, { method:'GET', signal:AbortSignal.timeout(6000) });
+    const latency = Date.now() - t0;
+    if (res.ok) {
+      const json = await res.json().catch(() => ({}));
+      return { status: json.status ?? 'ok', latency, note:`${json.summary ?? 'Desk /health responded'} · direct check ${latency}ms` };
+    }
+    return { status:'degraded', latency, note:`Desk /health returned HTTP ${res.status} · ${latency}ms` };
+  } catch {}
+  const directLatency = Date.now() - t0;
+  if (n8nIsDown()) return { status:'unknown', latency:directLatency, note:`Direct check blocked (CORS or unreachable) and n8n is down · ${directLatency}ms` };
+  try {
+    const t1 = Date.now();
+    const res = await fetch(DESK_WEBHOOK_URL, { method:'GET', signal:AbortSignal.timeout(10000) });
+    const latency2 = Date.now() - t1;
+    if (res.ok) {
+      const json = await res.json().catch(() => ({}));
+      return { status: json.status ?? 'degraded', latency:latency2, note:`${json.summary ?? 'Desk checked via n8n fallback'} · ${latency2}ms` };
+    }
+    return { status:'degraded', latency:latency2, note:`Desk n8n webhook returned HTTP ${res.status} · ${latency2}ms` };
+  } catch(e) {
+    const latency = Date.now() - t0;
+    return { status:'down', latency, note:`Desk unreachable via direct check and n8n webhook · ${latency}ms` };
+  }
+}
+
+async function checkFirebase() {
+  const AUTH_URL = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAkwOQZ15O8-_GB9LYNKaAUPe9NYgGUMw4`;
+  const t0 = Date.now();
+  try {
+    const res = await fetch(AUTH_URL, { method:'POST', signal:AbortSignal.timeout(8000) });
+    const latency = Date.now() - t0;
+    if (res.status === 400) return { status:'ok', latency, note:`Firebase Auth responded HTTP 400 · Firebase operational · ${latency}ms` };
+    if (res.ok)             return { status:'ok', latency, note:`Firebase Auth responded HTTP ${res.status} · Firebase operational · ${latency}ms` };
+    if (res.status >= 500)  return { status:'degraded', latency, note:`Firebase Auth returned HTTP ${res.status} · Firebase may have an issue · ${latency}ms` };
+    return { status:'degraded', latency, note:`Firebase Auth returned unexpected HTTP ${res.status} · ${latency}ms` };
+  } catch(e) {
+    const latency = Date.now() - t0;
+    return { status: 'down', latency,
+      note: e.name==='TimeoutError'||e.name==='AbortError' ? `Firebase Auth timed out after ${latency}ms` : `Firebase Auth unreachable · ${latency}ms` };
+  }
+}
+
+// ── RUN ALL CHECKS ──
+async function runAllChecks() {
+  document.getElementById('pulse').classList.add('checking');
+  document.getElementById('nav-ts').textContent = 'Checking…';
+  ['n8n','loki','firebase','api'].forEach(id => { statusData[id].status='checking'; statusData[id].latency=null; });
+  renderServices();
+  const n8nResult = await checkN8N();
+  statusData.n8n = { ...statusData.n8n, ...n8nResult, updatedAt:new Date(), checkType:'live' };
+  renderServices();
+  const [lokiResult, firebaseResult, deskResult] = await Promise.all([checkLoki(), checkFirebase(), checkDesk()]);
+  statusData.loki     = { ...statusData.loki,     ...lokiResult,     updatedAt:new Date(), checkType:'live' };
+  statusData.firebase = { ...statusData.firebase, ...firebaseResult, updatedAt:new Date(), checkType:'live' };
+  statusData.api      = { ...statusData.api,      ...deskResult,     updatedAt:new Date(), checkType:'live' };
+  document.getElementById('pulse').classList.remove('checking');
+  updateNavTs();
+  render();
+}
+
+// ── LOAD SUMMARY STATS from 1d history API ──
+async function loadSummaryStats() {
+  try {
+    const res = await fetch(`${HEALTH_LOG_URL}?days=1`, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const svcs = data.services ?? {};
+    const normalised = {};
+    for (const [k, v] of Object.entries(svcs)) {
+      normalised[k === 'desk' ? 'api' : k] = v;
+    }
+    const ids = Object.keys(normalised);
+    if (!ids.length) return;
+    const uptimes = ids.map(id => normalised[id].uptime_pct).filter(v => v != null);
+    const avgUptime = uptimes.length ? (uptimes.reduce((a,b)=>a+b,0)/uptimes.length) : null;
+    const lats = ids.map(id => normalised[id].latency_avg_ms).filter(v => v != null);
+    const avgLat = lats.length ? Math.round(lats.reduce((a,b)=>a+b,0)/lats.length) : null;
+    const totalChecks = ids.reduce((sum, id) => sum + (normalised[id].total_checks ?? 0), 0);
+    let incidents = 0;
+    ids.forEach(id => {
+      const checks = normalised[id].checks ?? [];
+      incidents += checks.filter(c => { const s = normalizeStatus(c.status); return s === 'down' || s === 'degraded'; }).length;
+    });
+    const uptimeEl = document.getElementById('s-uptime');
+    uptimeEl.classList.remove('stat-loading');
+    if (avgUptime != null) {
+      uptimeEl.style.color = avgUptime >= 99 ? 'var(--accent)' : avgUptime >= 95 ? 'var(--warn)' : 'var(--danger)';
+      uptimeEl.textContent = avgUptime.toFixed(1) + '%';
+    } else { uptimeEl.textContent = '—'; }
+    const latEl = document.getElementById('s-latency');
+    latEl.classList.remove('stat-loading');
+    if (avgLat != null) {
+      latEl.style.color = avgLat < 300 ? 'var(--accent)' : avgLat < 1000 ? 'var(--warn)' : 'var(--danger)';
+      latEl.textContent = avgLat + 'ms';
+    } else { latEl.textContent = '—'; }
+    const checksEl = document.getElementById('s-checks');
+    checksEl.classList.remove('stat-loading');
+    checksEl.textContent = totalChecks || '—';
+    document.getElementById('s-checks-sub').textContent = totalChecks ? `across ${ids.length} services` : 'no data';
+    const incEl = document.getElementById('s-incidents');
+    incEl.classList.remove('stat-loading');
+    incEl.style.color = incidents === 0 ? 'var(--accent)' : incidents < 5 ? 'var(--warn)' : 'var(--danger)';
+    incEl.textContent = incidents;
+    document.getElementById('s-incidents-sub').textContent = incidents === 0 ? 'all clear' : `down/degraded events`;
+  } catch(e) {
+    ['s-uptime','s-latency','s-checks','s-incidents'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('stat-loading');
+      el.textContent = '—';
+    });
+  }
+}
+
+// ── HELPERS ──
+function timeAgo(d){ const s=Math.round((Date.now()-d.getTime())/1000); if(s<60) return s+'s ago'; if(s<3600) return Math.round(s/60)+'m ago'; if(s<86400) return Math.round(s/3600)+'h ago'; return Math.round(s/86400)+'d ago'; }
+function fmtDate(d){ return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function statusLabel(s){
+  const n = normalizeStatus(s);
+  return n==='ok'?'Operational':n==='degraded'?'Degraded':n==='down'?'Down':n==='checking'?'Checking…':'Unknown';
+}
+function updateNavTs(){ document.getElementById('nav-ts').textContent='Checked '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
+function render(){ renderServices(); updateOverall(); }
+
+function renderServices(){
+  const el = document.getElementById('services-list');
+  el.innerHTML = '';
+  SERVICES.forEach(svc => {
+    const d = statusData[svc.id] || { status:'unknown', note:'', updatedAt:new Date(), checkType:'live' };
+    const isLive = svc.checkType === 'live';
+    const card = document.createElement('div');
+    card.className = `svc-card live-${d.status==='checking'?'checking':d.status}`;
+    let badgeHtml = d.status==='checking'
+      ? `<span class="status-badge checking"><span class="badge-spinner"></span>Checking</span>`
+      : d.status==='unknown'
+        ? `<span class="status-badge unknown"><span class="badge-dot"></span>Unknown</span>`
+        : `<span class="status-badge ${d.status}"><span class="badge-dot"></span>${statusLabel(d.status)}</span>`;
+    let liveDetailHtml = '';
+    if(isLive && d.status !== 'checking' && d.latency != null){
+      const latColor = d.latency < 300 ? 'var(--accent)' : d.latency < 1000 ? 'var(--warn)' : 'var(--danger)';
+      liveDetailHtml = `<div class="live-detail">
+        <div class="live-metric"><div class="live-metric-val" style="color:${latColor}">${d.latency}ms</div><div class="live-metric-lbl">Latency</div></div>
+        <div class="live-separator"></div>
+        <div class="live-metric"><div class="live-metric-val">${timeAgo(d.updatedAt)}</div><div class="live-metric-lbl">Last checked</div></div>
+      </div>`;
+    }
+    let corsWarnHtml = d.corsNote ? `<div class="corserr">⚠ Browser CORS policy prevents reading the response — but the connection succeeded. Use the n8n health-check workflow for full HTTP status monitoring.</div>` : '';
+    card.innerHTML = `
+      <div class="svc-header">
+        <div class="svc-icon" style="background:${svc.bg}">${svc.icon}</div>
+        <div style="flex:1">
+          <div class="svc-name">${svc.name}
+            ${isLive ? `<button class="check-btn" onclick="checkOne('${svc.id}')">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.28-4.56"/></svg>Check now</button>` : ''}
+          </div>
+          <div class="svc-meta">${svc.meta} · ${isLive?'live check':'manual'} · updated ${timeAgo(d.updatedAt)}</div>
+          <span class="svc-check-type ${isLive?'live':'manual'}">${isLive?'● live':'◎ manual'}</span>
+        </div>
+        ${badgeHtml}
+      </div>
+      ${liveDetailHtml}
+      ${d.note ? `<div class="svc-note">${d.note}</div>` : ''}
+      ${corsWarnHtml}`;
+    el.appendChild(card);
+  });
+}
+
+async function checkOne(id) {
+  statusData[id].status = 'checking'; statusData[id].latency = null; renderServices();
+  let result;
+  if(id==='n8n') result = await checkN8N();
+  else if(id==='loki') result = await checkLoki();
+  else if(id==='firebase') result = await checkFirebase();
+  else if(id==='api') result = await checkDesk();
+  statusData[id] = { ...statusData[id], ...result, updatedAt:new Date() };
+  render();
+  toast(`${id} check complete — ${statusLabel(result.status)}`);
+}
+
+function updateOverall(){
+  const statuses = SERVICES.map(s=>(statusData[s.id]||{}).status).filter(s=>s!=='checking');
+  const banner=document.getElementById('overall-banner'), title=document.getElementById('overall-title'),
+        sub=document.getElementById('overall-sub'), icon=document.getElementById('overall-icon');
+  const hasChecking = SERVICES.some(s=>statusData[s.id]?.status==='checking');
+  if(hasChecking && statuses.length < SERVICES.length){
+    banner.className='overall-banner checking';
+    icon.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    title.textContent='Running health checks…'; sub.textContent='Contacting live services'; return;
+  }
+  if(statuses.includes('down')){
+    banner.className='overall-banner down';
+    icon.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    title.textContent='Major outage detected'; sub.textContent='One or more services are down';
+  } else if(statuses.includes('degraded')||statuses.includes('unknown')){
+    banner.className='overall-banner degraded';
+    icon.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    const hasUnknown = statuses.includes('unknown');
+    title.textContent = hasUnknown ? 'Status partially unknown' : 'Partial degradation';
+    sub.textContent   = hasUnknown ? 'Some services could not be verified — n8n may be down' : 'Some services are experiencing issues';
+  } else {
+    banner.className='overall-banner ok';
+    icon.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    title.textContent='All systems operational'; sub.textContent='4 services monitored · no active incidents';
+  }
+}
+
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2800); }
+
+// ── INIT ──
+renderServices();
+updateOverall();
+runAllChecks();
+loadSummaryStats();
+setInterval(runAllChecks, 120000);
+
+// ── TAB SWITCHING ──
+function switchTab(name) {
+  document.getElementById('tab-status').style.display  = name==='status'  ? '' : 'none';
+  document.getElementById('tab-history').style.display = name==='history' ? '' : 'none';
+  document.getElementById('tab-btn-status').classList.toggle('active',  name==='status');
+  document.getElementById('tab-btn-history').classList.toggle('active', name==='history');
+  if (name==='history' && !historyLoaded) loadHistory(1);
+}
+
+// ── HISTORY ──
+let historyLoaded = false;
+let currentDays = 1;
+
+const SVC_META = {
+  api:      { name:'EvoAI Desk',             icon:'🔗', bg:'rgba(180,120,255,.1)' },
+  n8n:      { name:'n8n workflow automation', icon:'🔁', bg:'rgba(0,229,160,.1)'   },
+  firebase: { name:'Firebase',               icon:'🔥', bg:'rgba(255,77,109,.08)' },
+  loki:     { name:'Grafana Loki (logs)',     icon:'📊', bg:'rgba(0,184,255,.1)'   },
+};
+const SVC_ORDER = ['api','n8n','firebase','loki'];
+
+async function loadHistory(days) {
+  currentDays = days;
+  historyLoaded = true;
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.toggle('active', b.textContent === days+'d'));
+  const body = document.getElementById('history-body');
+  body.innerHTML = `<div class="hist-loading">Loading ${days}-day history…</div>`;
+  try {
+    const res = await fetch(`${HEALTH_LOG_URL}?days=${days}`, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    renderHistory(await res.json(), days);
+  } catch(e) {
+    body.innerHTML = `<div class="hist-err">⚠ Failed to load history: ${e.message}<br>Check that the EvoAIDesk Health Log API workflow is active in n8n.</div>`;
+  }
+}
+
+function renderHistory(data, days) {
+  const svcs = data.services ?? {};
+  const body = document.getElementById('history-body');
+  if (!Object.keys(svcs).length) { body.innerHTML='<div class="hist-loading">No data found for this period.</div>'; return; }
+
+  const normalised = {};
+  for (const [k,v] of Object.entries(svcs)) normalised[k==='desk'?'api':k] = v;
+  body.innerHTML = '';
+
+  const order = SVC_ORDER.filter(id => normalised[id]);
+  Object.keys(normalised).forEach(id => { if (!order.includes(id)) order.push(id); });
+
+  for (const id of order) {
+    const svc  = normalised[id];
+    const meta = SVC_META[id] ?? { name:id, icon:'⚙️', bg:'rgba(107,127,163,.1)' };
+    const uptime    = svc.uptime_pct    != null ? svc.uptime_pct.toFixed(2)+'%' : '—';
+    const avgLat    = svc.latency_avg_ms!= null ? svc.latency_avg_ms+'ms'       : '—';
+    const minLat    = svc.latency_min_ms!= null ? svc.latency_min_ms+'ms'       : '—';
+    const maxLat    = svc.latency_max_ms!= null ? svc.latency_max_ms+'ms'       : '—';
+    const uptimeColor = svc.uptime_pct==null?'var(--muted)':svc.uptime_pct>=99?'var(--accent)':svc.uptime_pct>=95?'var(--warn)':'var(--danger)';
+
+    let grouped = [];
+    if (days === 1) {
+      const checks = (svc.checks ?? []).slice().reverse();
+      grouped = checks.map(c => {
+        const ns = normalizeStatus(c.status);
+        const time = new Date(c.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+        return { status:ns, tip:`${time} · ${statusLabel(ns)} · ${c.latency_ms!=null?c.latency_ms+'ms':'—'}` };
+      });
+      if (!grouped.length) grouped = [{status:'empty',tip:'No data'}];
+    } else {
+      const timeline = svc.timeline ?? [];
+      const totalSlots = Math.min(days*24, 720);
+      const now = Date.now();
+      const slotMs = (days*86400*1000)/totalSlots;
+      const hourMap = {};
+      for (const t of timeline) hourMap[t.hour] = normalizeStatus(t.status);
+      const slots = [];
+      for (let i=totalSlots-1; i>=0; i--) {
+        const slotTime = new Date(now - i*slotMs);
+        slots.push(hourMap[slotTime.toISOString().slice(0,13)] ?? 'empty');
+      }
+      const maxBlocks=90, groupSize=Math.ceil(slots.length/maxBlocks);
+      for (let i=0; i<slots.length; i+=groupSize) {
+        const chunk=slots.slice(i,i+groupSize);
+        const worst=chunk.includes('down')?'down':chunk.includes('degraded')?'degraded':chunk.every(s=>s==='empty')?'empty':'ok';
+        grouped.push({status:worst, tip:worst==='empty'?'No data':worst.charAt(0).toUpperCase()+worst.slice(1)});
+      }
+    }
+
+    const blocksHtml = grouped.map((b,idx)=>
+      `<div class="t-block ${b.status}" data-tip="${b.tip}" data-idx="${idx}" onmouseenter="showTip(event,this)" onmouseleave="hideTip()"></div>`
+    ).join('');
+
+    const currentStatus = normalizeStatus(svc.current_status);
+    const card = document.createElement('div');
+    card.className = 'hist-card';
+    card.innerHTML = `
+      <div class="hist-svc-header">
+        <div class="svc-icon" style="background:${meta.bg}">${meta.icon}</div>
+        <div style="flex:1">
+          <div class="hist-svc-name">${meta.name}</div>
+          <div class="hist-meta">${svc.last_checked?'Last checked '+fmtDate(new Date(svc.last_checked)):'—'}</div>
+        </div>
+        <span class="status-badge ${currentStatus}"><span class="badge-dot"></span>${statusLabel(currentStatus)}</span>
+      </div>
+      <div class="hist-stats">
+        <div class="hist-stat"><div class="hist-stat-val" style="color:${uptimeColor}">${uptime}</div><div class="hist-stat-lbl">${days}d uptime</div></div>
+        <div class="hist-stat"><div class="hist-stat-val">${avgLat}</div><div class="hist-stat-lbl">Avg latency</div></div>
+        <div class="hist-stat"><div class="hist-stat-val">${minLat}</div><div class="hist-stat-lbl">Min</div></div>
+        <div class="hist-stat"><div class="hist-stat-val">${maxLat}</div><div class="hist-stat-lbl">Max</div></div>
+        <div class="hist-stat"><div class="hist-stat-val" style="color:var(--muted)">${svc.total_checks??0}</div><div class="hist-stat-lbl">Total checks</div></div>
+      </div>
+      <div class="timeline-wrap">
+        <div class="timeline-blocks">${blocksHtml}</div>
+        <div class="timeline-labels">
+          <span class="t-lbl">${days===1?'24h ago':days+'d ago'}</span>
+          <span class="t-lbl">${days===1?grouped.length+' checks':''}</span>
+          <span class="t-lbl">now</span>
+        </div>
+      </div>
+      <button class="log-toggle" id="log-toggle-${id}" onclick="toggleLog('${id}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        Show event log (${svc.checks?.length??0} entries)
+      </button>
+      <div class="log-list" id="log-list-${id}"></div>`;
+
+    const checks = (svc.checks??[]).slice().reverse().slice(0,500);
+    card.querySelector(`#log-list-${id}`).innerHTML = checks.map(c => {
+      const ns = normalizeStatus(c.status);
+      return `<div class="log-row">
+        <span class="log-ts">${new Date(c.ts).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+        <span class="log-dot ${ns}"></span>
+        <span class="log-note">${c.note??statusLabel(ns)}</span>
+        <span class="log-lat">${c.latency_ms!=null?c.latency_ms+'ms':'—'}</span>
+      </div>`;
+    }).join('');
+
+    body.appendChild(card);
+  }
+}
+
+function toggleLog(id) {
+  const list=document.getElementById('log-list-'+id), btn=document.getElementById('log-toggle-'+id);
+  const open=list.classList.toggle('open');
+  btn.classList.toggle('open',open);
+  btn.querySelector('svg').style.transform=open?'rotate(180deg)':'';
+}
+
+function showTip(e,el){
+  const tip=document.getElementById('tooltip');
+  tip.textContent=el.dataset.tip; tip.style.display='block'; moveTip(e);
+  el.addEventListener('mousemove',moveTip);
+}
+function hideTip(){ document.getElementById('tooltip').style.display='none'; }
+function moveTip(e){
+  const tip=document.getElementById('tooltip');
+  tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY-28)+'px';
+}
+</script>
+</body>
+</html>

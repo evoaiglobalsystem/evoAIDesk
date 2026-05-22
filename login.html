@@ -259,7 +259,7 @@
   .card {
     position: relative; z-index: 1;
     background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
-    padding: 44px 44px 40px; width: 100%; max-width: 440px;
+    padding: 28px 36px 24px; width: 100%; max-width: 420px;
     box-shadow: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(0,229,160,.05);
     animation: cardIn .4s cubic-bezier(.22,1,.36,1); text-align: center;
     margin: 0; transition: max-width .3s ease;
@@ -279,17 +279,17 @@
   @keyframes vEnter { from { opacity: 0; transform: translateY(14px)  scale(.98); } to { opacity: 1; transform: none; } }
 
   /* Logo */
-  .logo-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 36px; }
-  .logo-wrap img { height: 56px; width: auto; }
+  .logo-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .logo-wrap img { height: 44px; width: auto; }
   .logo-badge {
     font-family: var(--font); font-size: .88rem; letter-spacing: .01em;
     background: var(--surface2); border: 1px solid var(--border);
     color: var(--text); padding: 5px 14px; border-radius: 6px; font-weight: 700;
   }
 
-  .card-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
-  .card-sub   { font-size: .9rem; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
-  .divider    { height: 1px; background: var(--border); margin: 0 -44px 32px; }
+  .card-title { font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
+  .card-sub   { font-size: .82rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .divider    { height: 1px; background: var(--border); margin: 0 -36px 20px; }
 
   /* Message box */
   .msg {
@@ -330,12 +330,12 @@
 
   .secure-note {
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    margin-top: 14px; font-size: .74rem; color: var(--muted); font-family: var(--mono); opacity: .7;
+    margin-top: 10px; font-size: .72rem; color: var(--muted); font-family: var(--mono); opacity: .7;
   }
 
   .know-more-link {
     display: flex; align-items: center; justify-content: center; gap: 7px;
-    margin-top: 16px; white-space: nowrap;
+    margin-top: 8px; white-space: nowrap;
     font-size: .72rem; font-family: var(--mono); font-weight: 500; letter-spacing: .03em;
     color: var(--accent); text-decoration: none;
     background: rgba(0,229,160,.07); border: 1px solid rgba(0,229,160,.22);
@@ -501,10 +501,26 @@
   .footer-links a:hover { color: var(--accent); }
   .footer-links span { opacity: .4; }
 
+  /* ── Status chip ── */
+  .status-chip {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    margin-top: 10px; font-size: .7rem; font-family: var(--mono);
+    color: var(--muted); text-decoration: none;
+    transition: color .15s;
+  }
+  .status-chip:hover { color: var(--accent); }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--border); flex-shrink: 0;
+    transition: background .3s;
+  }
+  .status-dot.ok       { background: var(--accent); box-shadow: 0 0 6px rgba(0,229,160,.5); animation: pulse 2s ease-in-out infinite; }
+  .status-dot.degraded { background: var(--warn);   box-shadow: 0 0 6px rgba(255,183,48,.5); }
+  .status-dot.down     { background: var(--danger);  box-shadow: 0 0 6px rgba(255,77,109,.5); }
+
   /* ── Trial request link ── */
   .trial-link {
     display: flex; align-items: center; justify-content: center; gap: 7px;
-    margin-top: 10px; width: 100%; white-space: nowrap;
+    margin-top: 8px; width: 100%; white-space: nowrap;
     font-size: .72rem; font-family: var(--mono); font-weight: 500; letter-spacing: .03em;
     color: var(--accent2); text-decoration: none;
     background: rgba(0,184,255,.07); border: 1px solid rgba(0,184,255,.22);
@@ -714,6 +730,11 @@
       </svg>
       Secured by Google OAuth 2.0
     </div>
+
+    <a class="status-chip" href="/status" id="statusChip">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusLabel">Checking system status\u2026</span>
+    </a>
   </div>
 
   <!-- ══ VIEW 2 — Destination Picker (super-admin only) ══ -->
@@ -927,6 +948,8 @@
       <a href="https://evoaiglobal.ai/privacy-policy" target="_blank">Privacy</a>
       <span>·</span>
       <a href="https://evoaiglobal.ai/terms" target="_blank">Terms</a>
+      <span>&middot;</span>
+      <a href="/status">Status</a>
     </div>
   </div>
 </footer>
@@ -943,6 +966,30 @@
     const _orig = window.showMsg;
     // Already defined in module via closure — the getElementById calls inside the
     // module reference elements by ID so they work fine after DOM is ready.
+  })();
+
+  /* ── Live status chip ── */
+  (async function() {
+    const dot   = document.getElementById('statusDot');
+    const label = document.getElementById('statusLabel');
+    try {
+      const res  = await fetch('https://desk.evoaiglobal.ai/health', { signal: AbortSignal.timeout(5000) });
+      const json = await res.json().catch(() => ({}));
+      const s    = json.status ?? (res.ok ? 'ok' : 'degraded');
+      if (s === 'ok') {
+        dot.className   = 'status-dot ok';
+        label.textContent = 'All systems operational';
+      } else if (s === 'degraded') {
+        dot.className   = 'status-dot degraded';
+        label.textContent = 'Partial degradation — check status';
+      } else {
+        dot.className   = 'status-dot down';
+        label.textContent = 'Service disruption — check status';
+      }
+    } catch {
+      dot.className   = 'status-dot degraded';
+      label.textContent = 'Status unknown — check status page';
+    }
   })();
 </script>
 
