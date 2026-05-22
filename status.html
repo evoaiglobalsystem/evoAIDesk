@@ -369,7 +369,7 @@ async function checkN8N() {
     if (res.ok) {
       const json = await res.json().catch(() => ({}));
       const ts = json.ts ? ` · server time ${json.ts.slice(11,19)}` : '';
-      return { status:'ok', latency, note:`Webhook OK · n8n processing normally · ${latency}ms${ts}` };
+      return { status:'ok', latency, note:`Webhook OK · automation processing normally · ${latency}ms${ts}` };
     }
     return { status:'degraded', latency, note:`Webhook returned HTTP ${res.status} · ${latency}ms` };
   } catch (webhookErr) {
@@ -383,8 +383,8 @@ async function checkN8N() {
       ? `Webhook timed out after ${latencyFinal}ms`
       : `Webhook unreachable · ${latencyFinal}ms`;
     const detail = healthzAlive
-      ? ` · /healthz process alive but workflow engine not responding — n8n likely needs restart`
-      : ` · /healthz also unreachable — n8n fully down`;
+      ? ` · /healthz process alive but workflow engine not responding — automation server likely needs restart`
+      : ` · /healthz also unreachable — automation server fully down`;
     return { status:'down', latency:latencyFinal, note: reason + detail };
   }
 }
@@ -406,25 +406,25 @@ async function checkLoki() {
         if (res.ok) {
           const json = await res.json().catch(() => ({}));
           return { status: json.status ?? 'ok', latency: directLatency,
-            note: `${json.summary ?? 'Loki reachable'} · direct ping ${directLatency}ms · n8n enrichment ${enrichLatency}ms` };
+            note: `${json.summary ?? 'Logs server reachable'} · direct ping ${directLatency}ms · auto enrichment ${enrichLatency}ms` };
         }
       } catch {}
     }
-    return { status:'ok', latency:directLatency, note:`Loki /ready responded · direct check ${directLatency}ms · n8n enrichment skipped${n8nIsDown()?' (n8n is down)':''}` };
+    return { status:'ok', latency:directLatency, note:`Logs server /ready responded · direct check ${directLatency}ms · n8n enrichment skipped${n8nIsDown()?' (n8n is down)':''}` };
   }
-  if (n8nIsDown()) return { status:'unknown', latency:directLatency, note:`Loki direct check failed AND n8n is down — cannot confirm status · ${directLatency}ms` };
+  if (n8nIsDown()) return { status:'unknown', latency:directLatency, note:`Logs server direct check failed AND n8n is down — cannot confirm status · ${directLatency}ms` };
   try {
     const t2 = Date.now();
     const res = await fetch(LOKI_WEBHOOK_URL, { method:'GET', signal:AbortSignal.timeout(10000) });
     const latency2 = Date.now() - t2;
     if (res.ok) {
       const json = await res.json().catch(() => ({}));
-      return { status: json.status ?? 'degraded', latency:latency2, note:`Direct ping failed · ${json.summary ?? 'Loki checked via n8n fallback'} · ${latency2}ms` };
+      return { status: json.status ?? 'degraded', latency:latency2, note:`Direct ping failed · ${json.summary ?? 'Logs server checked via n8n fallback'} · ${latency2}ms` };
     }
-    return { status:'down', latency:latency2, note:`Loki unreachable directly and via n8n (HTTP ${res.status}) · ${latency2}ms` };
+    return { status:'down', latency:latency2, note:`Logs server unreachable directly and via n8n (HTTP ${res.status}) · ${latency2}ms` };
   } catch(e) {
     const latency = Date.now() - t0;
-    return { status:'down', latency, note:`Loki unreachable via direct check and n8n webhook · ${latency}ms` };
+    return { status:'down', latency, note:`Logs server unreachable via direct check and n8n webhook · ${latency}ms` };
   }
 }
 
@@ -440,19 +440,19 @@ async function checkDesk() {
     return { status:'degraded', latency, note:`Desk /health returned HTTP ${res.status} · ${latency}ms` };
   } catch {}
   const directLatency = Date.now() - t0;
-  if (n8nIsDown()) return { status:'unknown', latency:directLatency, note:`Direct check blocked (CORS or unreachable) and n8n is down · ${directLatency}ms` };
+  if (n8nIsDown()) return { status:'unknown', latency:directLatency, note:`Direct check blocked (CORS or unreachable) and automation server is down · ${directLatency}ms` };
   try {
     const t1 = Date.now();
     const res = await fetch(DESK_WEBHOOK_URL, { method:'GET', signal:AbortSignal.timeout(10000) });
     const latency2 = Date.now() - t1;
     if (res.ok) {
       const json = await res.json().catch(() => ({}));
-      return { status: json.status ?? 'degraded', latency:latency2, note:`${json.summary ?? 'Desk checked via n8n fallback'} · ${latency2}ms` };
+      return { status: json.status ?? 'degraded', latency:latency2, note:`${json.summary ?? 'Desk checked via automation fallback'} · ${latency2}ms` };
     }
-    return { status:'degraded', latency:latency2, note:`Desk n8n webhook returned HTTP ${res.status} · ${latency2}ms` };
+    return { status:'degraded', latency:latency2, note:`Desk automation webhook returned HTTP ${res.status} · ${latency2}ms` };
   } catch(e) {
     const latency = Date.now() - t0;
-    return { status:'down', latency, note:`Desk unreachable via direct check and n8n webhook · ${latency}ms` };
+    return { status:'down', latency, note:`Desk unreachable via direct check and automation webhook · ${latency}ms` };
   }
 }
 
@@ -462,14 +462,14 @@ async function checkFirebase() {
   try {
     const res = await fetch(AUTH_URL, { method:'POST', signal:AbortSignal.timeout(8000) });
     const latency = Date.now() - t0;
-    if (res.status === 400) return { status:'ok', latency, note:`Firebase Auth responded HTTP 400 · Firebase operational · ${latency}ms` };
-    if (res.ok)             return { status:'ok', latency, note:`Firebase Auth responded HTTP ${res.status} · Firebase operational · ${latency}ms` };
-    if (res.status >= 500)  return { status:'degraded', latency, note:`Firebase Auth returned HTTP ${res.status} · Firebase may have an issue · ${latency}ms` };
-    return { status:'degraded', latency, note:`Firebase Auth returned unexpected HTTP ${res.status} · ${latency}ms` };
+    if (res.status === 400) return { status:'ok', latency, note:`Data server Auth responded HTTP 400 · Data server operational · ${latency}ms` };
+    if (res.ok)             return { status:'ok', latency, note:`Data server Auth responded HTTP ${res.status} · Data server operational · ${latency}ms` };
+    if (res.status >= 500)  return { status:'degraded', latency, note:`Data server Auth returned HTTP ${res.status} · Data server may have an issue · ${latency}ms` };
+    return { status:'degraded', latency, note:`Data server Auth returned unexpected HTTP ${res.status} · ${latency}ms` };
   } catch(e) {
     const latency = Date.now() - t0;
     return { status: 'down', latency,
-      note: e.name==='TimeoutError'||e.name==='AbortError' ? `Firebase Auth timed out after ${latency}ms` : `Firebase Auth unreachable · ${latency}ms` };
+      note: e.name==='TimeoutError'||e.name==='AbortError' ? `Data server Auth timed out after ${latency}ms` : `Data server Auth unreachable · ${latency}ms` };
   }
 }
 
