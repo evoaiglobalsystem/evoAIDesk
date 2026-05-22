@@ -335,9 +335,9 @@ const HEALTH_LOG_URL   = `${N8N_BASE}/webhook/health-log`;
 
 const SERVICES = [
   { id:'api',      name:'EvoAI Desk',             meta:'desk.evoaiglobal.ai',           icon:'🔗', bg:'rgba(180,120,255,.1)', checkType:'live' },
-  { id:'n8n',      name:'Workflow Automation (n8n)', meta:'n8n.evoaiglobal.ai · Docker',   icon:'🔁', bg:'rgba(0,229,160,.1)',   checkType:'live' },
-  { id:'firebase', name:'DB (Firebase)',       meta:'Firestore · evoaidesk project', icon:'🔥', bg:'rgba(255,77,109,.08)', checkType:'live' },
-  { id:'loki',     name:'Grafana Loki (logs)',     meta:'logs-prod-018.grafana.net',     icon:'📊', bg:'rgba(0,184,255,.1)',   checkType:'live' },
+  { id:'n8n',      name:'Workflow Automation', meta:'n8n.evoaiglobal.ai · Docker',   icon:'🔁', bg:'rgba(0,229,160,.1)',   checkType:'live' },
+  { id:'firebase', name:'DB',       meta:'Firestore · evoaidesk project', icon:'🔥', bg:'rgba(255,77,109,.08)', checkType:'live' },
+  { id:'loki',     name:'Logging',     meta:'logs-prod-018.grafana.net',     icon:'📊', bg:'rgba(0,184,255,.1)',   checkType:'live' },
 ];
 
 let statusData = {
