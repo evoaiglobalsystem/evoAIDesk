@@ -92,7 +92,7 @@ nav {
 
 /* ── TABS ── */
 .tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border)}
-.tab{padding:8px 16px;font-size:.76rem;font-weight:500;font-family:var(--font);color:var(--muted);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .14s;margin-bottom:-1px}
+.tab{padding:8px 16px;font-size:.76rem;font-weight:500;font-family:var(--font);color:var(--muted);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .14s;margin-bottom:-1px;touch-action:manipulation}
 .tab:hover{color:var(--text)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 
@@ -134,7 +134,7 @@ nav {
 .section-label{font-size:.61rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .toast{position:fixed;bottom:22px;right:22px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:.76rem;color:var(--text);transform:translateY(50px);opacity:0;transition:all .28s;z-index:999;pointer-events:none;font-family:var(--font)}
 .toast.show{transform:none;opacity:1}
-.check-btn{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;font-size:.62rem;font-weight:600;font-family:var(--font);border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;transition:all .14s;margin-left:8px}
+.check-btn{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;font-size:.62rem;font-weight:600;font-family:var(--font);border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--muted);cursor:pointer;transition:all .14s;margin-left:8px;touch-action:manipulation;min-height:32px}
 .check-btn:hover{border-color:var(--accent2);color:var(--accent2)}
 .corserr{font-size:.63rem;color:var(--warn);font-family:var(--mono);margin-top:6px;line-height:1.5;padding:6px 10px;background:rgba(255,183,48,.05);border:1px solid rgba(255,183,48,.15);border-radius:6px}
 
@@ -176,7 +176,7 @@ nav {
 .hist-err{padding:14px 16px;background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.2);border-radius:8px;color:var(--danger);font-size:.73rem;font-family:var(--mono)}
 .tooltip{position:fixed;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:.63rem;font-family:var(--mono);color:var(--text);pointer-events:none;z-index:200;display:none;line-height:1.6}
 .day-filter{display:flex;gap:6px;margin-bottom:16px}
-.day-btn{padding:4px 12px;font-size:.68rem;font-weight:600;font-family:var(--font);border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .14s}
+.day-btn{padding:4px 12px;font-size:.68rem;font-weight:600;font-family:var(--font);border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .14s;touch-action:manipulation;min-height:34px}
 .day-btn:hover{border-color:var(--accent2);color:var(--accent2)}
 .day-btn.active{background:rgba(0,229,160,.1);border-color:rgba(0,229,160,.3);color:var(--accent)}
 
@@ -190,14 +190,121 @@ nav {
 .footer-left a{color:var(--accent);text-decoration:none}
 .footer-right{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.65rem;color:var(--muted)}
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE / MOBILE FIRST ── */
+
+/* Tablet */
 @media(max-width:680px){
-  .page{padding:24px 20px 60px}
-  nav{padding:0 16px}
-  .stats-row{grid-template-columns:repeat(2,1fr)}
+  :root{--nav-h:56px}
+  .page{padding:20px 16px 72px}
+  nav{padding:0 14px}
+  .nav-badge{display:none}
+  .nav-ts{display:none}
+  .stats-row{grid-template-columns:repeat(2,1fr);gap:10px}
+  .stat-card{padding:13px 14px}
+  .stat-value{font-size:1.25rem}
+  .page-title{font-size:1.55rem}
+  .overall-banner{padding:11px 14px;gap:10px}
+  .hist-stats{gap:12px}
+  .hist-stat-val{font-size:.8rem}
 }
+
+/* Mobile */
 @media(max-width:480px){
+  :root{--nav-h:52px}
+  .page{padding:16px 12px 80px}
+  nav{padding:0 12px}
+
+  /* Nav: stack or simplify */
+  .nav-back span{display:none}  /* hide "Back to Home" text, keep arrow */
+  .nav-back{gap:2px}
+
+  /* Stats: 2-col grid, smaller */
+  .stats-row{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .stat-card{padding:12px 12px;border-radius:8px}
+  .stat-label{font-size:.58rem;margin-bottom:6px}
+  .stat-value{font-size:1.15rem}
+  .stat-sub{font-size:.6rem}
+
+  /* Header */
+  .page-title{font-size:1.35rem}
+  .page-eyebrow{font-size:.6rem}
+  .page-meta{gap:6px}
+  .meta-chip{font-size:.62rem;padding:3px 8px}
+
+  /* Overall banner */
+  .overall-banner{flex-wrap:wrap;padding:10px 12px;gap:8px;font-size:.78rem}
+  .overall-sub{font-size:.65rem}
+
+  /* Tabs: bigger touch targets */
+  .tab-bar{gap:0}
+  .tab{flex:1;text-align:center;padding:10px 8px;font-size:.75rem}
+
+  /* Service cards */
+  .svc-card{padding:13px 13px}
+  .svc-header{gap:10px;margin-bottom:10px}
+  .svc-icon{width:30px;height:30px;font-size:14px;border-radius:8px}
+  .svc-name{font-size:.8rem}
+  .svc-meta{font-size:.6rem}
+
+  /* Live detail: wrap tighter */
+  .live-detail{gap:10px;margin-bottom:8px}
+  .live-metric-val{font-size:.72rem}
+  .live-metric-lbl{font-size:.55rem}
+  .live-separator{height:20px}
+
+  /* Status badge */
+  .status-badge{font-size:.6rem;padding:3px 8px}
+
+  /* Check btn: easier tap */
+  .check-btn{padding:5px 9px;font-size:.62rem}
+
+  /* Section label */
+  .section-label{font-size:.58rem}
+
+  /* History stats: 3-col wrapping grid */
+  .hist-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .hist-stat{background:var(--surface2);border-radius:6px;padding:7px 8px}
+  .hist-stat-val{font-size:.8rem}
+  .hist-stat-lbl{font-size:.55rem}
+
+  /* History header: stack */
+  div[style*="justify-content:space-between"]{flex-wrap:wrap;gap:8px}
+
+  /* Timeline blocks: slightly taller for touch */
+  .timeline-blocks{height:24px}
+  .t-block{min-width:3px}
+
+  /* Log rows: stack on mobile */
+  .log-row{flex-wrap:wrap;gap:4px 8px;padding:7px 0}
+  .log-ts{min-width:unset;font-size:.62rem;flex:0 0 auto}
+  .log-note{flex:1 1 100%;order:3;font-size:.64rem}
+  .log-lat{min-width:unset;font-size:.62rem;margin-left:auto}
+
+  /* Footer: stack */
+  .page-footer{flex-direction:column;gap:8px;align-items:flex-start;margin-top:36px}
+  .footer-left{font-size:.67rem}
+  .footer-right{font-size:.63rem}
+
+  /* Btn */
+  .btn{padding:8px 14px;font-size:.74rem}
+
+  /* Toast: full-width bottom */
+  .toast{left:12px;right:12px;bottom:16px;text-align:center;font-size:.73rem}
+
+  /* Hist card */
+  .hist-card{padding:14px 13px;border-radius:9px}
+  .hist-svc-name{font-size:.8rem}
+  .hist-meta{font-size:.6rem}
+
+  /* CORS note */
+  .corserr{font-size:.6rem}
+}
+
+/* Very small phones */
+@media(max-width:360px){
   .stats-row{grid-template-columns:1fr 1fr}
+  .stat-value{font-size:1rem}
+  .hist-stats{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -798,8 +905,20 @@ function showTip(e,el){
 function hideTip(){ document.getElementById('tooltip').style.display='none'; }
 function moveTip(e){
   const tip=document.getElementById('tooltip');
-  tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY-28)+'px';
+  const x = e.clientX ?? (e.touches?.[0]?.clientX ?? 0);
+  const y = e.clientY ?? (e.touches?.[0]?.clientY ?? 0);
+  const tw = tip.offsetWidth || 120;
+  const left = Math.min(x+12, window.innerWidth - tw - 8);
+  tip.style.left=left+'px'; tip.style.top=(y-36)+'px';
 }
+// Touch support for timeline blocks
+document.addEventListener('touchstart', function(e){
+  const el = e.target.closest('.t-block');
+  if(!el){ hideTip(); return; }
+  e.preventDefault();
+  showTip(e.touches[0], el);
+  setTimeout(hideTip, 1800);
+}, {passive:false});
 </script>
 </body>
 </html>
