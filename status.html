@@ -24,9 +24,9 @@ nav {
   background:rgba(8,12,16,.92);backdrop-filter:blur(18px);
   border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 32px;height:var(--nav-h);gap:16px;
+  padding:0 32px;height:var(--nav-h);
 }
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .nav-logo img{height:26px}
 .nav-badge{
   font-family:var(--font);font-size:.78rem;letter-spacing:.01em;
@@ -36,18 +36,11 @@ nav {
 .nav-back{
   display:flex;align-items:center;gap:6px;
   font-size:.75rem;color:var(--muted);font-family:var(--mono);
-  text-decoration:none;transition:color .15s;white-space:nowrap;
+  text-decoration:none;transition:color .15s;
 }
 .nav-back:hover{color:var(--accent)}
-.nav-signout-btn{
-  display:flex;align-items:center;gap:6px;white-space:nowrap;
-  font-size:.72rem;font-family:var(--mono);color:var(--muted);
-  background:none;border:1px solid var(--border);border-radius:6px;
-  padding:5px 11px;cursor:pointer;transition:all .15s;flex-shrink:0;
-}
-.nav-signout-btn:hover{border-color:var(--danger);color:var(--danger);}
-.nav-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
-.nav-ts{font-family:var(--mono);font-size:.63rem;color:var(--muted);white-space:nowrap}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-ts{font-family:var(--mono);font-size:.63rem;color:var(--muted)}
 .pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(0,229,160,.4);animation:pulse-live 2s infinite;display:inline-block}
 .pulse-dot.checking{background:var(--warn);box-shadow:0 0 0 0 rgba(255,183,48,.4)}
 @keyframes pulse-live{0%{box-shadow:0 0 0 0 rgba(0,229,160,.4)}70%{box-shadow:0 0 0 6px rgba(0,229,160,0)}100%{box-shadow:0 0 0 0 rgba(0,229,160,0)}}
@@ -113,8 +106,8 @@ nav {
 .svc-card.live-checking{border-left:3px solid var(--border)}
 .svc-card.live-manual{border-left:3px solid var(--muted)}
 .svc-card.live-unknown{border-left:3px solid var(--warn)}
-.svc-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.svc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.svc-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.svc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;align-self:flex-start;margin-top:2px}
 .svc-name{font-size:.85rem;font-weight:600;flex:1}
 .svc-meta{font-size:.63rem;color:var(--muted);margin-top:2px;font-family:var(--mono)}
 .svc-check-type{font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:4px;border:1px solid;margin-top:3px;display:inline-block}
@@ -147,7 +140,8 @@ nav {
 
 /* ── HISTORY ── */
 .hist-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:10px;overflow:hidden}
-.hist-svc-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.hist-svc-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.hist-header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .hist-svc-name{font-size:.85rem;font-weight:600;flex:1}
 .hist-meta{font-size:.63rem;color:var(--muted);font-family:var(--mono);margin-top:2px}
 .hist-stats{display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap}
@@ -155,7 +149,7 @@ nav {
 .hist-stat-val{font-family:var(--mono);font-size:.88rem;font-weight:600;color:var(--text)}
 .hist-stat-lbl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
 .timeline-wrap{margin-bottom:6px;overflow:hidden}
-.timeline-blocks{display:flex;gap:1px;height:28px;width:100%;overflow:hidden}
+.timeline-blocks{display:flex;gap:2px;height:28px;overflow:hidden}
 .t-block{flex:1 1 0;min-width:0;border-radius:2px;cursor:pointer;transition:opacity .12s;position:relative}
 .t-block:hover{opacity:.75}
 .t-block.ok{background:var(--accent)}
@@ -199,6 +193,31 @@ nav {
 
 /* ── RESPONSIVE / MOBILE FIRST ── */
 
+/* Ensure long strings don't blow out layout */
+.svc-meta, .svc-note, .corserr, .hist-meta, .log-note {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Service name row: wrap check-btn gracefully */
+.svc-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+/* History header inline-style div — make it flex-wrap */
+#tab-history > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 /* Tablet */
 @media(max-width:680px){
   :root{--nav-h:56px}
@@ -221,13 +240,13 @@ nav {
   .page{padding:16px 12px 80px}
   nav{padding:0 12px}
 
-  /* Nav: stack or simplify */
-  .nav-back span{display:none}  /* hide "Back to Home" text, keep arrow */
+  /* Nav: simplify */
+  .nav-back span{display:none}
   .nav-back{gap:2px}
 
-  /* Stats: 2-col grid, smaller */
+  /* Stats: 2-col grid */
   .stats-row{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-  .stat-card{padding:12px 12px;border-radius:8px}
+  .stat-card{padding:12px 10px;border-radius:8px}
   .stat-label{font-size:.58rem;margin-bottom:6px}
   .stat-value{font-size:1.15rem}
   .stat-sub{font-size:.6rem}
@@ -235,7 +254,7 @@ nav {
   /* Header */
   .page-title{font-size:1.35rem}
   .page-eyebrow{font-size:.6rem}
-  .page-meta{gap:6px}
+  .page-meta{gap:6px;flex-wrap:wrap}
   .meta-chip{font-size:.62rem;padding:3px 8px}
 
   /* Overall banner */
@@ -247,23 +266,29 @@ nav {
   .tab{flex:1;text-align:center;padding:10px 8px;font-size:.75rem}
 
   /* Service cards */
-  .svc-card{padding:13px 13px}
-  .svc-header{gap:10px;margin-bottom:10px}
-  .svc-icon{width:30px;height:30px;font-size:14px;border-radius:8px}
-  .svc-name{font-size:.8rem}
-  .svc-meta{font-size:.6rem}
+  .svc-card{padding:12px 12px}
+  .svc-header{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:8px 10px;
+    align-items:start;
+    margin-bottom:10px;
+  }
+  .svc-icon{width:30px;height:30px;font-size:14px;border-radius:8px;flex-shrink:0}
+  .svc-name{font-size:.8rem;flex-wrap:wrap;gap:4px}
+  .svc-meta{font-size:.6rem;word-break:break-word}
 
-  /* Live detail: wrap tighter */
-  .live-detail{gap:10px;margin-bottom:8px}
+  /* Status badge: keep right-aligned in grid */
+  .status-badge{font-size:.6rem;padding:3px 8px;white-space:nowrap;align-self:start}
+
+  /* Check btn inline with name */
+  .check-btn{padding:4px 8px;font-size:.6rem;min-height:28px}
+
+  /* Live detail: wrap on small screens */
+  .live-detail{gap:8px 12px;margin-bottom:8px;flex-wrap:wrap}
   .live-metric-val{font-size:.72rem}
   .live-metric-lbl{font-size:.55rem}
-  .live-separator{height:20px}
-
-  /* Status badge */
-  .status-badge{font-size:.6rem;padding:3px 8px}
-
-  /* Check btn: easier tap */
-  .check-btn{padding:5px 9px;font-size:.62rem}
+  .live-separator{display:none} /* remove dividers when wrapping */
 
   /* Section label */
   .section-label{font-size:.58rem}
@@ -274,22 +299,30 @@ nav {
   .hist-stat-val{font-size:.8rem}
   .hist-stat-lbl{font-size:.55rem}
 
-  /* History header: stack */
-  div[style*="justify-content:space-between"]{flex-wrap:wrap;gap:8px}
+  /* History card header: grid layout */
+  .hist-svc-header{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:start;
+    gap:8px 10px;
+    margin-bottom:12px;
+  }
+  .hist-svc-name{font-size:.8rem}
+  .hist-meta{font-size:.6rem;word-break:break-word}
 
-  /* Timeline blocks: slightly taller for touch */
+  /* Timeline */
   .timeline-blocks{height:24px}
-  .t-block{min-width:0}
 
   /* Log rows: stack on mobile */
   .log-row{flex-wrap:wrap;gap:4px 8px;padding:7px 0}
-  .log-ts{min-width:unset;font-size:.62rem;flex:0 0 auto}
-  .log-note{flex:1 1 100%;order:3;font-size:.64rem}
+  .log-ts{min-width:unset;font-size:.62rem;flex:0 0 auto;width:auto}
+  .log-dot{flex-shrink:0;margin-top:3px}
+  .log-note{flex:1 1 100%;order:3;font-size:.64rem;word-break:break-word}
   .log-lat{min-width:unset;font-size:.62rem;margin-left:auto}
 
   /* Footer: stack */
   .page-footer{flex-direction:column;gap:8px;align-items:flex-start;margin-top:36px}
-  .footer-left{font-size:.67rem}
+  .footer-left{font-size:.67rem;line-height:1.8}
   .footer-right{font-size:.63rem}
 
   /* Btn */
@@ -299,9 +332,7 @@ nav {
   .toast{left:12px;right:12px;bottom:16px;text-align:center;font-size:.73rem}
 
   /* Hist card */
-  .hist-card{padding:14px 13px;border-radius:9px}
-  .hist-svc-name{font-size:.8rem}
-  .hist-meta{font-size:.6rem}
+  .hist-card{padding:14px 12px;border-radius:9px}
 
   /* CORS note */
   .corserr{font-size:.6rem}
@@ -312,76 +343,26 @@ nav {
   .stats-row{grid-template-columns:1fr 1fr}
   .stat-value{font-size:1rem}
   .hist-stats{grid-template-columns:repeat(2,1fr)}
-}
-
-/* ── AUTH GATE ── */
-#authGate {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #080c10;
-  display: flex; align-items: center; justify-content: center;
+  .svc-header{grid-template-columns:auto 1fr;gap:6px}
+  .status-badge{grid-column:1 / -1;justify-self:start;margin-top:2px}
+  .hist-svc-header{grid-template-columns:auto 1fr;gap:6px}
+  .hist-svc-header .status-badge{grid-column:1/-1;justify-self:start}
 }
 </style>
-
-<!-- ── Firebase auth guard ── -->
-<script type="module">
-  import { initializeApp }    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyC4k4kJZ2aDrYs7Ah-H0SuMF-d8s55X9ZM",
-    authDomain: "evoai-authentication.firebaseapp.com",
-    projectId: "evoai-authentication",
-    storageBucket: "evoai-authentication.firebasestorage.app",
-    messagingSenderId: "77079760801",
-    appId: "1:77079760801:web:2bbfeffffc38a6265c45e0"
-  };
-
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  window.doSignOut = async () => {
-    await signOut(auth);
-    window.location.href = '/index.html';
-  };
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // Authenticated — remove the gate overlay
-      const gate = document.getElementById('authGate');
-      if (gate) gate.remove();
-    } else {
-      // Not authenticated — redirect to login
-      window.location.href = '/index.html';
-    }
-  });
-
-</script>
 </head>
 <body>
 
-<!-- ── AUTH GATE (shown until auth check completes) ── -->
-<div id="authGate">
-  <div style="display:flex;flex-direction:column;align-items:center;gap:14px;opacity:.55">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00e5a0" stroke-width="1.5" style="animation:spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.28-4.56"/></svg>
-    <span style="font-family:'DM Mono',monospace;font-size:.72rem;color:#6b7fa3;letter-spacing:.08em">Verifying session…</span>
-  </div>
-</div>
-
 <h2 class="sr-only">EvoAI Desk live health status</h2>
+
+<!-- ── NAV (from privacy-security) ── -->
 <nav>
   <a class="nav-logo" href="https://desk.evoaiglobal.ai/">
     <img src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAIDesk"/>
   </a>
-  <div class="nav-right">
-    <a class="nav-back" href="/index.html">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-      <span>All Dashboards</span>
-    </a>
-    <button class="nav-signout-btn" onclick="doSignOut()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sign out
-    </button>
-  </div>
+  <a class="nav-back" href="https://desk.evoaiglobal.ai/">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
 </nav>
 
 <!-- ── MAIN ── -->
@@ -459,7 +440,7 @@ nav {
 
   <!-- HISTORY TAB -->
   <div id="tab-history" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div class="hist-header-row">
       <div class="section-label" style="margin-bottom:0">Uptime history</div>
       <button class="btn btn-ghost" style="padding:4px 12px;font-size:.68rem" onclick="loadHistory(currentDays)">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.28-4.56"/></svg>
@@ -876,6 +857,7 @@ function renderHistory(data, days) {
       if (!checks.length) {
         grouped = [{status:'empty', tip:'No data'}];
       } else {
+        // Cap to 90 display blocks so the timeline fits on any screen width
         const maxBlocks = 90;
         const groupSize = Math.ceil(checks.length / maxBlocks);
         for (let i = 0; i < checks.length; i += groupSize) {
