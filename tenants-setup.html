@@ -1816,18 +1816,26 @@
     el.className   = 'rte-char-count' + (len > MAX_RTE_CHARS * 0.8 ? ' warn' : '');
   }
 
+  function decodeHtmlEntities(str) {
+    // Decode HTML entities using a temporary DOM element — handles &lt; &gt; &amp; &quot; etc.
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str || '';
+    return txt.value;
+  }
+
   function getRteHtml(quill) {
     const html = quill.root.innerHTML;
     return html === '<p><br></p>' ? '' : html;
   }
 
   function setRteHtml(quill, html, countElId) {
-    quill.root.innerHTML = html || '';
+    // Decode stored HTML entities before loading into Quill so tags render correctly
+    quill.root.innerHTML = decodeHtmlEntities(html) || '';
     updateRteCount(countElId, quill);
   }
 
   function sanitizeHtml(html) {
-    // Strip script/style tags — basic client-side guard before saving
+    // Strip script/style tags and inline event handlers — basic client-side guard before saving
     return html.replace(/<script[\s\S]*?<\/script>/gi, '')
                .replace(/<style[\s\S]*?<\/style>/gi, '')
                .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '');
