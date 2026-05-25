@@ -6,6 +6,8 @@
 <title>evoAI Desk — Tenant Setup</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="icon" type="image/x-icon" href="https://evoaiglobal.ai/images/favicon.ico">
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet"/>
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
 <!-- Firebase SDK -->
 <script type="module">
@@ -451,6 +453,29 @@
   }
   .info-banner svg { flex-shrink: 0; color: var(--accent2); margin-top: 1px; }
   .info-banner strong { color: var(--text); }
+
+  /* RICH TEXT EDITOR (Quill — themed to match dark UI) */
+  .rte-wrap { border: 1px solid var(--border); border-radius: 7px; overflow: hidden; transition: border-color .18s; }
+  .rte-wrap:focus-within { border-color: rgba(0,184,255,.45); box-shadow: 0 0 0 3px rgba(0,184,255,.08); }
+  .rte-wrap .ql-toolbar {
+    background: var(--surface2); border: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    padding: 7px 10px;
+  }
+  .rte-wrap .ql-container { background: var(--surface2); border: none !important; font-family: var(--font); font-size: .82rem; }
+  .rte-wrap .ql-editor { min-height: 140px; max-height: 280px; overflow-y: auto; color: var(--text); padding: 10px 13px; line-height: 1.6; }
+  .rte-wrap .ql-editor.ql-blank::before { color: var(--muted); font-style: normal; font-size: .82rem; }
+  .rte-wrap .ql-editor p, .rte-wrap .ql-editor li { color: var(--text); }
+  .rte-wrap .ql-snow .ql-stroke { stroke: var(--muted); }
+  .rte-wrap .ql-snow .ql-fill  { fill: var(--muted); }
+  .rte-wrap .ql-snow .ql-picker { color: var(--muted); }
+  .rte-wrap .ql-snow .ql-picker-options { background: var(--surface2); border-color: var(--border); }
+  .rte-wrap .ql-toolbar button:hover .ql-stroke,
+  .rte-wrap .ql-toolbar button.ql-active .ql-stroke { stroke: var(--accent); }
+  .rte-wrap .ql-toolbar button:hover .ql-fill,
+  .rte-wrap .ql-toolbar button.ql-active .ql-fill  { fill: var(--accent); }
+  .rte-char-count { font-size: .66rem; color: var(--muted); font-family: var(--mono); text-align: right; margin-top: 4px; }
+  .rte-char-count.warn { color: var(--warn); }
 
   /* FILTER PILL */
   #filterPill {
@@ -1264,6 +1289,29 @@
           </div>
           <div class="field-hint">Maps to <span style="color:var(--accent);">smtp_app_password</span> — use a Google / provider app password, not your account password</div>
         </div>
+
+        <!-- ── NEW: Intro Email Content ── -->
+        <div class="form-section-title">Intro Email Content</div>
+        <div class="field full">
+          <label>Intro / Welcome Email Body</label>
+          <div class="rte-wrap">
+            <div id="fIntroEmailEditor"></div>
+          </div>
+          <div class="rte-char-count" id="fIntroEmailCount">0 chars</div>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">intro_email_html</span> — rich HTML injected as the body of the tenant's welcome email</div>
+        </div>
+
+        <!-- ── NEW: Proposal Content ── -->
+        <div class="form-section-title">Proposal Content</div>
+        <div class="field full">
+          <label>Proposal Template Body</label>
+          <div class="rte-wrap">
+            <div id="fProposalEditor"></div>
+          </div>
+          <div class="rte-char-count" id="fProposalCount">0 chars</div>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">proposal_content_html</span> — rich HTML used as the proposal template for this tenant. Use <span style="color:var(--accent2);">{{name}}</span>, <span style="color:var(--accent2);">{{company}}</span> as merge tags</div>
+        </div>
+
       </div>
     </div>
     <div class="modal-foot">
@@ -1732,6 +1780,59 @@
       : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
   }
 
+  /* ══════════════ QUILL RICH TEXT EDITORS ══════════════ */
+  const QUILL_TOOLBAR = [
+    ['bold', 'italic', 'underline'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'header': [1, 2, 3, false] }],
+    ['link', 'clean']
+  ];
+  const MAX_RTE_CHARS = 100000; // 100 KB soft cap per field
+
+  let _quillIntro    = null;
+  let _quillProposal = null;
+
+  function initQuillEditors() {
+    if (_quillIntro) return; // already initialised
+    _quillIntro = new Quill('#fIntroEmailEditor', {
+      theme: 'snow',
+      placeholder: 'Write the welcome / intro email body here…',
+      modules: { toolbar: QUILL_TOOLBAR }
+    });
+    _quillProposal = new Quill('#fProposalEditor', {
+      theme: 'snow',
+      placeholder: 'Write the proposal template here. Use {{name}}, {{company}} as merge tags…',
+      modules: { toolbar: QUILL_TOOLBAR }
+    });
+    // Char count listeners
+    _quillIntro.on('text-change', () => updateRteCount('fIntroEmailCount', _quillIntro));
+    _quillProposal.on('text-change', () => updateRteCount('fProposalCount', _quillProposal));
+  }
+
+  function updateRteCount(elId, quill) {
+    const len  = quill.root.innerHTML === '<p><br></p>' ? 0 : quill.root.innerHTML.length;
+    const el   = document.getElementById(elId);
+    el.textContent = len.toLocaleString() + ' chars';
+    el.className   = 'rte-char-count' + (len > MAX_RTE_CHARS * 0.8 ? ' warn' : '');
+  }
+
+  function getRteHtml(quill) {
+    const html = quill.root.innerHTML;
+    return html === '<p><br></p>' ? '' : html;
+  }
+
+  function setRteHtml(quill, html, countElId) {
+    quill.root.innerHTML = html || '';
+    updateRteCount(countElId, quill);
+  }
+
+  function sanitizeHtml(html) {
+    // Strip script/style tags — basic client-side guard before saving
+    return html.replace(/<script[\s\S]*?<\/script>/gi, '')
+               .replace(/<style[\s\S]*?<\/style>/gi, '')
+               .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '');
+  }
+
   /* ══════════════ TAB SWITCHING ══════════════ */
   function switchTab(tab, resetUserFilter) {
     _activeTab = tab;
@@ -1820,6 +1921,9 @@
     document.getElementById('fSmtpAppPassword').value = '';
     document.getElementById('fSmtpAppPassword').type  = 'password';
     document.getElementById('tenantModal').classList.add('open');
+    initQuillEditors();
+    setRteHtml(_quillIntro,    '', 'fIntroEmailCount');
+    setRteHtml(_quillProposal, '', 'fProposalCount');
     setTimeout(() => document.getElementById('fName').focus(), 100);
   }
 
@@ -1845,6 +1949,9 @@
     document.getElementById('fSmtpAppPassword').placeholder = '•••••••• (leave blank to keep current)';
     document.getElementById('fSmtpAppPassword').type  = 'password';
     document.getElementById('tenantModal').classList.add('open');
+    initQuillEditors();
+    setRteHtml(_quillIntro,    t.intro_email_html      || '', 'fIntroEmailCount');
+    setRteHtml(_quillProposal, t.proposal_content_html || '', 'fProposalCount');
   }
 
   function closeTenantModal() { document.getElementById('tenantModal').classList.remove('open'); }
@@ -1862,6 +1969,18 @@
     const location             = document.getElementById('fLocation').value.trim();
     const from_email           = document.getElementById('fFromEmail').value.trim();
     const smtp_app_password    = document.getElementById('fSmtpAppPassword').value;
+
+    // Rich text fields — sanitize before persisting
+    const intro_email_html      = sanitizeHtml(getRteHtml(_quillIntro));
+    const proposal_content_html = sanitizeHtml(getRteHtml(_quillProposal));
+
+    // Guard: 100 KB soft cap per field
+    if (intro_email_html.length > 100000) {
+      toast('Intro email content is too large (max ~100 KB)', 'error'); return;
+    }
+    if (proposal_content_html.length > 100000) {
+      toast('Proposal content is too large (max ~100 KB)', 'error'); return;
+    }
 
     if (!name) { toast('Company name is required', 'error'); return; }
     if (!slug)  { toast('Slug is required', 'error'); return; }
@@ -1881,6 +2000,8 @@
         id: slug, name, slug, plan, status,
         timezone, currency, tenant_contact_email, tenant_contact_phone, location,
         from_email,
+        intro_email_html,
+        proposal_content_html,
         ...(smtp_app_password ? { smtp_app_password } : {}),
         ..._editTenantSlug
           ? { updatedAt: window._serverTimestamp() }
