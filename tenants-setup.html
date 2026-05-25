@@ -1269,12 +1269,31 @@
           <div class="field-hint">City / Country of the tenant</div>
         </div>
 
-        <!-- ── NEW: Email / SMTP section ── -->
+        <!-- ── Email / SMTP section ── -->
         <div class="form-section-title">Email &amp; SMTP</div>
-        <div class="field full">
+        <div class="field">
+          <label>Email Provider</label>
+          <select id="fSmtpProvider" onchange="onSmtpProviderChange()">
+            <option value="">— Select provider —</option>
+            <option value="gmail">Gmail</option>
+            <option value="outlook">Outlook / Office 365</option>
+            <option value="zoho">Zoho Mail</option>
+            <option value="yahoo">Yahoo Mail</option>
+            <option value="sendgrid">SendGrid</option>
+            <option value="mailgun">Mailgun</option>
+            <option value="custom">Custom / Other</option>
+          </select>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">smtp_provider</span> — n8n resolves host, port &amp; SSL automatically</div>
+        </div>
+        <div class="field">
           <label>From Email</label>
           <input type="email" id="fFromEmail" placeholder="e.g. noreply@company.ai" autocomplete="off"/>
-          <div class="field-hint">Maps to <span style="color:var(--accent);">from_email</span> — used as the sender address for outgoing emails</div>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">from_email</span> — sender address for outgoing emails</div>
+        </div>
+        <div class="field full" id="fSmtpCustomHostWrap" style="display:none;">
+          <label>Custom SMTP Host</label>
+          <input type="text" id="fSmtpCustomHost" placeholder="e.g. mail.yourdomain.com" autocomplete="off"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">smtp_host</span> — only needed for Custom / Other provider</div>
         </div>
         <div class="field full">
           <label>SMTP App Password</label>
@@ -1780,6 +1799,13 @@
       : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
   }
 
+  /* ══════════════ SMTP PROVIDER QUICK-SELECT ══════════════ */
+  function onSmtpProviderChange() {
+    const val  = document.getElementById('fSmtpProvider').value;
+    const wrap = document.getElementById('fSmtpCustomHostWrap');
+    wrap.style.display = val === 'custom' ? 'block' : 'none';
+  }
+
   /* ══════════════ QUILL RICH TEXT EDITORS ══════════════ */
   const QUILL_TOOLBAR = [
     ['bold', 'italic', 'underline'],
@@ -1926,6 +1952,9 @@
     document.getElementById('fContactPhone').value = '';
     document.getElementById('fLocation').value     = '';
     document.getElementById('fFromEmail').value       = '';
+    document.getElementById('fSmtpProvider').value    = '';
+    document.getElementById('fSmtpCustomHost').value  = '';
+    document.getElementById('fSmtpCustomHostWrap').style.display = 'none';
     document.getElementById('fSmtpAppPassword').value = '';
     document.getElementById('fSmtpAppPassword').type  = 'password';
     document.getElementById('tenantModal').classList.add('open');
@@ -1952,6 +1981,9 @@
     document.getElementById('fContactPhone').value = t.tenant_contact_phone || '';
     document.getElementById('fLocation').value     = t.location             || '';
     document.getElementById('fFromEmail').value       = t.from_email         || '';
+    document.getElementById('fSmtpProvider').value    = t.smtp_provider       || '';
+    document.getElementById('fSmtpCustomHost').value  = t.smtp_host           || '';
+    document.getElementById('fSmtpCustomHostWrap').style.display = t.smtp_provider === 'custom' ? 'block' : 'none';
     // ISO 27001 A.10: Never send credentials back to browser
     document.getElementById('fSmtpAppPassword').value = '';
     document.getElementById('fSmtpAppPassword').placeholder = '•••••••• (leave blank to keep current)';
@@ -1976,6 +2008,8 @@
     const tenant_contact_phone = document.getElementById('fContactPhone').value.trim();
     const location             = document.getElementById('fLocation').value.trim();
     const from_email           = document.getElementById('fFromEmail').value.trim();
+    const smtp_provider        = document.getElementById('fSmtpProvider').value;
+    const smtp_host            = document.getElementById('fSmtpCustomHost').value.trim();
     const smtp_app_password    = document.getElementById('fSmtpAppPassword').value;
 
     // Rich text fields — sanitize before persisting
@@ -2008,6 +2042,8 @@
         id: slug, name, slug, plan, status,
         timezone, currency, tenant_contact_email, tenant_contact_phone, location,
         from_email,
+        smtp_provider,
+        ...(smtp_provider === 'custom' && smtp_host ? { smtp_host } : {}),
         intro_email_html,
         proposal_content_html,
         ...(smtp_app_password ? { smtp_app_password } : {}),
