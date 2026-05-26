@@ -4249,20 +4249,19 @@ async function triggerN8n(actionId, lead, btnEl) {
         triggeredAt: new Date().toISOString(),
       })});
 
-    // n8n returns 200 even on node errors — parse the body to detect failures
+    // Parse response — error path returns { status:"error", message:"..." } with 500
+    // Success path returns { status:"ok" } with 200
     let respBody = null;
     try { respBody = await resp.json(); } catch(_) {}
 
-    const n8nError = respBody?.data?.resultData?.error?.message
-      || respBody?.message
-      || (Array.isArray(respBody) && respBody[0]?.error?.message)
-      || null;
+    const n8nError = (!resp.ok)
+      ? (respBody?.message || `HTTP ${resp.status}`)
+      : (respBody?.status === 'error' ? respBody?.message : null);
 
-    if (!resp.ok || n8nError) {
-      const msg = n8nError || `HTTP ${resp.status}`;
+    if (n8nError) {
       btnEl.classList.remove('running'); btnEl.textContent = '⚠ Failed';
-      toast(`⚠ ${msg}`, 'error');
-      console.error('[evoAIDesk] n8n error:', msg, respBody);
+      toast(`⚠ ${n8nError}`, 'error');
+      console.error('[evoAIDesk] n8n error:', n8nError, respBody);
       return;
     }
 
