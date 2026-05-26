@@ -219,6 +219,38 @@
   .form-group input::placeholder { color: var(--muted); opacity: .6; }
   .form-group select option { background: var(--surface); }
 
+  /* ── Config rows ── */
+  .config-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .config-row-label {
+    font-size: .75rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    flex-shrink: 0;
+  }
+  .config-row-value {
+    font-size: .875rem;
+    font-weight: 500;
+    color: var(--text);
+    font-family: var(--mono);
+  }
+  .config-row-right {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  .config-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1rem 0;
+  }
+
   /* ── Buttons ── */
   .btn {
     display: inline-flex;
@@ -357,55 +389,40 @@
   <h1 class="page-title">Email Settings</h1>
   <p class="page-subtitle">Connect your email account to send emails to your leads directly from evoAIDesk.</p>
 
-  <!-- Tenant Config Card -->
+  <!-- Combined Email Settings Card -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-icon" style="background:rgba(0,229,160,.1);">🏢</div>
-      <div>
-        <div class="card-title">Configuration</div>
-        <div class="card-desc">Your account and tenant information</div>
+
+    <!-- Tenant row -->
+    <div class="config-row">
+      <span class="config-row-label">Tenant</span>
+      <span class="config-row-value" id="tenantName">—</span>
+    </div>
+
+    <div class="config-divider"></div>
+
+    <!-- Gmail row -->
+    <div class="config-row">
+      <span class="config-row-label">Gmail</span>
+      <div class="config-row-right">
+        <span class="status-badge disconnected" id="gmailStatus">
+          <span class="status-dot"></span> Not connected
+        </span>
+        <span class="connected-email" id="gmailConnectedEmail" style="display:none;font-size:.82rem;"></span>
       </div>
     </div>
-    <div class="form-group">
-      <label>Tenant Name</label>
-      <input type="text" id="tenantName" readonly placeholder="Loading…"
-             style="cursor:default;opacity:.75;background:rgba(107,127,163,.07);border-color:var(--border);" />
-    </div>
-  </div>
 
-  <!-- Gmail OAuth Card -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-icon gmail">📧</div>
-      <div>
-        <div class="card-title">Gmail</div>
-        <div class="card-desc">Connect your Google / Gmail account</div>
+    <!-- Actions -->
+    <div style="margin-top:1.1rem;">
+      <button class="btn btn-google" id="btnConnectGmail" onclick="connectGmail()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+        Sign in with Google to connect Gmail
+      </button>
+      <div class="btn-row" id="gmailActions" style="display:none;">
+        <button class="btn btn-outline" onclick="connectGmail()">Reconnect</button>
+        <button class="btn btn-danger" onclick="disconnectGmail()">Disconnect</button>
       </div>
-      <span class="status-badge disconnected" id="gmailStatus">
-        <span class="status-dot"></span> Not connected
-      </span>
     </div>
 
-    <!-- Connected info -->
-    <div class="connected-info" id="gmailConnectedInfo">
-      <div class="connected-label">Connected as</div>
-      <div class="connected-email" id="gmailConnectedEmail">—</div>
-    </div>
-
-    <!-- Connect button -->
-    <button class="btn btn-google" id="btnConnectGmail" onclick="connectGmail()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
-      Sign in with Google to connect Gmail
-    </button>
-
-    <div class="btn-row" id="gmailActions" style="display:none;">
-      <button class="btn btn-outline" onclick="connectGmail()">Reconnect</button>
-      <button class="btn btn-danger" onclick="disconnectGmail()">Disconnect</button>
-    </div>
-
-    <p class="note">
-      evoAIDesk will only use your Gmail account to <strong>send emails on your behalf</strong> to your leads. We never read your inbox or store your emails.
-    </p>
   </div>
 
 
@@ -494,7 +511,7 @@
 
       // Tenant name (read-only)
       if (data.name) {
-        document.getElementById('tenantName').value = data.name;
+        document.getElementById('tenantName').textContent = data.name;
       }
 
       // Gmail OAuth status
@@ -551,8 +568,9 @@
   function setGmailConnected(email) {
     document.getElementById('gmailStatus').className = 'status-badge connected';
     document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Connected';
-    document.getElementById('gmailConnectedEmail').textContent = email;
-    document.getElementById('gmailConnectedInfo').classList.add('show');
+    const emailEl = document.getElementById('gmailConnectedEmail');
+    emailEl.textContent = email;
+    emailEl.style.display = '';
     document.getElementById('btnConnectGmail').style.display = 'none';
     document.getElementById('gmailActions').style.display    = 'flex';
   }
@@ -560,7 +578,9 @@
   function setGmailDisconnected() {
     document.getElementById('gmailStatus').className = 'status-badge disconnected';
     document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Not connected';
-    document.getElementById('gmailConnectedInfo').classList.remove('show');
+    const emailEl = document.getElementById('gmailConnectedEmail');
+    emailEl.textContent = '';
+    emailEl.style.display = 'none';
     document.getElementById('btnConnectGmail').style.display = '';
     document.getElementById('gmailActions').style.display    = 'none';
   }
