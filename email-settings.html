@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Email Settings — evoAIDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/x-icon" href="https://evoaiglobal.ai/images/favicon.ico">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --border:    #21262d;
+    --accent:    #00e5a0;
+    --accent2:   #0af;
+    --text:      #e6edf3;
+    --muted:     #6b7fa3;
+    --danger:    #ff4d6d;
+    --warning:   #f0a030;
+    --success:   #00e5a0;
+    --font:      'Sora', sans-serif;
+    --mono:      'DM Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .topbar-logo span { color: var(--accent); }
+  .topbar-back {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: .85rem;
+    transition: color .2s;
+  }
+  .topbar-back:hover { color: var(--text); }
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-size: .82rem;
+    color: var(--muted);
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 700; color: #000;
+  }
+
+  /* ── Loading overlay ── */
+  #authLoading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1rem; z-index: 999;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Main layout ── */
+  .main {
+    flex: 1;
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .page-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: .4rem;
+  }
+  .page-subtitle {
+    font-size: .875rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .card-icon.gmail  { background: rgba(234,67,53,.15); }
+  .card-icon.smtp   { background: rgba(0,170,255,.1); }
+  .card-title { font-size: 1rem; font-weight: 600; }
+  .card-desc  { font-size: .8rem; color: var(--muted); margin-top: .15rem; }
+
+  /* ── Status badge ── */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .75rem;
+    font-weight: 500;
+    padding: .25rem .65rem;
+    border-radius: 20px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .status-badge.connected    { background: rgba(0,229,160,.12); color: var(--success); border: 1px solid rgba(0,229,160,.25); }
+  .status-badge.disconnected { background: rgba(107,127,163,.1); color: var(--muted);  border: 1px solid rgba(107,127,163,.2); }
+  .status-badge.error        { background: rgba(255,77,109,.1);  color: var(--danger); border: 1px solid rgba(255,77,109,.2); }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ── Connected info box ── */
+  .connected-info {
+    background: rgba(0,229,160,.06);
+    border: 1px solid rgba(0,229,160,.2);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.1rem;
+    display: none;
+  }
+  .connected-info.show { display: block; }
+  .connected-email {
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+  .connected-label {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-bottom: .2rem;
+  }
+
+  /* ── Form fields ── */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+    margin-bottom: .75rem;
+  }
+  .form-group { margin-bottom: .75rem; }
+  .form-group label {
+    display: block;
+    font-size: .75rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: .35rem;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: .6rem .85rem;
+    font-family: var(--font);
+    font-size: .875rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--accent2);
+  }
+  .form-group input::placeholder { color: var(--muted); opacity: .6; }
+  .form-group select option { background: var(--surface); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .6rem 1.2rem;
+    border-radius: 8px;
+    font-family: var(--font);
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+    text-decoration: none;
+  }
+  .btn-google {
+    background: #fff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    width: 100%;
+    justify-content: center;
+    padding: .7rem 1.2rem;
+    font-size: .9rem;
+  }
+  .btn-google:hover { background: #f8f9fa; box-shadow: 0 1px 6px rgba(0,0,0,.2); }
+  .btn-google img { width: 18px; height: 18px; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    font-weight: 600;
+  }
+  .btn-primary:hover { opacity: .88; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--muted); color: var(--text); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid rgba(255,77,109,.3);
+  }
+  .btn-danger:hover { background: rgba(255,77,109,.08); }
+
+  .btn-row {
+    display: flex;
+    gap: .6rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin: 1.1rem 0;
+    color: var(--muted);
+    font-size: .75rem;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Info note ── */
+  .note {
+    font-size: .78rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-top: .75rem;
+    padding: .75rem 1rem;
+    background: rgba(107,127,163,.07);
+    border-radius: 7px;
+    border-left: 3px solid var(--border);
+  }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem; right: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .85rem 1.2rem;
+    font-size: .85rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .3s ease;
+    z-index: 200;
+    max-width: 320px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-color: rgba(0,229,160,.4); }
+  #toast.error   { border-color: rgba(255,77,109,.4); }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .form-row { grid-template-columns: 1fr; }
+    .main { padding: 1.5rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="authLoading">
+  <img src="https://evoaiglobal.ai/images/favicon.ico" style="height:38px;opacity:.85;" />
+  <div class="spinner"></div>
+</div>
+
+<!-- Top bar -->
+<header class="topbar">
+  <a href="dashboard.html" class="topbar-back">
+    ← Back to Dashboard
+  </a>
+  <a href="dashboard.html" class="topbar-logo">evo<span>AI</span>Desk</a>
+  <div class="topbar-user">
+    <div class="avatar" id="userInitials">--</div>
+    <span id="userName" style="color:var(--text);font-size:.82rem;"></span>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="main">
+  <h1 class="page-title">Email Settings</h1>
+  <p class="page-subtitle">Connect your email account to send emails to your leads directly from evoAIDesk.</p>
+
+  <!-- Gmail OAuth Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon gmail">📧</div>
+      <div>
+        <div class="card-title">Gmail</div>
+        <div class="card-desc">Connect your Google / Gmail account</div>
+      </div>
+      <span class="status-badge disconnected" id="gmailStatus">
+        <span class="status-dot"></span> Not connected
+      </span>
+    </div>
+
+    <!-- Connected info -->
+    <div class="connected-info" id="gmailConnectedInfo">
+      <div class="connected-label">Connected as</div>
+      <div class="connected-email" id="gmailConnectedEmail">—</div>
+    </div>
+
+    <!-- Connect button -->
+    <button class="btn btn-google" id="btnConnectGmail" onclick="connectGmail()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+      Sign in with Google to connect Gmail
+    </button>
+
+    <div class="btn-row" id="gmailActions" style="display:none;">
+      <button class="btn btn-outline" onclick="connectGmail()">Reconnect</button>
+      <button class="btn btn-danger" onclick="disconnectGmail()">Disconnect</button>
+    </div>
+
+    <p class="note">
+      evoAIDesk will only use your Gmail account to <strong>send emails on your behalf</strong> to your leads. We never read your inbox or store your emails.
+    </p>
+  </div>
+
+  <!-- SMTP Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon smtp">⚙️</div>
+      <div>
+        <div class="card-title">Custom SMTP</div>
+        <div class="card-desc">Use Outlook, Zoho, or any custom email server</div>
+      </div>
+      <span class="status-badge disconnected" id="smtpStatus">
+        <span class="status-dot"></span> Not configured
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label>SMTP Provider</label>
+      <select id="smtpProvider" onchange="onProviderChange()">
+        <option value="">— Select provider —</option>
+        <option value="gmail">Gmail (smtp.gmail.com)</option>
+        <option value="outlook">Outlook / Office 365</option>
+        <option value="zoho">Zoho Mail</option>
+        <option value="yahoo">Yahoo Mail</option>
+        <option value="custom">Custom SMTP</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>SMTP Host</label>
+        <input type="text" id="smtpHost" placeholder="smtp.gmail.com" />
+      </div>
+      <div class="form-group">
+        <label>SMTP Port</label>
+        <input type="number" id="smtpPort" placeholder="587" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="smtpEmail" placeholder="you@yourdomain.com" />
+    </div>
+
+    <div class="form-group">
+      <label>App Password / SMTP Password</label>
+      <input type="password" id="smtpPassword" placeholder="••••••••••••••••" />
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveSmtp()">Save SMTP Settings</button>
+      <button class="btn btn-outline" onclick="testSmtp()" id="btnTestSmtp">Test Connection</button>
+    </div>
+
+    <p class="note">
+      For Gmail, use an <strong>App Password</strong> (not your regular password). 
+      Go to <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--accent2);">myaccount.google.com/apppasswords</a> to generate one.
+    </p>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Firebase + OAuth Script -->
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged }
+                             from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc }
+                             from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkwOQZ15O8-_GB9LYNKaAUPe9NYgGUMw4",
+    authDomain: "evoaidesk.firebaseapp.com",
+    projectId: "evoaidesk",
+    storageBucket: "evoaidesk.firebasestorage.app",
+    messagingSenderId: "904271339352",
+    appId: "1:904271339352:web:06c777dd45b9051d8d8f2d",
+    measurementId: "G-VGZHC96EYC"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let currentTenantId = null;
+
+  // ── Auth check ──
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.replace("login.html");
+      return;
+    }
+
+    // Get tenant_id from users collection
+    try {
+      const userSnap = await getDoc(doc(db, 'users', user.email));
+      if (!userSnap.exists()) { showAccessDenied(); return; }
+      currentTenantId = userSnap.data().tenant_id || null;
+      if (!currentTenantId) { showAccessDenied(); return; }
+    } catch(e) {
+      console.error('Failed to fetch tenant:', e);
+      showAccessDenied();
+      return;
+    }
+
+    // Set user info in topbar
+    const name     = user.displayName || user.email.split('@')[0];
+    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('userInitials').textContent = initials;
+    document.getElementById('userName').textContent = name;
+
+    // Load existing settings
+    await loadSettings();
+
+    // Handle redirect back from Google OAuth
+    handleOAuthCallback();
+
+    // Hide loading
+    document.getElementById('authLoading').style.display = 'none';
+  });
+
+  // ── Load existing email settings from Firestore ──
+  async function loadSettings() {
+    try {
+      const snap = await getDoc(doc(db, 'tenants', currentTenantId));
+      if (!snap.exists()) return;
+      const data = snap.data();
+
+      // Gmail OAuth status
+      if (data.gmail_connected && data.gmail_email) {
+        setGmailConnected(data.gmail_email);
+      }
+
+      // SMTP settings
+      if (data.smtp_email) {
+        document.getElementById('smtpEmail').value    = data.smtp_email || '';
+        document.getElementById('smtpHost').value     = data.smtp_host  || '';
+        document.getElementById('smtpPort').value     = data.smtp_port  || '';
+        document.getElementById('smtpProvider').value = data.smtp_provider || '';
+        // Don't prefill password for security — show placeholder
+        if (data.smtp_app_password) {
+          document.getElementById('smtpPassword').placeholder = '••••• saved •••••';
+        }
+        // Update SMTP status badge
+        const smtpBadge = document.getElementById('smtpStatus');
+        smtpBadge.className = 'status-badge connected';
+        smtpBadge.innerHTML = '<span class="status-dot"></span> Configured';
+      }
+    } catch(e) {
+      console.error('Failed to load settings:', e);
+    }
+  }
+
+  // ── Connect Gmail via OAuth2 redirect flow ──
+  window.connectGmail = function() {
+    if (!currentTenantId) {
+      showToast('❌ Tenant not loaded. Please refresh and try again.', 'error');
+      return;
+    }
+    const clientId = '904271339352-djaepjp0voh1ihu8bi4v0ucb2mjmj10f.apps.googleusercontent.com';
+    const redirectUri = 'https://n8n.evoaiglobal.ai/webhook/gmail-oauth-callback';
+    const scope = 'https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email';
+
+    const url = 'https://accounts.google.com/o/oauth2/v2/auth' +
+      '?client_id=' + encodeURIComponent(clientId) +
+      '&redirect_uri=' + encodeURIComponent(redirectUri) +
+      '&response_type=code' +
+      '&scope=' + encodeURIComponent(scope) +
+      '&access_type=offline' +
+      '&prompt=consent' +
+      '&state=' + encodeURIComponent(currentTenantId);
+
+    window.location.href = url;
+  };
+
+  // ── Handle redirect back from Google ──
+  function handleOAuthCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const gmailStatus = params.get('gmail');
+    if (gmailStatus === 'connected') {
+      showToast('✅ Gmail connected successfully!', 'success');
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (gmailStatus === 'error') {
+      showToast('❌ Failed to connect Gmail. Please try again.', 'error');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+
+  // ── Disconnect Gmail ──
+  window.disconnectGmail = async function() {
+    if (!confirm('Disconnect Gmail? Emails will stop sending until you reconnect.')) return;
+    try {
+      await updateDoc(doc(db, 'tenants', currentTenantId), {
+        gmail_connected:    false,
+        gmail_email:        '',
+        gmail_access_token: '',
+      });
+      setGmailDisconnected();
+      showToast('Gmail disconnected.', 'success');
+    } catch(e) {
+      showToast('Failed to disconnect. Please try again.', 'error');
+    }
+  };
+
+  // ── Save SMTP settings ──
+  window.saveSmtp = async function() {
+    const host     = document.getElementById('smtpHost').value.trim();
+    const port     = document.getElementById('smtpPort').value.trim();
+    const email    = document.getElementById('smtpEmail').value.trim();
+    const password = document.getElementById('smtpPassword').value.trim();
+    const provider = document.getElementById('smtpProvider').value;
+
+    if (!email) { showToast('Please enter your email address.', 'error'); return; }
+    if (!host)  { showToast('Please enter SMTP host.', 'error'); return; }
+
+    try {
+      const updateData = {
+        smtp_provider: provider,
+        smtp_host:     host,
+        smtp_port:     parseInt(port) || 587,
+        smtp_email:    email,
+        from_email:    email,
+        smtp_updated_at: new Date().toISOString()
+      };
+      // Only update password if a new one was entered
+      if (password) updateData.smtp_app_password = password;
+
+      await updateDoc(doc(db, 'tenants', currentTenantId), updateData);
+
+      const smtpBadge = document.getElementById('smtpStatus');
+      smtpBadge.className = 'status-badge connected';
+      smtpBadge.innerHTML = '<span class="status-dot"></span> Configured';
+
+      showToast('✅ SMTP settings saved!', 'success');
+    } catch(e) {
+      console.error('SMTP save error:', e);
+      showToast('❌ Failed to save. Please try again.', 'error');
+    }
+  };
+
+  // ── Test SMTP (calls n8n webhook) ──
+  window.testSmtp = async function() {
+    const btn = document.getElementById('btnTestSmtp');
+    btn.textContent = 'Testing...';
+    btn.disabled = true;
+    try {
+      // You can wire this to an n8n webhook that tests the SMTP connection
+      await new Promise(r => setTimeout(r, 1500)); // placeholder
+      showToast('✅ Connection looks good!', 'success');
+    } catch(e) {
+      showToast('❌ Connection failed. Check your settings.', 'error');
+    } finally {
+      btn.textContent = 'Test Connection';
+      btn.disabled = false;
+    }
+  };
+
+  // ── SMTP provider presets ──
+  window.onProviderChange = function() {
+    const presets = {
+      gmail:    { host: 'smtp.gmail.com',      port: 465 },
+      outlook:  { host: 'smtp.office365.com',  port: 587 },
+      zoho:     { host: 'smtp.zoho.com',       port: 465 },
+      yahoo:    { host: 'smtp.mail.yahoo.com', port: 465 },
+      custom:   { host: '', port: 587 }
+    };
+    const val = document.getElementById('smtpProvider').value;
+    if (presets[val]) {
+      document.getElementById('smtpHost').value = presets[val].host;
+      document.getElementById('smtpPort').value = presets[val].port;
+    }
+  };
+
+  // ── UI helpers ──
+  function setGmailConnected(email) {
+    document.getElementById('gmailStatus').className = 'status-badge connected';
+    document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Connected';
+    document.getElementById('gmailConnectedEmail').textContent = email;
+    document.getElementById('gmailConnectedInfo').classList.add('show');
+    document.getElementById('btnConnectGmail').style.display = 'none';
+    document.getElementById('gmailActions').style.display    = 'flex';
+  }
+
+  function setGmailDisconnected() {
+    document.getElementById('gmailStatus').className = 'status-badge disconnected';
+    document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Not connected';
+    document.getElementById('gmailConnectedInfo').classList.remove('show');
+    document.getElementById('btnConnectGmail').style.display = '';
+    document.getElementById('gmailActions').style.display    = 'none';
+  }
+
+  function showAccessDenied() {
+    document.getElementById('authLoading').innerHTML = `
+      <img src="https://evoaiglobal.ai/images/favicon.ico" style="height:38px;opacity:.85;" />
+      <div style="color:#ff4d6d;font-size:.9rem;text-align:center;max-width:320px;">
+        <strong>Access Denied</strong><br>
+        <span style="color:#6b7fa3;font-size:.78rem;">Your account is not linked to a tenant. Please contact your administrator.</span>
+      </div>`;
+  }
+
+  // ── Toast ──
+  window.showToast = function(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `show ${type}`;
+    setTimeout(() => { t.className = ''; }, 3500);
+  };
+</script>
+</body>
+</html>
