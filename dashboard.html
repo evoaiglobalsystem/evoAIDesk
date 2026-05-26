@@ -4237,7 +4237,7 @@ async function triggerN8n(actionId, lead, btnEl) {
 
   
   try {
-     await fetch(url, {method:'POST',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning': 'true'},
+    const resp = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning': 'true'},
       body:JSON.stringify({
         leadId: lead.leadId, name: lead.name, email: lead.email,
         phone: lead.phone, company: lead.company, status: lead.status,
@@ -4248,6 +4248,24 @@ async function triggerN8n(actionId, lead, btnEl) {
         proposal_link: lead.proposal_link || '',
         triggeredAt: new Date().toISOString(),
       })});
+
+    // n8n returns 200 even on node errors — parse the body to detect failures
+    let respBody = null;
+    try { respBody = await resp.json(); } catch(_) {}
+
+    const n8nError = respBody?.data?.resultData?.error?.message
+      || respBody?.message
+      || (Array.isArray(respBody) && respBody[0]?.error?.message)
+      || null;
+
+    if (!resp.ok || n8nError) {
+      const msg = n8nError || `HTTP ${resp.status}`;
+      btnEl.classList.remove('running'); btnEl.textContent = '⚠ Failed';
+      toast(`⚠ ${msg}`, 'error');
+      console.error('[evoAIDesk] n8n error:', msg, respBody);
+      return;
+    }
+
     btnEl.classList.remove('running'); btnEl.classList.add('done'); btnEl.textContent = '✓ Triggered';
     toast(`Automation: ${actionId.replace(/_/g,' ')} completed successfully`,'success');
     if(_viewingDocId) {
