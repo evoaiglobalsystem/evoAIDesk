@@ -183,6 +183,15 @@
     color: var(--muted);
     margin-bottom: .2rem;
   }
+  .connected-at {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-top: .35rem;
+    font-family: var(--mono);
+  }
+  .connected-at span {
+    color: var(--text);
+  }
 
   /* ── Form fields ── */
   .form-row {
@@ -411,6 +420,12 @@
       </div>
     </div>
 
+    <!-- Connected At row (shown only when connected) -->
+    <div class="config-row" id="gmailConnectedAtRow" style="display:none;margin-top:.6rem;">
+      <span class="config-row-label">Connected At</span>
+      <span class="config-row-value" id="gmailConnectedAt" style="font-size:.82rem;">—</span>
+    </div>
+
     <!-- Actions -->
     <div style="margin-top:1.1rem;">
       <button class="btn btn-google" id="btnConnectGmail" onclick="connectGmail()">
@@ -516,7 +531,7 @@
 
       // Gmail OAuth status
       if (data.gmail_connected && data.gmail_email) {
-        setGmailConnected(data.gmail_email);
+        setGmailConnected(data.gmail_email, data.gmail_connected_at || null);
       }
 
     } catch(e) {
@@ -565,7 +580,7 @@
   };
 
   // ── UI helpers ──
-  function setGmailConnected(email) {
+  function setGmailConnected(email, connectedAt) {
     document.getElementById('gmailStatus').className = 'status-badge connected';
     document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Connected';
     const emailEl = document.getElementById('gmailConnectedEmail');
@@ -573,6 +588,23 @@
     emailEl.style.display = '';
     document.getElementById('btnConnectGmail').style.display = 'none';
     document.getElementById('gmailActions').style.display    = 'flex';
+
+    // Show connected-at
+    const atRow = document.getElementById('gmailConnectedAtRow');
+    const atEl  = document.getElementById('gmailConnectedAt');
+    if (connectedAt) {
+      let display = connectedAt;
+      // Handle Firestore Timestamp objects
+      if (connectedAt && typeof connectedAt.toDate === 'function') {
+        display = connectedAt.toDate().toLocaleString();
+      } else if (typeof connectedAt === 'string' || typeof connectedAt === 'number') {
+        display = new Date(connectedAt).toLocaleString();
+      }
+      atEl.textContent = display;
+      atRow.style.display = '';
+    } else {
+      atRow.style.display = 'none';
+    }
   }
 
   function setGmailDisconnected() {
@@ -583,6 +615,8 @@
     emailEl.style.display = 'none';
     document.getElementById('btnConnectGmail').style.display = '';
     document.getElementById('gmailActions').style.display    = 'none';
+    document.getElementById('gmailConnectedAtRow').style.display = 'none';
+    document.getElementById('gmailConnectedAt').textContent = '—';
   }
 
   function showAccessDenied() {
