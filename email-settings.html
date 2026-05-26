@@ -504,11 +504,23 @@
     document.getElementById('userInitials').textContent = initials;
     document.getElementById('userName').textContent = name;
 
-    // Load existing settings
-    await loadSettings();
-
-    // Handle redirect back from Google OAuth
-    handleOAuthCallback();
+    // Handle OAuth callback FIRST — before loadSettings reads Firestore.
+    // If we just came back from Google, wait 1.5s for n8n→Firestore write to propagate,
+    // then reload settings so the UI reflects the newly saved gmail_connected state.
+    const oauthParam = new URLSearchParams(window.location.search).get('gmail');
+    if (oauthParam === 'connected') {
+      showToast('✅ Gmail connected successfully!', 'success');
+      window.history.replaceState({}, '', window.location.pathname);
+      // Short delay ensures Firestore has the new data before we read it
+      await new Promise(r => setTimeout(r, 1500));
+      await loadSettings();
+    } else if (oauthParam === 'error') {
+      showToast('❌ Failed to connect Gmail. Please try again.', 'error');
+      window.history.replaceState({}, '', window.location.pathname);
+      await loadSettings();
+    } else {
+      await loadSettings();
+    }
 
     // Hide loading
     document.getElementById('authLoading').style.display = 'none';
@@ -568,19 +580,7 @@
     window.location.href = url;
   };
 
-  // ── Handle redirect back from Google ──
-  function handleOAuthCallback() {
-    const params = new URLSearchParams(window.location.search);
-    const gmailStatus = params.get('gmail');
-    if (gmailStatus === 'connected') {
-      showToast('✅ Gmail connected successfully!', 'success');
-      // Clean URL
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (gmailStatus === 'error') {
-      showToast('❌ Failed to connect Gmail. Please try again.', 'error');
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }
+  // handleOAuthCallback is now inlined inside onAuthStateChanged above
 
   // ── Disconnect Gmail ──
   window.disconnectGmail = async function() {
