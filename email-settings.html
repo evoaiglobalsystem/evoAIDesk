@@ -99,7 +99,7 @@
   /* ── Main layout ── */
   .main {
     flex: 1;
-    max-width: 680px;
+    max-width: 860px;
     width: 100%;
     margin: 0 auto;
     padding: 2.5rem 1.5rem;
@@ -191,6 +191,18 @@
   }
   .connected-at span {
     color: var(--text);
+  }
+
+  /* ── Gmail 3-column grid ── */
+  .gmail-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+  .gmail-col {
+    display: flex;
+    flex-direction: column;
   }
 
   /* ── Form fields ── */
@@ -371,6 +383,159 @@
     .form-row { grid-template-columns: 1fr; }
     .main { padding: 1.5rem 1rem; }
   }
+
+  /* ── Email Templates ── */
+  .tpl-tabs {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: 1.25rem;
+  }
+  .tpl-tab {
+    padding: .45rem 1rem;
+    border-radius: 7px;
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font);
+    transition: all .2s;
+  }
+  .tpl-tab.active {
+    background: rgba(0,170,255,.12);
+    border-color: rgba(0,170,255,.35);
+    color: var(--accent2);
+  }
+  .tpl-panel { display: none; }
+  .tpl-panel.active { display: block; }
+
+  .editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    padding: .55rem .7rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    align-items: center;
+  }
+  .tb-btn {
+    padding: .28rem .55rem;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-size: .82rem;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all .15s;
+    line-height: 1;
+  }
+  .tb-btn:hover { background: var(--surface); color: var(--text); border-color: var(--border); }
+  .tb-sep { width: 1px; height: 18px; background: var(--border); margin: 0 .15rem; flex-shrink: 0; }
+  .tb-color { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; padding: 0; background: transparent; }
+
+  .editor-area {
+    min-height: 260px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    padding: 1rem;
+    font-size: .875rem;
+    color: var(--text);
+    outline: none;
+    line-height: 1.7;
+    overflow-y: auto;
+  }
+  .editor-area:focus { border-color: var(--accent2); }
+  .editor-area a { color: var(--accent2); }
+
+  .tpl-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .75rem;
+    margin-bottom: .75rem;
+  }
+  .tpl-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    gap: .75rem;
+    flex-wrap: wrap;
+  }
+  .tpl-status {
+    font-size: .78rem;
+    color: var(--muted);
+  }
+  .tpl-status.saved { color: var(--success); }
+  .tpl-status.saving { color: var(--warning); }
+  .tpl-status.error  { color: var(--danger); }
+
+  /* Preview modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.65);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: min(720px, 95vw);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: .95rem; font-weight: 600; }
+  .modal-close {
+    background: none; border: none; color: var(--muted);
+    font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 0;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { flex: 1; overflow: auto; padding: 1.25rem; }
+  .preview-frame {
+    width: 100%;
+    background: #fff;
+    border-radius: 8px;
+    border: none;
+    min-height: 400px;
+  }
+  .var-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-top: .6rem;
+  }
+  .var-chip {
+    font-size: .72rem;
+    font-family: var(--mono);
+    background: rgba(0,170,255,.1);
+    border: 1px solid rgba(0,170,255,.25);
+    color: var(--accent2);
+    padding: .18rem .55rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .15s;
+    user-select: none;
+  }
+  .var-chip:hover { background: rgba(0,170,255,.2); }
+  .var-hint { font-size: .72rem; color: var(--muted); margin-top: .45rem; }
+
 </style>
 </head>
 <body>
@@ -409,21 +574,25 @@
 
     <div class="config-divider"></div>
 
-    <!-- Gmail row -->
-    <div class="config-row">
-      <span class="config-row-label">Gmail</span>
-      <div class="config-row-right">
-        <span class="status-badge disconnected" id="gmailStatus">
+    <!-- Gmail info grid -->
+    <div class="gmail-grid">
+      <!-- Col 1: Status -->
+      <div class="gmail-col">
+        <span class="config-row-label">Gmail</span>
+        <span class="status-badge disconnected" id="gmailStatus" style="margin-left:0;margin-top:.4rem;">
           <span class="status-dot"></span> Not connected
         </span>
-        <span class="connected-email" id="gmailConnectedEmail" style="display:none;font-size:.82rem;"></span>
       </div>
-    </div>
-
-    <!-- Connected At row (shown only when connected) -->
-    <div class="config-row" id="gmailConnectedAtRow" style="display:none;margin-top:.6rem;">
-      <span class="config-row-label">Connected At</span>
-      <span class="config-row-value" id="gmailConnectedAt" style="font-size:.82rem;">—</span>
+      <!-- Col 2: Email (hidden when disconnected) -->
+      <div class="gmail-col" id="gmailEmailCol" style="display:none;">
+        <span class="config-row-label">Account</span>
+        <span class="connected-email" id="gmailConnectedEmail" style="margin-top:.4rem;display:block;"></span>
+      </div>
+      <!-- Col 3: Connected since (hidden when disconnected) -->
+      <div class="gmail-col" id="gmailConnectedAtRow" style="display:none;">
+        <span class="config-row-label">Connected Since</span>
+        <span class="config-row-value" id="gmailConnectedAt" style="font-size:.85rem;margin-top:.4rem;display:block;">—</span>
+      </div>
     </div>
 
     <!-- Actions -->
@@ -438,6 +607,162 @@
       </div>
     </div>
 
+  </div>
+
+
+
+  <!-- ── Email Templates Card ── -->
+  <div class="card" style="margin-top:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;">
+      <div>
+        <div style="font-size:1rem;font-weight:600;">Email Templates</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem;">
+          Customize the HTML emails sent to your tenant clients.
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tpl-tabs">
+      <button class="tpl-tab active" onclick="switchTab('intro')" id="tab-intro">📨 Intro Email</button>
+      <button class="tpl-tab" onclick="switchTab('proposal')" id="tab-proposal">📄 Proposal</button>
+    </div>
+
+    <!-- ── Intro Email Panel ── -->
+    <div class="tpl-panel active" id="panel-intro">
+      <div class="tpl-meta">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Subject Line</label>
+          <input type="text" id="intro-subject" placeholder="e.g. Introduction — {{company}}" />
+        </div>
+      </div>
+      <label style="font-size:.75rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem;">Body (HTML)</label>
+      <div class="editor-toolbar" id="tb-intro">
+        <button class="tb-btn" onclick="fmt('intro','bold')" title="Bold"><b>B</b></button>
+        <button class="tb-btn" onclick="fmt('intro','italic')" title="Italic"><i>I</i></button>
+        <button class="tb-btn" onclick="fmt('intro','underline')" title="Underline"><u>U</u></button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="fmt('intro','justifyLeft')" title="Align Left">⬅</button>
+        <button class="tb-btn" onclick="fmt('intro','justifyCenter')" title="Center">↔</button>
+        <button class="tb-btn" onclick="fmt('intro','justifyRight')" title="Align Right">➡</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="fmt('intro','insertUnorderedList')" title="Bullet list">• List</button>
+        <button class="tb-btn" onclick="fmt('intro','insertOrderedList')" title="Numbered list">1. List</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="insertLink('intro')" title="Insert link">🔗 Link</button>
+        <div class="tb-sep"></div>
+        <select onchange="fmt('intro','fontSize',this.value);this.selectedIndex=0;" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--font);font-size:.78rem;padding:.25rem .4rem;cursor:pointer;">
+          <option value="">Size</option>
+          <option value="1">Small</option>
+          <option value="3">Normal</option>
+          <option value="5">Large</option>
+          <option value="7">X-Large</option>
+        </select>
+        <select onchange="fmt('intro','foreColor',this.value);this.selectedIndex=0;" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--font);font-size:.78rem;padding:.25rem .4rem;cursor:pointer;">
+          <option value="">Color</option>
+          <option value="#e6edf3">Default</option>
+          <option value="#00e5a0">Green</option>
+          <option value="#00aaff">Blue</option>
+          <option value="#f0a030">Orange</option>
+          <option value="#ff4d6d">Red</option>
+        </select>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="fmt('intro','removeFormat')" title="Clear formatting" style="font-size:.7rem;">✕ Clear</button>
+      </div>
+      <div class="editor-area" id="editor-intro" contenteditable="true" spellcheck="true"></div>
+      <div style="margin-top:.6rem;">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:.3rem;">Click to insert — replaced with real values at send time:</div>
+        <div class="var-chips" id="vars-intro">
+          <span class="var-chip" onclick="insertVar('intro','{{name}}')">{{name}}</span>
+          <span class="var-chip" onclick="insertVar('intro','{{company}}')">{{company}}</span>
+          <span class="var-chip" onclick="insertVar('intro','{{company_link}}')">{{company_link}}</span>
+        </div>
+      </div>
+      <div class="tpl-actions">
+        <span class="tpl-status" id="status-intro"></span>
+        <div style="display:flex;gap:.6rem;">
+          <button class="btn btn-outline" onclick="previewTemplate('intro')">👁 Preview</button>
+          <button class="btn btn-primary" onclick="saveTemplate('intro')">Save Intro Email</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Proposal Panel ── -->
+    <div class="tpl-panel" id="panel-proposal">
+      <div class="tpl-meta">
+        <div class="form-group" style="margin-bottom:0;">
+          <label>Subject Line</label>
+          <input type="text" id="proposal-subject" placeholder="e.g. Proposal for {{company}}" />
+        </div>
+      </div>
+      <label style="font-size:.75rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem;">Body (HTML)</label>
+      <div class="editor-toolbar" id="tb-proposal">
+        <button class="tb-btn" onclick="fmt('proposal','bold')" title="Bold"><b>B</b></button>
+        <button class="tb-btn" onclick="fmt('proposal','italic')" title="Italic"><i>I</i></button>
+        <button class="tb-btn" onclick="fmt('proposal','underline')" title="Underline"><u>U</u></button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="fmt('proposal','justifyLeft')" title="Align Left">⬅</button>
+        <button class="tb-btn" onclick="fmt('proposal','justifyCenter')" title="Center">↔</button>
+        <button class="tb-btn" onclick="fmt('proposal','justifyRight')" title="Align Right">➡</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="fmt('proposal','insertUnorderedList')" title="Bullet list">• List</button>
+        <button class="tb-btn" onclick="fmt('proposal','insertOrderedList')" title="Numbered list">1. List</button>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="insertLink('proposal')" title="Insert link">🔗 Link</button>
+        <div class="tb-sep"></div>
+        <select onchange="fmt('proposal','fontSize',this.value);this.selectedIndex=0;" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--font);font-size:.78rem;padding:.25rem .4rem;cursor:pointer;">
+          <option value="">Size</option>
+          <option value="1">Small</option>
+          <option value="3">Normal</option>
+          <option value="5">Large</option>
+          <option value="7">X-Large</option>
+        </select>
+        <select onchange="fmt('proposal','foreColor',this.value);this.selectedIndex=0;" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--font);font-size:.78rem;padding:.25rem .4rem;cursor:pointer;">
+          <option value="">Color</option>
+          <option value="#e6edf3">Default</option>
+          <option value="#00e5a0">Green</option>
+          <option value="#00aaff">Blue</option>
+          <option value="#f0a030">Orange</option>
+          <option value="#ff4d6d">Red</option>
+        </select>
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="fmt('proposal','removeFormat')" title="Clear formatting" style="font-size:.7rem;">✕ Clear</button>
+      </div>
+      <div class="editor-area" id="editor-proposal" contenteditable="true" spellcheck="true"></div>
+      <div style="margin-top:.6rem;">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:.3rem;">Click to insert — replaced with real values at send time:</div>
+        <div class="var-chips" id="vars-proposal">
+          <span class="var-chip" onclick="insertVar('proposal','{{name}}')">{{name}}</span>
+          <span class="var-chip" onclick="insertVar('proposal','{{company}}')">{{company}}</span>
+          <span class="var-chip" onclick="insertVar('proposal','{{company_link}}')">{{company_link}}</span>
+          <span class="var-chip" onclick="insertVar('proposal','{{proposal_link}}')">{{proposal_link}}</span>
+        </div>
+      </div>
+      <div class="tpl-actions">
+        <span class="tpl-status" id="status-proposal"></span>
+        <div style="display:flex;gap:.6rem;">
+          <button class="btn btn-outline" onclick="previewTemplate('proposal')">👁 Preview</button>
+          <button class="btn btn-primary" onclick="saveTemplate('proposal')">Save Proposal</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- Preview Modal -->
+  <div class="modal-overlay" id="previewModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="previewModalTitle">Email Preview</span>
+        <button class="modal-close" onclick="closePreview()">×</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem;">
+          Subject: <span id="previewSubject" style="color:var(--text);font-weight:500;"></span>
+        </div>
+        <iframe class="preview-frame" id="previewFrame" sandbox="allow-same-origin"></iframe>
+      </div>
+    </div>
   </div>
 
 
@@ -534,6 +859,24 @@
         setGmailConnected(data.gmail_email, data.gmail_connected_at || null);
       }
 
+      // Email templates
+      if (data.intro_email_html !== undefined) {
+        document.getElementById('editor-intro').innerHTML = data.intro_email_html || '';
+      }
+      if (data.intro_email_subject !== undefined) {
+        document.getElementById('intro-subject').value = data.intro_email_subject || '';
+      }
+
+      if (data.proposal_content_html !== undefined) {
+        document.getElementById('editor-proposal').innerHTML = data.proposal_content_html || `<p><strong>Proposal for {{company}}</strong></p><p><br></p><p><strong>Dear {{name}},</strong></p><p><strong>Thank you for your interest in evoAI Desk.</strong> Based on our conversation, we’ve put together a tailored proposal to help {{company}} automate lead engagement and close deals faster.</p><p><br></p><p><strong>What’s Included</strong></p><ul><li><strong>AI Lead Agent</strong> — 24/7 lead qualification and response</li><li><strong>Automated Follow-ups</strong> — Multi-step sequences via email and WhatsApp</li><li><strong>Live Dashboard</strong> — Real-time pipeline visibility for your team</li><li><strong>Weekly Reports</strong> — Digest delivered every Monday</li></ul><p><br></p><p><strong>Engagement Terms</strong></p><ul><li>Setup &amp; onboarding: <strong>Week 1</strong></li><li><strong>Go-live: Week 2</strong></li><li><strong>First review call: Day 30</strong></li></ul><p><br></p><p>This proposal is valid for <strong>14 days</strong>. To proceed, simply reply with your confirmation or <a href="{{proposal_link}}">view the full proposal here</a>.</p><p><br></p><p>Looking forward to working with {{company}},<br><strong>The evoAI Team</strong></p>`;
+      } else {
+        document.getElementById('editor-proposal').innerHTML = `<p><strong>Proposal for {{company}}</strong></p><p><br></p><p><strong>Dear {{name}},</strong></p><p><strong>Thank you for your interest in evoAI Desk.</strong> Based on our conversation, we’ve put together a tailored proposal to help {{company}} automate lead engagement and close deals faster.</p><p><br></p><p><strong>What’s Included</strong></p><ul><li><strong>AI Lead Agent</strong> — 24/7 lead qualification and response</li><li><strong>Automated Follow-ups</strong> — Multi-step sequences via email and WhatsApp</li><li><strong>Live Dashboard</strong> — Real-time pipeline visibility for your team</li><li><strong>Weekly Reports</strong> — Digest delivered every Monday</li></ul><p><br></p><p><strong>Engagement Terms</strong></p><ul><li>Setup &amp; onboarding: <strong>Week 1</strong></li><li><strong>Go-live: Week 2</strong></li><li><strong>First review call: Day 30</strong></li></ul><p><br></p><p>This proposal is valid for <strong>14 days</strong>. To proceed, simply reply with your confirmation or <a href="{{proposal_link}}">view the full proposal here</a>.</p><p><br></p><p>Looking forward to working with {{company}},<br><strong>The evoAI Team</strong></p>`;
+      }
+      if (data.proposal_subject !== undefined) {
+        document.getElementById('proposal-subject').value = data.proposal_subject || '';
+      }
+
+
     } catch(e) {
       console.error('Failed to load settings:', e);
     }
@@ -583,24 +926,24 @@
   function setGmailConnected(email, connectedAt) {
     document.getElementById('gmailStatus').className = 'status-badge connected';
     document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Connected';
+    // Show email column
     const emailEl = document.getElementById('gmailConnectedEmail');
     emailEl.textContent = email;
-    emailEl.style.display = '';
+    document.getElementById('gmailEmailCol').style.display = '';
     document.getElementById('btnConnectGmail').style.display = 'none';
     document.getElementById('gmailActions').style.display    = 'flex';
 
-    // Show connected-at
+    // Show connected-since as date only (no time)
     const atRow = document.getElementById('gmailConnectedAtRow');
     const atEl  = document.getElementById('gmailConnectedAt');
     if (connectedAt) {
-      let display = connectedAt;
-      // Handle Firestore Timestamp objects
-      if (connectedAt && typeof connectedAt.toDate === 'function') {
-        display = connectedAt.toDate().toLocaleString();
-      } else if (typeof connectedAt === 'string' || typeof connectedAt === 'number') {
-        display = new Date(connectedAt).toLocaleString();
+      let d;
+      if (typeof connectedAt.toDate === 'function') {
+        d = connectedAt.toDate();
+      } else {
+        d = new Date(connectedAt);
       }
-      atEl.textContent = display;
+      atEl.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
       atRow.style.display = '';
     } else {
       atRow.style.display = 'none';
@@ -610,9 +953,8 @@
   function setGmailDisconnected() {
     document.getElementById('gmailStatus').className = 'status-badge disconnected';
     document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Not connected';
-    const emailEl = document.getElementById('gmailConnectedEmail');
-    emailEl.textContent = '';
-    emailEl.style.display = 'none';
+    document.getElementById('gmailConnectedEmail').textContent = '';
+    document.getElementById('gmailEmailCol').style.display = 'none';
     document.getElementById('btnConnectGmail').style.display = '';
     document.getElementById('gmailActions').style.display    = 'none';
     document.getElementById('gmailConnectedAtRow').style.display = 'none';
@@ -627,6 +969,140 @@
         <span style="color:#6b7fa3;font-size:.78rem;">Your account is not linked to a tenant. Please contact your administrator.</span>
       </div>`;
   }
+
+
+
+  // ══════════════════════════════════════════════
+  //  EMAIL TEMPLATES
+  // ══════════════════════════════════════════════
+
+  // Load templates from Firestore
+  async function loadTemplates() {
+    try {
+      const snap = await getDoc(doc(db, 'tenants', currentTenantId));
+      if (!snap.exists()) return;
+      const data = snap.data();
+
+      if (data.intro_email_html !== undefined) {
+        document.getElementById('editor-intro').innerHTML = data.intro_email_html || '';
+      }
+      if (data.intro_email_subject !== undefined) {
+        document.getElementById('intro-subject').value = data.intro_email_subject || '';
+      }
+
+
+      if (data.proposal_content_html !== undefined) {
+        document.getElementById('editor-proposal').innerHTML = data.proposal_content_html || `<p><strong>Proposal for {{company}}</strong></p><p><br></p><p><strong>Dear {{name}},</strong></p><p><strong>Thank you for your interest in evoAI Desk.</strong> Based on our conversation, we’ve put together a tailored proposal to help {{company}} automate lead engagement and close deals faster.</p><p><br></p><p><strong>What’s Included</strong></p><ul><li><strong>AI Lead Agent</strong> — 24/7 lead qualification and response</li><li><strong>Automated Follow-ups</strong> — Multi-step sequences via email and WhatsApp</li><li><strong>Live Dashboard</strong> — Real-time pipeline visibility for your team</li><li><strong>Weekly Reports</strong> — Digest delivered every Monday</li></ul><p><br></p><p><strong>Engagement Terms</strong></p><ul><li>Setup &amp; onboarding: <strong>Week 1</strong></li><li><strong>Go-live: Week 2</strong></li><li><strong>First review call: Day 30</strong></li></ul><p><br></p><p>This proposal is valid for <strong>14 days</strong>. To proceed, simply reply with your confirmation or <a href="{{proposal_link}}">view the full proposal here</a>.</p><p><br></p><p>Looking forward to working with {{company}},<br><strong>The evoAI Team</strong></p>`;
+      } else {
+        document.getElementById('editor-proposal').innerHTML = `<p><strong>Proposal for {{company}}</strong></p><p><br></p><p><strong>Dear {{name}},</strong></p><p><strong>Thank you for your interest in evoAI Desk.</strong> Based on our conversation, we’ve put together a tailored proposal to help {{company}} automate lead engagement and close deals faster.</p><p><br></p><p><strong>What’s Included</strong></p><ul><li><strong>AI Lead Agent</strong> — 24/7 lead qualification and response</li><li><strong>Automated Follow-ups</strong> — Multi-step sequences via email and WhatsApp</li><li><strong>Live Dashboard</strong> — Real-time pipeline visibility for your team</li><li><strong>Weekly Reports</strong> — Digest delivered every Monday</li></ul><p><br></p><p><strong>Engagement Terms</strong></p><ul><li>Setup &amp; onboarding: <strong>Week 1</strong></li><li><strong>Go-live: Week 2</strong></li><li><strong>First review call: Day 30</strong></li></ul><p><br></p><p>This proposal is valid for <strong>14 days</strong>. To proceed, simply reply with your confirmation or <a href="{{proposal_link}}">view the full proposal here</a>.</p><p><br></p><p>Looking forward to working with {{company}},<br><strong>The evoAI Team</strong></p>`;
+      }
+      if (data.proposal_subject !== undefined) {
+        document.getElementById('proposal-subject').value = data.proposal_subject || '';
+      }
+
+    } catch(e) {
+      console.error('Failed to load templates:', e);
+    }
+  }
+
+  // Tab switcher
+  window.switchTab = function(name) {
+    ['intro','proposal'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('active', t === name);
+      document.getElementById('panel-' + t).classList.toggle('active', t === name);
+    });
+  };
+
+  // execCommand wrapper
+  window.fmt = function(editor, cmd, val) {
+    document.getElementById('editor-' + editor).focus();
+    document.execCommand(cmd, false, val || null);
+  };
+
+  // Insert hyperlink
+  window.insertLink = function(editor) {
+    const url = prompt('Enter URL:', 'https://');
+    if (!url) return;
+    document.getElementById('editor-' + editor).focus();
+    document.execCommand('createLink', false, url);
+  };
+
+  // Insert variable at cursor in contenteditable
+  window.insertVar = function(editor, varText) {
+    const el = document.getElementById('editor-' + editor);
+    el.focus();
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    const node = document.createTextNode(varText);
+    range.insertNode(node);
+    range.setStartAfter(node);
+    range.setEndAfter(node);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  };
+
+  // Save to Firestore
+  window.saveTemplate = async function(type) {
+    const statusEl = document.getElementById('status-' + type);
+    statusEl.textContent = 'Saving…';
+    statusEl.className = 'tpl-status saving';
+    try {
+      const updates = {};
+      if (type === 'intro') {
+        updates.intro_email_html    = document.getElementById('editor-intro').innerHTML;
+        updates.intro_email_subject = document.getElementById('intro-subject').value.trim();
+      } else {
+        updates.proposal_content_html = document.getElementById('editor-proposal').innerHTML;
+        updates.proposal_subject      = document.getElementById('proposal-subject').value.trim();
+      }
+      await updateDoc(doc(db, 'tenants', currentTenantId), updates);
+      statusEl.textContent = '✓ Saved';
+      statusEl.className = 'tpl-status saved';
+      setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'tpl-status'; }, 3000);
+      showToast('✅ Template saved successfully!', 'success');
+    } catch(e) {
+      statusEl.textContent = '✗ Save failed';
+      statusEl.className = 'tpl-status error';
+      showToast('❌ Failed to save template.', 'error');
+    }
+  };
+
+  // Preview modal
+  window.previewTemplate = function(type) {
+    const html   = document.getElementById('editor-' + type).innerHTML;
+    const subj   = document.getElementById(type + '-subject').value || '(no subject)';
+    const titles = { intro: 'Intro Email Preview', proposal: 'Proposal Preview' };
+
+    document.getElementById('previewModalTitle').textContent = titles[type];
+    document.getElementById('previewSubject').textContent = subj;
+
+    const frame = document.getElementById('previewFrame');
+    const doc2  = frame.contentDocument || frame.contentWindow.document;
+    doc2.open();
+    doc2.write(`<!DOCTYPE html><html><head>
+      <meta charset="UTF-8"/>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 2rem; color: #1a1a1a; line-height: 1.6; max-width: 600px; margin: 0 auto; }
+        a { color: #0070f3; }
+      </style>
+    </head><body>${html || '<p style="color:#999">No content yet.</p>'}</body></html>`);
+    doc2.close();
+    frame.style.height = (doc2.body.scrollHeight + 48) + 'px';
+
+    document.getElementById('previewModal').classList.add('show');
+  };
+
+  window.closePreview = function() {
+    document.getElementById('previewModal').classList.remove('show');
+  };
+
+  // Close modal on overlay click
+  document.getElementById('previewModal').addEventListener('click', function(e) {
+    if (e.target === this) closePreview();
+  });
+
 
   // ── Toast ──
   window.showToast = function(msg, type='success') {
