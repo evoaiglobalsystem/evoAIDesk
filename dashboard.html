@@ -4087,11 +4087,12 @@ async function viewLead(leadId, docId, preloadedLead = null) {
       ['Industry',   lead.industry],
     ]) +
     section('Lead Details', [
-      ['Status',     lead.status],
-      ['Service',    lead.service],
-      ['Source',     lead.source],
-      ['Page / URL', lead.page],
-      ['Created At', lead.date ? fmtDate(lead.date, true) : '—'],
+      ['Status',         lead.status],
+      ['Service',        lead.service],
+      ['Source',         lead.source],
+      ['Page / URL',     lead.page],
+      ['Proposal Link',  lead.proposal_link, true],
+      ['Created At',     lead.date ? fmtDate(lead.date, true) : '—'],
     ]) +
     section('System IDs', [
       ['Lead ID',            lead.leadId],
