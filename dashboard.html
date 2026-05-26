@@ -4111,11 +4111,11 @@ async function viewLead(leadId, docId, preloadedLead = null) {
 
   window._viewingLead = lead;
   document.getElementById('autoGrid').innerHTML = AUTO_ACTIONS.map(a =>
-    `<button class="auto-btn" data-action="${a.id}" onclick="handleAutoBtn(this)">
+    `<button class="auto-btn" data-action="${a.id}" data-label="${a.label}" data-badge="${a.badge}" onclick="handleAutoBtn(this)">
       <span>${a.icon}</span> ${a.label}<span class="auto-badge">${a.badge}</span>
     </button>`).join('');
   document.getElementById('outreachGrid').innerHTML = OUTREACH_ACTIONS.map(a =>
-    `<button class="auto-btn" data-action="${a.id}" onclick="handleAutoBtn(this)">
+    `<button class="auto-btn" data-action="${a.id}" data-label="${a.label}" data-badge="${a.badge}" onclick="handleAutoBtn(this)">
       <span>${a.icon}</span> ${a.label}<span class="auto-badge">${a.badge}</span>
     </button>`).join('');
 
@@ -4240,6 +4240,9 @@ async function triggerN8n(actionId, lead, btnEl) {
     return;
   }
 
+  // Reset any stale failed/done state before running
+  btnEl.classList.remove('done');
+  if (btnEl.dataset.label) btnEl.innerHTML = `<span></span> ${btnEl.dataset.label}<span class="auto-badge">${btnEl.dataset.badge||''}</span>`;
   btnEl.classList.add('running');
   btnEl.innerHTML = `<div class="spinner" style="width:13px;height:13px;"></div> Running…`;
   

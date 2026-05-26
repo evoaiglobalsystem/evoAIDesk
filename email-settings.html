@@ -944,6 +944,7 @@
 
   // ── UI helpers ──
   function setGmailConnected(email, connectedAt) {
+    if (window._tenantGmailConnected !== undefined) window._tenantGmailConnected = true;
     document.getElementById('gmailStatus').className = 'status-badge connected';
     document.getElementById('gmailStatus').innerHTML = '<span class="status-dot"></span> Connected';
     // Show email column
