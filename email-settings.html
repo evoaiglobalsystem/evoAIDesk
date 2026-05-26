@@ -910,13 +910,32 @@
   window.disconnectGmail = async function() {
     if (!confirm('Disconnect Gmail? Emails will stop sending until you reconnect.')) return;
     try {
+      // Grab the refresh token before wiping it so we can revoke it with Google
+      const tenantSnap = await getDoc(doc(db, 'tenants', currentTenantId));
+      const refreshToken = tenantSnap.exists() ? (tenantSnap.data().gmail_refresh_token || '') : '';
+
+      // Fix 1 — clear ALL gmail fields including refresh_token so n8n cannot send
       await updateDoc(doc(db, 'tenants', currentTenantId), {
-        gmail_connected:    false,
-        gmail_email:        '',
-        gmail_access_token: '',
+        gmail_connected:     false,
+        gmail_email:         '',
+        gmail_access_token:  '',
+        gmail_refresh_token: '',
       });
+
+      // Fix 2 — revoke the token at Google's end so it can't be reused even if cached
+      if (refreshToken) {
+        try {
+          await fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(refreshToken), {
+            method: 'POST',
+          });
+        } catch (revokeErr) {
+          // Revocation failure is non-critical — token is already cleared from Firestore
+          console.warn('[evoAIDesk] Token revocation failed (non-critical):', revokeErr);
+        }
+      }
+
       setGmailDisconnected();
-      showToast('Gmail disconnected.', 'success');
+      showToast('Gmail disconnected. Emails will no longer send.', 'success');
     } catch(e) {
       showToast('Failed to disconnect. Please try again.', 'error');
     }
