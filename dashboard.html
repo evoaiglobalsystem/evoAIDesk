@@ -145,6 +145,7 @@
       assignedToEmail: d.assignedToEmail || '',
       assignedAt:      toISO(d.assignedAt),
       reference_lead_id: d.reference_lead_id || '',
+      proposal_link:     d.proposal_link     || '',
       deleted:           d.deleted === true,
       deletedAt:         d.deletedAt?.toDate ? d.deletedAt.toDate().toISOString() : '',
       deletedBy:         d.deletedBy || '',
@@ -187,6 +188,7 @@
       assignedTo:          lead.assignedTo      || 'Unassigned',
       assignedToEmail:     lead.assignedToEmail || '',
       reference_lead_id:   lead.reference_lead_id || '',
+      proposal_link:       lead.proposal_link     || '',
       // ── Soft-delete: preserve the lead's existing deleted state on update; always false on create ──
       deleted:             lead.deleted === true ? true : false,
       // assignedAt: only write when actually assigning
@@ -2530,6 +2532,11 @@
         </div>
         <div class="field"><label>Source</label>    <input type="text" id="f-source" placeholder="Website / LinkedIn / Referral…"/></div>
         <div class="field"><label>Page / URL</label><input type="text" id="f-page"   placeholder="/services"/></div>
+        <div class="field full">
+          <label>Proposal Link</label>
+          <input type="url" id="f-proposal_link" placeholder="https://docs.google.com/…  or any proposal doc URL"/>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:4px;">Embedded in the proposal email as <span style="color:var(--accent);font-family:var(--mono);">{{proposal_link}}</span></div>
+        </div>
         <div class="field full"><label>Message / Enquiry</label> <textarea id="f-message"  placeholder="Describe the enquiry…"></textarea></div>
         <div class="field full"><label>Internal Comments</label> <textarea id="f-comments" placeholder="Internal notes for the team…"></textarea></div>
       </div>
@@ -3784,7 +3791,7 @@ function openCreate() {
   document.getElementById('formModalTitle').textContent = 'New Lead';
   document.getElementById('formSubmitBtn').textContent  = 'Create Lead';
   ['name','email','phone','linkedin','company','jobtitle','industry','service','status','source','page',
-   'message','comments','dealvalue','followup','assignedTo','assignedToEmail','reference_lead_id'].forEach(f => {
+   'message','comments','dealvalue','followup','assignedTo','assignedToEmail','reference_lead_id','proposal_link'].forEach(f => {
     const el = document.getElementById('f-'+f);
     if(el) el.value = f === 'status' ? 'New' : '';
   });
@@ -3811,7 +3818,7 @@ async function editLeadById(leadId, docId) {
   document.getElementById('formSubmitBtn').textContent  = 'Save Changes';
 
   ['name','email','phone','linkedin','company','jobtitle','service','status','source','page',
-   'message','comments','dealvalue','followup','assignedTo','assignedToEmail','reference_lead_id'].forEach(f => {
+   'message','comments','dealvalue','followup','assignedTo','assignedToEmail','reference_lead_id','proposal_link'].forEach(f => {
     const el = document.getElementById('f-'+f);
     if(el) el.value = lead[f] || '';
   });
@@ -3869,6 +3876,7 @@ async function submitForm() {
     dealvalue:       document.getElementById('f-dealvalue').value.trim(),
     followup:        document.getElementById('f-followup').value,
     reference_lead_id: document.getElementById('f-reference_lead_id').value.trim(),
+    proposal_link:   document.getElementById('f-proposal_link').value.trim(),
     assignedTo:      newAssignedTo,
     assignedToEmail: newAssignedToEmail,
     _setAssignedAt,
@@ -4215,6 +4223,11 @@ async function triggerN8n(actionId, lead, btnEl) {
   const url = N8N_WEBHOOKS[actionId];
   const activeActions = ['send_intro_email','send_proposal','schedule_followup','send_nurture','send_whatsapp'];
   if (!activeActions.includes(actionId)) { toast('Automation to be configured!', 'warn'); return; }
+
+  if (actionId === 'send_proposal' && !lead.proposal_link) {
+    toast('No Proposal Link set — edit this lead and add a Proposal Link before sending.', 'error');
+    return;
+  }
   btnEl.classList.add('running');
   btnEl.innerHTML = `<div class="spinner" style="width:13px;height:13px;"></div> Running…`;
   
@@ -4230,6 +4243,8 @@ async function triggerN8n(actionId, lead, btnEl) {
         service: lead.service, actId: actionId, followup_date: lead.followup,
         assignedTo: lead.assignedTo, assignedToEmail: lead.assignedToEmail,
 		evoUserName: evo_username, evoUserEmail: evo_useremail, tenantId: lead.tenantId,
+        company_link: lead.page || '',
+        proposal_link: lead.proposal_link || '',
         triggeredAt: new Date().toISOString(),
       })});
     btnEl.classList.remove('running'); btnEl.classList.add('done'); btnEl.textContent = '✓ Triggered';
