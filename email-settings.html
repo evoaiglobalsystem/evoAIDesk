@@ -935,6 +935,7 @@
       }
 
       setGmailDisconnected();
+      if (window._tenantGmailConnected !== undefined) window._tenantGmailConnected = false;
       showToast('Gmail disconnected. Emails will no longer send.', 'success');
     } catch(e) {
       showToast('Failed to disconnect. Please try again.', 'error');

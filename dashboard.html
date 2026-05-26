@@ -685,6 +685,9 @@
           window._tenantCurrency = td.currency.trim().toUpperCase();
         }
 
+        // ── Gmail connection state (cached to avoid extra Firestore calls) ──
+        window._tenantGmailConnected = td.gmail_connected === true || td.gmail_connected === 'true';
+
         // ── Timezone: tenant field → browser tz → UTC ──
         if (isValidTz(td.timezone)) {
           window._tenantTimezone = td.timezone.trim();
@@ -4229,6 +4232,14 @@ async function triggerN8n(actionId, lead, btnEl) {
     toast('No Proposal Link set — edit this lead and add a Proposal Link before sending.', 'error');
     return;
   }
+
+  // For email actions, check cached gmail_connected (set at startup from tenant doc — no extra Firestore call)
+  const emailActions = ['send_intro_email', 'send_proposal', 'send_nurture'];
+  if (emailActions.includes(actionId) && window._tenantGmailConnected === false) {
+    toast('⚠ Gmail is disconnected — go to Email Settings and reconnect before sending.', 'error');
+    return;
+  }
+
   btnEl.classList.add('running');
   btnEl.innerHTML = `<div class="spinner" style="width:13px;height:13px;"></div> Running…`;
   
