@@ -1271,22 +1271,30 @@
 
         <!-- ── Gmail Status (read-only) ── -->
         <div class="form-section-title">Gmail Status</div>
+        <div class="field full">
+          <label>Connection Status</label>
+          <div id="fGmailStatusBadge" style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:.74rem;font-weight:600;background:rgba(107,127,163,.1);border:1px solid var(--border);color:var(--muted);">
+            <span style="width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;"></span>
+            <span id="fGmailStatusText">Not connected</span>
+          </div>
+          <div class="field-hint">Reflects <span style="color:var(--accent);">gmail_connected</span> — toggled by OAuth flow in Email Settings</div>
+        </div>
         <div class="field">
           <label>Gmail Account</label>
-          <input type="text" id="fGmailEmail" readonly placeholder="Not connected" autocomplete="off"
-            style="background:var(--bg);color:var(--muted);cursor:default;opacity:.85;"/>
-          <div class="field-hint">Maps to <span style="color:var(--accent);">gmail_email</span> — set by OAuth flow in Email Settings</div>
+          <input type="text" id="fGmailEmail" readonly placeholder="—" autocomplete="off"
+            style="background:var(--bg);color:var(--muted);cursor:default;"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">gmail_email</span></div>
         </div>
         <div class="field">
           <label>Connected At</label>
           <input type="text" id="fGmailConnectedAt" readonly placeholder="—" autocomplete="off"
-            style="background:var(--bg);color:var(--muted);cursor:default;opacity:.85;"/>
+            style="background:var(--bg);color:var(--muted);cursor:default;"/>
           <div class="field-hint">Maps to <span style="color:var(--accent);">gmail_connected_at</span></div>
         </div>
         <div class="field full">
           <label>Refresh Token</label>
           <input type="text" id="fGmailRefreshToken" readonly placeholder="—" autocomplete="off"
-            style="background:var(--bg);color:var(--muted);cursor:default;opacity:.85;font-family:var(--mono);font-size:.72rem;"/>
+            style="background:var(--bg);color:var(--muted);cursor:default;font-family:var(--mono);font-size:.72rem;"/>
           <div class="field-hint">Maps to <span style="color:var(--accent);">gmail_refresh_token</span> — managed by OAuth; never edit manually</div>
         </div>
 
@@ -1928,6 +1936,7 @@
     document.getElementById('fGmailEmail').value        = '';
     document.getElementById('fGmailConnectedAt').value  = '';
     document.getElementById('fGmailRefreshToken').value = '';
+    setGmailBadge(false);
     document.getElementById('fIntroSubject').value    = '';
     document.getElementById('fProposalSubject').value = '';
     document.getElementById('tenantModal').classList.add('open');
@@ -1954,6 +1963,7 @@
     document.getElementById('fContactPhone').value = t.tenant_contact_phone || '';
     document.getElementById('fLocation').value     = t.location             || '';
     // Gmail status — read-only, format connected_at as human date if present
+    setGmailBadge(!!t.gmail_connected);
     document.getElementById('fGmailEmail').value        = t.gmail_email || '';
     const gCat = t.gmail_connected_at;
     document.getElementById('fGmailConnectedAt').value  = gCat
@@ -1969,6 +1979,22 @@
   }
 
   function closeTenantModal() { document.getElementById('tenantModal').classList.remove('open'); }
+
+  function setGmailBadge(connected) {
+    const badge = document.getElementById('fGmailStatusBadge');
+    const text  = document.getElementById('fGmailStatusText');
+    if (connected) {
+      badge.style.background = 'rgba(0,229,160,.12)';
+      badge.style.border     = '1px solid rgba(0,229,160,.25)';
+      badge.style.color      = 'var(--accent)';
+      text.textContent       = 'Connected';
+    } else {
+      badge.style.background = 'rgba(107,127,163,.1)';
+      badge.style.border     = '1px solid var(--border)';
+      badge.style.color      = 'var(--muted)';
+      text.textContent       = 'Not connected';
+    }
+  }
 
   /* ══════════════ SAVE TENANT ══════════════ */
   async function saveTenant() {
