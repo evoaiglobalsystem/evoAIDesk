@@ -862,11 +862,18 @@
       }
 
       // Email templates
+      const INTRO_SAMPLE_HTML = `<p><strong>Hi {{name}},</strong></p><p><br></p><p>Thank you for your interest in <strong>{{tenant_company}}</strong>. We’d love to help <strong>{{company}}</strong> automate lead engagement and close deals faster with our AI-powered platform.</p><p><br></p><p>I’d love to set up a quick call to walk you through what we’ve built and how it can work for your team.</p><p><br></p><p>Looking forward to connecting,<br><strong>The evoAI Team</strong></p>`;
+      const INTRO_SAMPLE_SUBJECT = 'Introduction from {{tenant_company}}';
+
       if (data.intro_email_html !== undefined) {
-        document.getElementById('editor-intro').innerHTML = data.intro_email_html || '';
+        document.getElementById('editor-intro').innerHTML = data.intro_email_html || INTRO_SAMPLE_HTML;
+      } else {
+        document.getElementById('editor-intro').innerHTML = INTRO_SAMPLE_HTML;
       }
       if (data.intro_email_subject !== undefined) {
-        document.getElementById('intro-subject').value = data.intro_email_subject || '';
+        document.getElementById('intro-subject').value = data.intro_email_subject || INTRO_SAMPLE_SUBJECT;
+      } else {
+        document.getElementById('intro-subject').value = INTRO_SAMPLE_SUBJECT;
       }
 
       if (data.proposal_content_html !== undefined) {
@@ -1007,11 +1014,18 @@
       if (!snap.exists()) return;
       const data = snap.data();
 
+      const INTRO_SAMPLE_HTML = `<p><strong>Hi {{name}},</strong></p><p><br></p><p>Thank you for your interest in <strong>{{tenant_company}}</strong>. We’d love to help <strong>{{company}}</strong> automate lead engagement and close deals faster with our AI-powered platform.</p><p><br></p><p>I’d love to set up a quick call to walk you through what we’ve built and how it can work for your team.</p><p><br></p><p>Looking forward to connecting,<br><strong>The evoAI Team</strong></p>`;
+      const INTRO_SAMPLE_SUBJECT = 'Introduction from {{tenant_company}}';
+
       if (data.intro_email_html !== undefined) {
-        document.getElementById('editor-intro').innerHTML = data.intro_email_html || '';
+        document.getElementById('editor-intro').innerHTML = data.intro_email_html || INTRO_SAMPLE_HTML;
+      } else {
+        document.getElementById('editor-intro').innerHTML = INTRO_SAMPLE_HTML;
       }
       if (data.intro_email_subject !== undefined) {
-        document.getElementById('intro-subject').value = data.intro_email_subject || '';
+        document.getElementById('intro-subject').value = data.intro_email_subject || INTRO_SAMPLE_SUBJECT;
+      } else {
+        document.getElementById('intro-subject').value = INTRO_SAMPLE_SUBJECT;
       }
 
 
