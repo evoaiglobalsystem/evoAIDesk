@@ -539,8 +539,28 @@
   .page-btn:disabled { opacity: .35; cursor: not-allowed; }
 
   /* META MODAL */
-  .meta-modal { max-width: 480px; }
+  .meta-modal { max-width: 500px; }
   .meta-kv-list { display: flex; flex-direction: column; gap: 10px; }
+  .meta-json-block {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: .73rem;
+    line-height: 1.65;
+    color: #c9d1d9;
+    white-space: pre;
+    overflow-x: auto;
+    max-height: 420px;
+    overflow-y: auto;
+  }
+  .meta-json-block .j-key    { color: #79c0ff; }
+  .meta-json-block .j-str    { color: #a5d6ff; }
+  .meta-json-block .j-num    { color: #f2cc60; }
+  .meta-json-block .j-bool   { color: #f0a05a; }
+  .meta-json-block .j-null   { color: #8b949e; font-style: italic; }
+  .meta-json-block .j-brace  { color: #8b949e; }
   .meta-kv-row {
     display: flex; align-items: flex-start; gap: 12px;
     background: var(--surface2); border: 1px solid var(--border);
@@ -3542,29 +3562,19 @@
     if (!metaObj || !Object.keys(metaObj).length) {
       list.innerHTML = `<div style="text-align:center;padding:18px 0;font-size:.8rem;color:var(--muted);">No meta data available.</div>`;
     } else {
-      list.innerHTML = Object.entries(metaObj).map(([k, v]) => {
-        let valHtml;
-        if (v === null || v === undefined) {
-          valHtml = `<span class="meta-kv-val is-null">null</span>`;
-        } else if (typeof v === 'boolean') {
-          valHtml = `<span class="meta-kv-val is-bool">${v}</span>`;
-        } else if (typeof v === 'number') {
-          valHtml = `<span class="meta-kv-val is-num">${v}</span>`;
-        } else if (typeof v === 'object') {
-          valHtml = `<span class="meta-kv-val is-obj">${esc(JSON.stringify(v, null, 2))}</span>`;
-        } else {
-          /* strings — highlight if looks like email / status badge */
-          const s = String(v);
-          const isBadge = ['active','inactive','success','failure','pending','admin','user','error','warn','info'].includes(s.toLowerCase());
-          valHtml = isBadge
-            ? `<span class="meta-badge">${esc(s)}</span>`
-            : `<span class="meta-kv-val">${esc(s)}</span>`;
-        }
-        return `<div class="meta-kv-row">
-          <div class="meta-kv-key">${esc(k)}</div>
-          <div style="flex:1;">${valHtml}</div>
-        </div>`;
-      }).join('');
+      function syntaxHighlight(obj) {
+        const json = JSON.stringify(obj, null, 2);
+        return json.replace(/("(\u[a-zA-Z0-9]{4}|\[^u]|[^\"])*"(\s*:)?|(true|false|null)|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+          if (/^"/.test(match)) {
+            if (/:$/.test(match)) return `<span class="j-key">${match}</span>`;
+            return `<span class="j-str">${match}</span>`;
+          }
+          if (/true|false/.test(match)) return `<span class="j-bool">${match}</span>`;
+          if (/null/.test(match))       return `<span class="j-null">${match}</span>`;
+          return `<span class="j-num">${match}</span>`;
+        }).replace(/[{}\[\]]/g, m => `<span class="j-brace">${m}</span>`);
+      }
+      list.innerHTML = `<div class="meta-json-block">${syntaxHighlight(metaObj)}</div>`;
     }
     document.getElementById('metaModal').classList.add('open');
   }
