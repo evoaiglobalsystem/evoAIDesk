@@ -2752,7 +2752,21 @@
         recipient_name, recipient_email, next_run_date,
         ...(run_day!==null?{run_day}:{}),
         updated_at: window._serverTimestamp() };
+      const afterSnap = { job_name, job_type, frequency, is_active, tenant_id,
+        recipient_name, recipient_email,
+        next_run_date: nextDateStr,
+        ...(run_day!==null?{run_day}:{}) };
       if (_editScheduleId) {
+        let beforeSnap = null;
+        const existing = await window._getDoc(window._doc(db,'scheduled_jobs',_editScheduleId));
+        if (existing.exists()) {
+          const d = existing.data();
+          beforeSnap = { job_name: d.job_name, job_type: d.job_type, frequency: d.frequency,
+            is_active: d.is_active, tenant_id: d.tenant_id,
+            recipient_name: d.recipient_name, recipient_email: d.recipient_email,
+            next_run_date: d.next_run_date?.toDate?.()?.toISOString?.() || d.next_run_date || null,
+            ...(d.run_day!=null?{run_day:d.run_day}:{}) };
+        }
         await window._setDoc(window._doc(db,'scheduled_jobs',_editScheduleId), data, { merge: true });
         toast('Schedule updated','success');
         writeLog({
@@ -2760,19 +2774,20 @@
           module: 'schedule', source: 'saveSchedule',
           tenant_id: tenant_id || null,
           message: `Schedule updated: ${job_name}`,
-          meta: { job_name, job_type, frequency, tenant_id, action: 'updated' }
+          meta: { action: 'updated', id: _editScheduleId,
+            ...(beforeSnap ? { before: beforeSnap, after: afterSnap } : afterSnap) }
         });
       } else {
         data.last_run_at = null;
         data.created_at  = window._serverTimestamp();
-        await window._addDoc(window._collection(db,'scheduled_jobs'), data);
+        const docRef = await window._addDoc(window._collection(db,'scheduled_jobs'), data);
         toast('Schedule created','success');
         writeLog({
           level: 'info', status: 'success',
           module: 'schedule', source: 'saveSchedule',
           tenant_id: tenant_id || null,
           message: `Schedule created: ${job_name}`,
-          meta: { job_name, job_type, frequency, tenant_id, action: 'created' }
+          meta: { action: 'created', id: docRef.id, ...afterSnap }
         });
       }
       closeScheduleModal();
@@ -2785,7 +2800,18 @@
         module: 'schedule', source: 'saveSchedule',
         tenant_id: document.getElementById('schTenantId').value || null,
         message: `Failed to save schedule: ${e.message}`,
-        meta: { job_name: document.getElementById('schJobName').value }
+        meta: {
+          action: _editScheduleId ? 'updated' : 'created',
+          id: _editScheduleId || null,
+          job_name:        document.getElementById('schJobName').value.trim(),
+          job_type:        document.getElementById('schJobType').value,
+          frequency:       document.getElementById('schFrequency').value,
+          is_active:       document.getElementById('schIsActive').value === 'true',
+          tenant_id:       document.getElementById('schTenantId').value,
+          recipient_name:  document.getElementById('schRecipientName').value.trim(),
+          recipient_email: document.getElementById('schRecipientEmail').value.trim(),
+          next_run_date:   document.getElementById('schNextRunDate').value
+        }
       });
     }
     btn.disabled = false;
@@ -2798,26 +2824,46 @@
     const btn = document.getElementById('confirmOkBtn');
     btn.onclick = async () => {
       try {
+        const deletedSch = _schedules.find(s => s._id === id);
         await window._deleteDoc(window._doc(window._db,'scheduled_jobs',id));
         toast('Schedule deleted','success');
-        const deletedSch = _schedules.find(s => s._id === id);
         writeLog({
           level: 'warn', status: 'success',
           module: 'schedule', source: 'deleteSchedule',
           tenant_id: deletedSch?.tenant_id || null,
           message: `Schedule deleted: ${label}`,
-          meta: { id, label }
+          meta: {
+            action: 'deleted', id,
+            job_name:        deletedSch?.job_name        || label,
+            job_type:        deletedSch?.job_type        || null,
+            frequency:       deletedSch?.frequency       || null,
+            is_active:       deletedSch?.is_active       ?? null,
+            tenant_id:       deletedSch?.tenant_id       || null,
+            recipient_name:  deletedSch?.recipient_name  || null,
+            recipient_email: deletedSch?.recipient_email || null,
+            run_day:         deletedSch?.run_day         ?? null
+          }
         });
         closeConfirm();
         await loadSchedules();
       } catch(e) {
         toast('Error: '+e.message,'error');
+        const deletedSch = _schedules.find(s => s._id === id);
         writeLog({
           level: 'error', status: 'failure',
           module: 'schedule', source: 'deleteSchedule',
-          tenant_id: _schedules.find(s => s._id === id)?.tenant_id || null,
+          tenant_id: deletedSch?.tenant_id || null,
           message: `Failed to delete schedule: ${e.message}`,
-          meta: { id, label }
+          meta: {
+            action: 'deleted', id,
+            job_name:        deletedSch?.job_name        || label,
+            job_type:        deletedSch?.job_type        || null,
+            frequency:       deletedSch?.frequency       || null,
+            is_active:       deletedSch?.is_active       ?? null,
+            tenant_id:       deletedSch?.tenant_id       || null,
+            recipient_name:  deletedSch?.recipient_name  || null,
+            recipient_email: deletedSch?.recipient_email || null
+          }
         });
       }
     };
