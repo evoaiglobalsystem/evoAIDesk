@@ -3265,9 +3265,16 @@
               action: 'status_change', id: _editTrialId,
               before: { status: existing.status },
               after:  { status },
-              name:    existing.name    || null,
-              email:   existing.email   || null,
-              company: existing.company || null
+              name:             existing.name             || null,
+              email:            existing.email            || null,
+              company:          existing.company          || null,
+              phone:            existing.phone            || null,
+              team_size:        existing.team_size        || null,
+              use_case:         existing.use_case         || null,
+              source:           existing.source           || null,
+              comments:         existing.comments         || null,
+              trial_start_date: existing.trial_start_date || null,
+              trial_end_date:   existing.trial_end_date   || null
             }
           });
           closeTrialModal();
