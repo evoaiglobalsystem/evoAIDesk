@@ -3968,7 +3968,7 @@ const N8N_WEBHOOKS = {
   add_to_crm:         'https://your-n8n-instance/webhook/add-to-crm',
   schedule_followup:   API.n8n_trigger_email_workflow,
   send_whatsapp:       API.n8n_trigger_email_workflow,
-  notify_slack:       'https://your-n8n-instance/webhook/notify-slack',
+  notify_telegram:     API.n8n_trigger_email_workflow,
   send_nurture:        API.n8n_trigger_email_workflow,
 };
 const AUTO_ACTIONS = [
@@ -3979,7 +3979,7 @@ const AUTO_ACTIONS = [
 ];
 const OUTREACH_ACTIONS = [
   {id:'send_whatsapp', label:'Send WhatsApp', icon:'💬', badge:'WhatsApp'},
-  {id:'notify_slack',  label:'Notify Slack',  icon:'🔔', badge:'Slack'},
+  {id:'notify_telegram',  label:'Send Telegram',  icon:'🔔', badge:'Telegram'},
 ];
 
 async function viewLead(leadId, docId, preloadedLead = null) {
@@ -4225,7 +4225,7 @@ function handleAutoBtn(btnEl) { triggerN8n(btnEl.dataset.action, window._viewing
 
 async function triggerN8n(actionId, lead, btnEl) {
   const url = N8N_WEBHOOKS[actionId];
-  const activeActions = ['send_intro_email','send_proposal','schedule_followup','send_nurture','send_whatsapp'];
+  const activeActions = ['send_intro_email','send_proposal','schedule_followup','send_nurture','send_whatsapp', 'notify_telegram'];
   if (!activeActions.includes(actionId)) { toast('Automation to be configured!', 'warn'); return; }
 
   if (actionId === 'send_proposal' && !lead.proposal_link) {
