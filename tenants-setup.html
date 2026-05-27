@@ -2054,7 +2054,12 @@
         module: 'tenant', source: 'saveTenant',
         tenant_id: slug,
         message: `Tenant ${action}: ${name}`,
-        meta: { slug, plan, status, action }
+        meta: {
+          action, slug, name, plan, status,
+          timezone, currency,
+          tenant_contact_email, tenant_contact_phone,
+          location, intro_email_subject, proposal_subject
+        }
       });
       closeTenantModal();
       await loadTenants();
@@ -2066,7 +2071,20 @@
         module: 'tenant', source: 'saveTenant',
         tenant_id: document.getElementById('fSlug').value || null,
         message: `Failed to save tenant: ${e.message}`,
-        meta: { slug: document.getElementById('fSlug').value }
+        meta: {
+          action: _editTenantSlug ? 'updated' : 'created',
+          slug: document.getElementById('fSlug').value,
+          name:   document.getElementById('fName').value.trim(),
+          plan:   document.getElementById('fPlan').value,
+          status: document.getElementById('fStatus').value,
+          timezone:             document.getElementById('fTimezone').value,
+          currency:             document.getElementById('fCurrency').value,
+          tenant_contact_email: document.getElementById('fContactEmail').value.trim(),
+          tenant_contact_phone: document.getElementById('fContactPhone').value.trim(),
+          location:             document.getElementById('fLocation').value.trim(),
+          intro_email_subject:  document.getElementById('fIntroSubject').value.trim(),
+          proposal_subject:     document.getElementById('fProposalSubject').value.trim()
+        }
       });
     }
     btn.disabled = false; resetSaveTenantBtn();
@@ -2185,7 +2203,7 @@
         module: 'user', source: 'saveUser',
         tenant_id: tenant_id || null,
         message: `User ${action}: ${google_id}`,
-        meta: { google_id, role, status, tenant_id, action }
+        meta: { action, google_id, name, role, status, tenant_id, telegram_user_id: telegram_user_id || '' }
       });
       closeUserModal();
       await loadUsers();
@@ -2197,7 +2215,15 @@
         module: 'user', source: 'saveUser',
         tenant_id: document.getElementById('uTenantId').value || null,
         message: `Failed to save user: ${e.message}`,
-        meta: { google_id: document.getElementById('uGoogleId').value }
+        meta: {
+          action: _editUserId ? 'updated' : 'added',
+          google_id:        document.getElementById('uGoogleId').value.trim(),
+          name:             document.getElementById('uName').value.trim(),
+          role:             document.getElementById('uRole').value,
+          status:           document.getElementById('uStatus').value,
+          tenant_id:        document.getElementById('uTenantId').value,
+          telegram_user_id: document.getElementById('uTelegramUserId').value.trim()
+        }
       });
     }
     btn.disabled = false;
