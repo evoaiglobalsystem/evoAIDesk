@@ -536,6 +536,24 @@
   .var-chip:hover { background: rgba(0,170,255,.2); }
   .var-hint { font-size: .72rem; color: var(--muted); margin-top: .45rem; }
 
+  /* ── Unsaved default banner ── */
+  .default-notice {
+    display: none;
+    align-items: center;
+    gap: .55rem;
+    background: rgba(240,160,48,.08);
+    border: 1px solid rgba(240,160,48,.3);
+    border-radius: 8px;
+    padding: .65rem 1rem;
+    margin-bottom: .9rem;
+    font-size: .78rem;
+    color: var(--warning);
+    line-height: 1.45;
+  }
+  .default-notice.show { display: flex; }
+  .default-notice-icon { font-size: 1rem; flex-shrink: 0; }
+  .default-notice strong { color: var(--text); }
+
 </style>
 </head>
 <body>
@@ -636,6 +654,10 @@
           <input type="text" id="intro-subject" placeholder="e.g. Introduction — {{tenant_company}} × {{company}}" />
         </div>
       </div>
+      <div class="default-notice" id="default-notice-intro">
+        <span class="default-notice-icon">⚠️</span>
+        <span><strong>Sample template — not saved yet.</strong> Customise the content below to match your business, then click <strong>Save Intro Email</strong>.</span>
+      </div>
       <label style="font-size:.75rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem;">Body (HTML)</label>
       <div class="editor-toolbar" id="tb-intro">
         <button class="tb-btn" onclick="fmt('intro','bold')" title="Bold"><b>B</b></button>
@@ -695,6 +717,10 @@
           <label>Subject Line</label>
           <input type="text" id="proposal-subject" placeholder="e.g. Proposal for {{company}} — {{tenant_company}}" />
         </div>
+      </div>
+      <div class="default-notice" id="default-notice-proposal">
+        <span class="default-notice-icon">⚠️</span>
+        <span><strong>Sample template — not saved yet.</strong> Customise the content below to match your business, then click <strong>Save Proposal</strong>.</span>
       </div>
       <label style="font-size:.75rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.4rem;">Body (HTML)</label>
       <div class="editor-toolbar" id="tb-proposal">
@@ -881,10 +907,15 @@
       } else {
         document.getElementById('editor-proposal').innerHTML = `<p><strong>Proposal for {{company}}</strong></p><p><br></p><p><strong>Dear {{name}},</strong></p><p><br></p><p>Thank you for taking the time to speak with us. Following our conversation, we’ve put together a tailored proposal for <strong>{{company}}</strong> outlining how <strong>{{tenant_company}}</strong> can help you achieve your goals.</p><p><br></p><p><strong>What’s Included</strong></p><ul><li>[Service or Deliverable 1] — [One-line description]</li><li>[Service or Deliverable 2] — [One-line description]</li><li>[Service or Deliverable 3] — [One-line description]</li><li>[Ongoing support or reporting] — [One-line description]</li></ul><p><br></p><p><strong>Proposed Timeline</strong></p><ul><li>Kick-off &amp; onboarding: <strong>Week 1</strong></li><li>Delivery / go-live: <strong>Week 2–3</strong></li><li>First review &amp; check-in: <strong>Day 30</strong></li></ul><p><br></p><p>This proposal is valid for <strong>14 days</strong>. To move forward, simply reply to confirm or <a href="{{proposal_link}}">view the full proposal here</a>.</p><p><br></p><p>We look forward to working with you,<br><strong>{{tenant_company}}</strong></p>`;
       }
+      const PROPOSAL_SAMPLE_SUBJECT = 'Proposal for {{company}} — {{tenant_company}}';
       if (data.proposal_subject !== undefined) {
-        document.getElementById('proposal-subject').value = data.proposal_subject || '';
+        document.getElementById('proposal-subject').value = data.proposal_subject || PROPOSAL_SAMPLE_SUBJECT;
+      } else {
+        document.getElementById('proposal-subject').value = PROPOSAL_SAMPLE_SUBJECT;
       }
 
+      // Mark templates as unsaved if loaded from defaults (not yet in Firestore)
+      checkAndMarkDefaults(data);
 
     } catch(e) {
       console.error('Failed to load settings:', e);
@@ -1034,9 +1065,15 @@
       } else {
         document.getElementById('editor-proposal').innerHTML = `<p><strong>Proposal for {{company}}</strong></p><p><br></p><p><strong>Dear {{name}},</strong></p><p><br></p><p>Thank you for taking the time to speak with us. Following our conversation, we’ve put together a tailored proposal for <strong>{{company}}</strong> outlining how <strong>{{tenant_company}}</strong> can help you achieve your goals.</p><p><br></p><p><strong>What’s Included</strong></p><ul><li>[Service or Deliverable 1] — [One-line description]</li><li>[Service or Deliverable 2] — [One-line description]</li><li>[Service or Deliverable 3] — [One-line description]</li><li>[Ongoing support or reporting] — [One-line description]</li></ul><p><br></p><p><strong>Proposed Timeline</strong></p><ul><li>Kick-off &amp; onboarding: <strong>Week 1</strong></li><li>Delivery / go-live: <strong>Week 2–3</strong></li><li>First review &amp; check-in: <strong>Day 30</strong></li></ul><p><br></p><p>This proposal is valid for <strong>14 days</strong>. To move forward, simply reply to confirm or <a href="{{proposal_link}}">view the full proposal here</a>.</p><p><br></p><p>We look forward to working with you,<br><strong>{{tenant_company}}</strong></p>`;
       }
+      const PROPOSAL_SAMPLE_SUBJECT = 'Proposal for {{company}} — {{tenant_company}}';
       if (data.proposal_subject !== undefined) {
-        document.getElementById('proposal-subject').value = data.proposal_subject || '';
+        document.getElementById('proposal-subject').value = data.proposal_subject || PROPOSAL_SAMPLE_SUBJECT;
+      } else {
+        document.getElementById('proposal-subject').value = PROPOSAL_SAMPLE_SUBJECT;
       }
+
+      // Mark templates as unsaved if loaded from defaults
+      checkAndMarkDefaults(data);
 
     } catch(e) {
       console.error('Failed to load templates:', e);
@@ -1099,6 +1136,7 @@
       statusEl.textContent = '✓ Saved';
       statusEl.className = 'tpl-status saved';
       setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'tpl-status'; }, 3000);
+      hideDefaultNotice(type);
       showToast('✅ Template saved successfully!', 'success');
     } catch(e) {
       statusEl.textContent = '✗ Save failed';
@@ -1141,6 +1179,24 @@
     if (e.target === this) closePreview();
   });
 
+
+  // ── Default-template notice ──
+  // Shows a warning banner when a template has never been saved to Firestore.
+  // Called after loading; dismissed permanently once the user saves.
+  function checkAndMarkDefaults(data) {
+    if (!data.intro_email_html)    showDefaultNotice('intro');
+    else                           hideDefaultNotice('intro');
+    if (!data.proposal_content_html) showDefaultNotice('proposal');
+    else                             hideDefaultNotice('proposal');
+  }
+  function showDefaultNotice(type) {
+    const el = document.getElementById('default-notice-' + type);
+    if (el) el.classList.add('show');
+  }
+  function hideDefaultNotice(type) {
+    const el = document.getElementById('default-notice-' + type);
+    if (el) el.classList.remove('show');
+  }
 
   // ── Toast ──
   window.showToast = function(msg, type='success') {
