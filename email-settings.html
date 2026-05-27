@@ -857,11 +857,18 @@
       window.history.replaceState({}, '', window.location.pathname);
       await new Promise(r => setTimeout(r, 1500));
       await loadSettings();
+      const connectedEmail = document.getElementById('gmailConnectedEmail')?.textContent?.trim() || null;
+      const connectedAt    = document.getElementById('gmailConnectedAt')?.textContent?.trim()    || null;
       writeLog({
         level: 'info', status: 'success',
         module: 'email_settings', source: 'connectGmail',
         message: 'Gmail connected via OAuth',
-        meta: { action: 'gmail_connected', tenant_id: currentTenantId }
+        meta: {
+          action: 'gmail_connected',
+          gmail_email: connectedEmail,
+          gmail_connected_at: connectedAt,
+          tenant_id: currentTenantId
+        }
       });
     } else if (oauthParam === 'error') {
       showToast('❌ Failed to connect Gmail. Please try again.', 'error');
