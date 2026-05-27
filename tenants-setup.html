@@ -1114,9 +1114,6 @@
             <!-- Module filter -->
             <select id="logModuleFilter" onchange="resetLogsPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
               <option value="">All Modules</option>
-              <option value="tenant">Tenant</option>
-              <option value="user">User</option>
-              <option value="schedule">Schedule</option>
             </select>
             <!-- Tenant filter -->
             <select id="logTenantFilter" onchange="resetLogsPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;">
@@ -2900,6 +2897,12 @@
       _logs = Array.isArray(data) ? data.map(item => item.json ?? item) : [];
       _logsLoaded = true;
       _logsPage = 1;
+      // Populate module filter dynamically from log data
+      const moduleSel = document.getElementById('logModuleFilter');
+      const prevModule = moduleSel.value;
+      const moduleIds = [...new Set(_logs.map(l => l.module).filter(Boolean))].sort();
+      moduleSel.innerHTML = '<option value="">All Modules</option>' +
+        moduleIds.map(m => `<option value="${esc(m)}"${m === prevModule ? ' selected' : ''}>${esc(m.replace(/_/g,' ').replace(/\w/g,c=>c.toUpperCase()))}</option>`).join('');
       // Populate tenant filter from log data
       const tenantSel = document.getElementById('logTenantFilter');
       const prevTenant = tenantSel.value;
