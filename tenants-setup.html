@@ -2031,9 +2031,21 @@
     try {
       const db  = window._db;
       const ref = window._doc(db, 'tenants', slug);
+      let beforeSnap = null;
       if (!_editTenantSlug) {
         const existing = await window._getDoc(ref);
         if (existing.exists()) { toast(`Slug "${slug}" already exists`, 'error'); btn.disabled=false; resetSaveTenantBtn(); return; }
+      } else {
+        const existing = await window._getDoc(ref);
+        if (existing.exists()) {
+          const d = existing.data();
+          beforeSnap = {
+            name: d.name, plan: d.plan, status: d.status,
+            timezone: d.timezone, currency: d.currency,
+            tenant_contact_email: d.tenant_contact_email, tenant_contact_phone: d.tenant_contact_phone,
+            location: d.location, intro_email_subject: d.intro_email_subject, proposal_subject: d.proposal_subject
+          };
+        }
       }
       const data = {
         id: slug, name, slug, plan, status,
@@ -2049,16 +2061,15 @@
       await window._setDoc(ref, data, { merge: !!_editTenantSlug });
       const action = _editTenantSlug ? 'updated' : 'created';
       toast(`Tenant ${action}`, 'success');
+      const afterSnap = { name, plan, status, timezone, currency, tenant_contact_email, tenant_contact_phone, location, intro_email_subject, proposal_subject };
       writeLog({
         level: 'info', status: 'success',
         module: 'tenant', source: 'saveTenant',
         tenant_id: slug,
         message: `Tenant ${action}: ${name}`,
         meta: {
-          action, slug, name, plan, status,
-          timezone, currency,
-          tenant_contact_email, tenant_contact_phone,
-          location, intro_email_subject, proposal_subject
+          action, slug,
+          ...(beforeSnap ? { before: beforeSnap, after: afterSnap } : afterSnap)
         }
       });
       closeTenantModal();
@@ -2176,8 +2187,17 @@
     try {
       const db = window._db;
       let ref;
+      let beforeSnap = null;
       if (_editUserId) {
         ref = window._doc(db, 'users', _editUserId);
+        const existing = await window._getDoc(ref);
+        if (existing.exists()) {
+          const d = existing.data();
+          beforeSnap = {
+            name: d.name, role: d.role, status: d.status,
+            tenant_id: d.tenant_id, telegram_user_id: d.telegram_user_id || ''
+          };
+        }
       } else {
         ref = window._doc(db, 'users', google_id);
         const existing = await window._getDoc(ref);
@@ -2198,12 +2218,16 @@
       await window._setDoc(ref, data, { merge: !!_editUserId });
       const action = _editUserId ? 'updated' : 'added';
       toast(`User ${action}`, 'success');
+      const afterSnap = { name, role, status, tenant_id, telegram_user_id: telegram_user_id || '' };
       writeLog({
         level: 'info', status: 'success',
         module: 'user', source: 'saveUser',
         tenant_id: tenant_id || null,
         message: `User ${action}: ${google_id}`,
-        meta: { action, google_id, name, role, status, tenant_id, telegram_user_id: telegram_user_id || '' }
+        meta: {
+          action, google_id,
+          ...(beforeSnap ? { before: beforeSnap, after: afterSnap } : afterSnap)
+        }
       });
       closeUserModal();
       await loadUsers();
