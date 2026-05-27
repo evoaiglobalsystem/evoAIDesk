@@ -1160,6 +1160,10 @@
       <div class="meta-kv-list" id="metaKvList"></div>
     </div>
     <div class="modal-foot">
+      <button class="btn btn-outline" id="metaCopyBtn" onclick="copyMetaJson()" style="display:flex;align-items:center;gap:6px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy JSON
+      </button>
       <button class="btn btn-outline" onclick="closeMetaModal()">Close</button>
     </div>
   </div>
@@ -1749,10 +1753,14 @@
     try {
       // ISO 27001 A.12: user_id captures who performed every action
       const user_id = window._currentUser?.email || 'unknown';
+      const enrichedMeta = {
+        ...meta,
+        updated_by: { name: window._currentUser?.name || 'unknown', email: user_id }
+      };
       await fetch(N8N_LOG_WRITE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level, status, module, source, user_id, tenant_id, message, meta: JSON.stringify(meta) })
+        body: JSON.stringify({ level, status, module, source, user_id, tenant_id, message, meta: JSON.stringify(enrichedMeta) })
       });
     } catch(e) {
       console.warn('[writeLog] failed:', e.message);
@@ -3511,10 +3519,25 @@
   function goLogsPage(p)   { _logsPage = p; renderLogsTable(); }
 
   /* ── Meta modal ── */
+  let _currentMetaObj = null;
+
+  function copyMetaJson() {
+    if (!_currentMetaObj) return;
+    const btn = document.getElementById('metaCopyBtn');
+    navigator.clipboard.writeText(JSON.stringify(_currentMetaObj, null, 2)).then(() => {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+      btn.style.color = 'var(--accent)';
+      btn.style.borderColor = 'var(--accent)';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
+    }).catch(() => toast('Copy failed', 'error'));
+  }
+
   function showMetaModal(metaObj) {
     if (typeof metaObj === 'string') {
       try { metaObj = JSON.parse(metaObj); } catch(e) { metaObj = { raw: metaObj }; }
     }
+    _currentMetaObj = metaObj;
     const list = document.getElementById('metaKvList');
     if (!metaObj || !Object.keys(metaObj).length) {
       list.innerHTML = `<div style="text-align:center;padding:18px 0;font-size:.8rem;color:var(--muted);">No meta data available.</div>`;
