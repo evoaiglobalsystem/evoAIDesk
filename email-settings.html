@@ -855,9 +855,14 @@
     if (oauthParam === 'connected') {
       showToast('✅ Gmail connected successfully!', 'success');
       window.history.replaceState({}, '', window.location.pathname);
-      // Short delay ensures Firestore has the new data before we read it
       await new Promise(r => setTimeout(r, 1500));
       await loadSettings();
+      writeLog({
+        level: 'info', status: 'success',
+        module: 'email_settings', source: 'connectGmail',
+        message: 'Gmail connected via OAuth',
+        meta: { action: 'gmail_connected', tenant_id: currentTenantId }
+      });
     } else if (oauthParam === 'error') {
       showToast('❌ Failed to connect Gmail. Please try again.', 'error');
       window.history.replaceState({}, '', window.location.pathname);
@@ -922,6 +927,22 @@
     }
   }
 
+  // ── Logging ──
+  const N8N_LOG_WRITE = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write';
+  async function writeLog({ level = 'info', status = null, module, source, message, meta = {} }) {
+    try {
+      const user      = auth.currentUser;
+      const user_id   = user?.email || 'unknown';
+      const enriched  = { ...meta, updated_by: { name: user?.displayName || user_id, email: user_id } };
+      await fetch(N8N_LOG_WRITE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level, status, module, source, user_id,
+          tenant_id: currentTenantId, message, meta: JSON.stringify(enriched) })
+      });
+    } catch(e) { console.warn('[writeLog] failed:', e.message); }
+  }
+
   // ── Connect Gmail via OAuth2 redirect flow ──
   window.connectGmail = function() {
     if (!currentTenantId) {
@@ -978,8 +999,21 @@
       setGmailDisconnected();
       if (window._tenantGmailConnected !== undefined) window._tenantGmailConnected = false;
       showToast('Gmail disconnected. Emails will no longer send.', 'success');
+      const disconnectedEmail = tenantSnap.exists() ? (tenantSnap.data().gmail_email || '') : '';
+      writeLog({
+        level: 'warn', status: 'success',
+        module: 'email_settings', source: 'disconnectGmail',
+        message: 'Gmail disconnected',
+        meta: { action: 'gmail_disconnected', gmail_email: disconnectedEmail, tenant_id: currentTenantId }
+      });
     } catch(e) {
       showToast('Failed to disconnect. Please try again.', 'error');
+      writeLog({
+        level: 'error', status: 'failure',
+        module: 'email_settings', source: 'disconnectGmail',
+        message: `Failed to disconnect Gmail: ${e.message}`,
+        meta: { action: 'gmail_disconnected', tenant_id: currentTenantId }
+      });
     }
   };
 
@@ -1138,10 +1172,32 @@
       setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'tpl-status'; }, 3000);
       hideDefaultNotice(type);
       showToast('✅ Template saved successfully!', 'success');
+      const subjectKey = type === 'intro' ? 'intro_email_subject' : 'proposal_subject';
+      writeLog({
+        level: 'info', status: 'success',
+        module: 'email_settings', source: 'saveTemplate',
+        message: `Email template saved: ${type}`,
+        meta: {
+          action: 'template_saved',
+          template_type: type,
+          subject: updates[subjectKey] || null,
+          tenant_id: currentTenantId
+        }
+      });
     } catch(e) {
       statusEl.textContent = '✗ Save failed';
       statusEl.className = 'tpl-status error';
       showToast('❌ Failed to save template.', 'error');
+      writeLog({
+        level: 'error', status: 'failure',
+        module: 'email_settings', source: 'saveTemplate',
+        message: `Failed to save email template: ${type} — ${e.message}`,
+        meta: {
+          action: 'template_saved',
+          template_type: type,
+          tenant_id: currentTenantId
+        }
+      });
     }
   };
 
