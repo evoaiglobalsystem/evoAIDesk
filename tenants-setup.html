@@ -3251,8 +3251,8 @@
               use_case:         existing.use_case         || null,
               source:           existing.source           || null,
               comments:         existing.comments         || null,
-              trial_start_date: existing.trial_start_date || null,
-              trial_end_date:   existing.trial_end_date   || null,
+              trial_start_date: existing.trial_start_date?.split('T')[0] || null,
+              trial_end_date:   existing.trial_end_date?.split('T')[0]   || null,
             })
           });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -3382,8 +3382,8 @@
           phone: t.phone || null, team_size: t.team_size || null,
           status: t.status, use_case: t.use_case || null,
           source: t.source || null, comments: t.comments || null,
-          trial_start_date: t.trial_start_date || null,
-          trial_end_date: t.trial_end_date || null } : null;
+          trial_start_date: t.trial_start_date?.split('T')[0] || null,
+          trial_end_date:   t.trial_end_date?.split('T')[0]   || null } : null;
       })() : null;
       writeLog({
         level: 'info', status: 'success',
@@ -3470,8 +3470,8 @@
           name:    t.name    || null,
           email:   t.email   || null,
           company: t.company || null,
-          trial_start_date: t.trial_start_date || null,
-          trial_end_date:   t.trial_end_date   || null
+          trial_start_date: t.trial_start_date?.split('T')[0] || null,
+          trial_end_date:   t.trial_end_date?.split('T')[0]   || null
         }
       });
       _trialsLoaded = false;
