@@ -3261,7 +3261,14 @@
             level: 'info', status: 'success',
             module: 'trial', source: 'saveTrial',
             message: `Trial status → ${status}: ${existing.name} (${existing.email})`,
-            meta: { id: _editTrialId, status }
+            meta: {
+              action: 'status_change', id: _editTrialId,
+              before: { status: existing.status },
+              after:  { status },
+              name:    existing.name    || null,
+              email:   existing.email   || null,
+              company: existing.company || null
+            }
           });
           closeTrialModal();
           _trialsLoaded = false;
@@ -3352,11 +3359,33 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const action = _editTrialId ? 'updated' : 'created';
       toast(`Trial request ${action}`, 'success');
+      const trialAfter = { name, email, company,
+        phone:             payload.phone,
+        team_size:         payload.team_size,
+        status:            payload.status,
+        use_case:          payload.use_case,
+        source:            payload.source,
+        comments:          payload.comments,
+        trial_start_date:  payload.trial_start_date,
+        trial_end_date:    payload.trial_end_date
+      };
+      const trialBefore = _editTrialId ? (() => {
+        const t = _trials.find(x => x.id == _editTrialId);
+        return t ? { name: t.name, email: t.email, company: t.company,
+          phone: t.phone || null, team_size: t.team_size || null,
+          status: t.status, use_case: t.use_case || null,
+          source: t.source || null, comments: t.comments || null,
+          trial_start_date: t.trial_start_date || null,
+          trial_end_date: t.trial_end_date || null } : null;
+      })() : null;
       writeLog({
         level: 'info', status: 'success',
         module: 'trial', source: 'saveTrial',
         message: `Trial ${action}: ${name} — ${company}`,
-        meta: { email, company, status: payload.status }
+        meta: {
+          action, id: _editTrialId || null,
+          ...(trialBefore ? { before: trialBefore, after: trialAfter } : trialAfter)
+        }
       });
       closeTrialModal();
       _trialsLoaded = false;
@@ -3427,12 +3456,34 @@
         level: 'info', status: 'success',
         module: 'trial', source: 'quickStatusTrial',
         message: `Trial status → ${status}: ${t.name} (${t.email})`,
-        meta: { id, status }
+        meta: {
+          action: 'status_change', id,
+          before: { status: t.status },
+          after:  { status },
+          name:    t.name    || null,
+          email:   t.email   || null,
+          company: t.company || null,
+          trial_start_date: t.trial_start_date || null,
+          trial_end_date:   t.trial_end_date   || null
+        }
       });
       _trialsLoaded = false;
       await loadTrials(true);
     } catch(e) {
       toast('Error: ' + e.message, 'error');
+      writeLog({
+        level: 'error', status: 'failure',
+        module: 'trial', source: 'quickStatusTrial',
+        message: `Failed to update trial status: ${e.message}`,
+        meta: {
+          action: 'status_change', id,
+          before: { status: t.status },
+          after:  { status },
+          name:    t.name    || null,
+          email:   t.email   || null,
+          company: t.company || null
+        }
+      });
     }
   }
 
@@ -3449,17 +3500,43 @@
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         toast('Trial request deleted', 'success');
+        const deletedTrial = _trials.find(x => x.id == id);
         writeLog({
-          level: 'info', status: 'success',
+          level: 'warn', status: 'success',
           module: 'trial', source: 'deleteTrial',
-          message: `Trial deleted: id=${id}`,
-          meta: { id }
+          message: `Trial deleted: ${deletedTrial?.name || name} (${deletedTrial?.email || ''})`,
+          meta: {
+            action: 'deleted', id,
+            name:             deletedTrial?.name             || name,
+            email:            deletedTrial?.email            || null,
+            company:          deletedTrial?.company          || null,
+            phone:            deletedTrial?.phone            || null,
+            team_size:        deletedTrial?.team_size        || null,
+            status:           deletedTrial?.status           || null,
+            use_case:         deletedTrial?.use_case         || null,
+            source:           deletedTrial?.source           || null,
+            trial_start_date: deletedTrial?.trial_start_date || null,
+            trial_end_date:   deletedTrial?.trial_end_date   || null
+          }
         });
         closeConfirm();
         _trialsLoaded = false;
         await loadTrials(true);
       } catch(e) {
         toast('Error: ' + e.message, 'error');
+        const deletedTrial = _trials.find(x => x.id == id);
+        writeLog({
+          level: 'error', status: 'failure',
+          module: 'trial', source: 'deleteTrial',
+          message: `Failed to delete trial: ${e.message}`,
+          meta: {
+            action: 'deleted', id,
+            name:    deletedTrial?.name    || name,
+            email:   deletedTrial?.email   || null,
+            company: deletedTrial?.company || null,
+            status:  deletedTrial?.status  || null
+          }
+        });
       }
     };
     document.getElementById('confirmModal').classList.add('open');
