@@ -1269,48 +1269,34 @@
           <div class="field-hint">City / Country of the tenant</div>
         </div>
 
-        <!-- ── Email / SMTP section ── -->
-        <div class="form-section-title">Email &amp; SMTP</div>
+        <!-- ── Gmail Status (read-only) ── -->
+        <div class="form-section-title">Gmail Status</div>
         <div class="field">
-          <label>Email Provider</label>
-          <select id="fSmtpProvider" onchange="onSmtpProviderChange()">
-            <option value="">— Select provider —</option>
-            <option value="gmail">Gmail</option>
-            <option value="outlook">Outlook / Office 365</option>
-            <option value="zoho">Zoho Mail</option>
-            <option value="yahoo">Yahoo Mail</option>
-            <option value="sendgrid">SendGrid</option>
-            <option value="mailgun">Mailgun</option>
-            <option value="custom">Custom / Other</option>
-          </select>
-          <div class="field-hint">Maps to <span style="color:var(--accent);">smtp_provider</span> — n8n resolves host, port &amp; SSL automatically</div>
+          <label>Gmail Account</label>
+          <input type="text" id="fGmailEmail" readonly placeholder="Not connected" autocomplete="off"
+            style="background:var(--bg);color:var(--muted);cursor:default;opacity:.85;"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">gmail_email</span> — set by OAuth flow in Email Settings</div>
         </div>
         <div class="field">
-          <label>From Email</label>
-          <input type="email" id="fFromEmail" placeholder="e.g. noreply@company.ai" autocomplete="off"/>
-          <div class="field-hint">Maps to <span style="color:var(--accent);">from_email</span> — sender address for outgoing emails</div>
-        </div>
-        <div class="field full" id="fSmtpCustomHostWrap" style="display:none;">
-          <label>Custom SMTP Host</label>
-          <input type="text" id="fSmtpCustomHost" placeholder="e.g. mail.yourdomain.com" autocomplete="off"/>
-          <div class="field-hint">Maps to <span style="color:var(--accent);">smtp_host</span> — only needed for Custom / Other provider</div>
+          <label>Connected At</label>
+          <input type="text" id="fGmailConnectedAt" readonly placeholder="—" autocomplete="off"
+            style="background:var(--bg);color:var(--muted);cursor:default;opacity:.85;"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">gmail_connected_at</span></div>
         </div>
         <div class="field full">
-          <label>SMTP App Password</label>
-          <div class="pw-wrap">
-            <input type="password" id="fSmtpAppPassword" placeholder="e.g. xxxx xxxx xxxx xxxx" autocomplete="new-password"/>
-            <button type="button" class="pw-toggle" onclick="toggleSmtpPw(this)" title="Show / hide password">
-              <svg id="smtpEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </button>
-          </div>
-          <div class="field-hint">Maps to <span style="color:var(--accent);">smtp_app_password</span> — use a Google / provider app password, not your account password</div>
+          <label>Refresh Token</label>
+          <input type="text" id="fGmailRefreshToken" readonly placeholder="—" autocomplete="off"
+            style="background:var(--bg);color:var(--muted);cursor:default;opacity:.85;font-family:var(--mono);font-size:.72rem;"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">gmail_refresh_token</span> — managed by OAuth; never edit manually</div>
         </div>
 
-        <!-- ── NEW: Intro Email Content ── -->
+        <!-- ── Intro Email Content ── -->
         <div class="form-section-title">Intro Email Content</div>
+        <div class="field full">
+          <label>Intro Email Subject</label>
+          <input type="text" id="fIntroSubject" placeholder="e.g. Introduction — {{company}}" autocomplete="off"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">intro_email_subject</span></div>
+        </div>
         <div class="field full">
           <label>Intro / Welcome Email Body</label>
           <div class="rte-wrap">
@@ -1320,8 +1306,13 @@
           <div class="field-hint">Maps to <span style="color:var(--accent);">intro_email_html</span> — rich HTML injected as the body of the tenant's welcome email</div>
         </div>
 
-        <!-- ── NEW: Proposal Content ── -->
+        <!-- ── Proposal Content ── -->
         <div class="form-section-title">Proposal Content</div>
+        <div class="field full">
+          <label>Proposal Subject</label>
+          <input type="text" id="fProposalSubject" placeholder="e.g. Proposal for {{company}}" autocomplete="off"/>
+          <div class="field-hint">Maps to <span style="color:var(--accent);">proposal_subject</span></div>
+        </div>
         <div class="field full">
           <label>Proposal Template Body</label>
           <div class="rte-wrap">
@@ -1789,23 +1780,6 @@
     _toastTimer = setTimeout(() => { el.className=''; }, 3000);
   }
 
-  /* ══════════════ SMTP PASSWORD TOGGLE ══════════════ */
-  function toggleSmtpPw(btn) {
-    const input = document.getElementById('fSmtpAppPassword');
-    const isHidden = input.type === 'password';
-    input.type = isHidden ? 'text' : 'password';
-    btn.querySelector('svg').innerHTML = isHidden
-      ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>`
-      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
-  }
-
-  /* ══════════════ SMTP PROVIDER QUICK-SELECT ══════════════ */
-  function onSmtpProviderChange() {
-    const val  = document.getElementById('fSmtpProvider').value;
-    const wrap = document.getElementById('fSmtpCustomHostWrap');
-    wrap.style.display = val === 'custom' ? 'block' : 'none';
-  }
-
   /* ══════════════ QUILL RICH TEXT EDITORS ══════════════ */
   const QUILL_TOOLBAR = [
     ['bold', 'italic', 'underline'],
@@ -1951,12 +1925,11 @@
     document.getElementById('fContactEmail').value = '';
     document.getElementById('fContactPhone').value = '';
     document.getElementById('fLocation').value     = '';
-    document.getElementById('fFromEmail').value       = '';
-    document.getElementById('fSmtpProvider').value    = '';
-    document.getElementById('fSmtpCustomHost').value  = '';
-    document.getElementById('fSmtpCustomHostWrap').style.display = 'none';
-    document.getElementById('fSmtpAppPassword').value = '';
-    document.getElementById('fSmtpAppPassword').type  = 'password';
+    document.getElementById('fGmailEmail').value        = '';
+    document.getElementById('fGmailConnectedAt').value  = '';
+    document.getElementById('fGmailRefreshToken').value = '';
+    document.getElementById('fIntroSubject').value    = '';
+    document.getElementById('fProposalSubject').value = '';
     document.getElementById('tenantModal').classList.add('open');
     initQuillEditors();
     setRteHtml(_quillIntro,    '', 'fIntroEmailCount');
@@ -1980,14 +1953,15 @@
     document.getElementById('fContactEmail').value = t.tenant_contact_email || '';
     document.getElementById('fContactPhone').value = t.tenant_contact_phone || '';
     document.getElementById('fLocation').value     = t.location             || '';
-    document.getElementById('fFromEmail').value       = t.from_email         || '';
-    document.getElementById('fSmtpProvider').value    = t.smtp_provider       || '';
-    document.getElementById('fSmtpCustomHost').value  = t.smtp_host           || '';
-    document.getElementById('fSmtpCustomHostWrap').style.display = t.smtp_provider === 'custom' ? 'block' : 'none';
-    // ISO 27001 A.10: Never send credentials back to browser
-    document.getElementById('fSmtpAppPassword').value = '';
-    document.getElementById('fSmtpAppPassword').placeholder = '•••••••• (leave blank to keep current)';
-    document.getElementById('fSmtpAppPassword').type  = 'password';
+    // Gmail status — read-only, format connected_at as human date if present
+    document.getElementById('fGmailEmail').value        = t.gmail_email || '';
+    const gCat = t.gmail_connected_at;
+    document.getElementById('fGmailConnectedAt').value  = gCat
+      ? (typeof gCat.toDate === 'function' ? gCat.toDate() : new Date(gCat)).toLocaleString()
+      : '';
+    document.getElementById('fGmailRefreshToken').value = t.gmail_refresh_token || '';
+    document.getElementById('fIntroSubject').value    = t.intro_email_subject || '';
+    document.getElementById('fProposalSubject').value = t.proposal_subject    || '';
     document.getElementById('tenantModal').classList.add('open');
     initQuillEditors();
     setRteHtml(_quillIntro,    t.intro_email_html      || '', 'fIntroEmailCount');
@@ -2007,10 +1981,8 @@
     const tenant_contact_email = document.getElementById('fContactEmail').value.trim();
     const tenant_contact_phone = document.getElementById('fContactPhone').value.trim();
     const location             = document.getElementById('fLocation').value.trim();
-    const from_email           = document.getElementById('fFromEmail').value.trim();
-    const smtp_provider        = document.getElementById('fSmtpProvider').value;
-    const smtp_host            = document.getElementById('fSmtpCustomHost').value.trim();
-    const smtp_app_password    = document.getElementById('fSmtpAppPassword').value;
+    const intro_email_subject  = document.getElementById('fIntroSubject').value.trim();
+    const proposal_subject     = document.getElementById('fProposalSubject').value.trim();
 
     // Rich text fields — sanitize before persisting
     const intro_email_html      = sanitizeHtml(getRteHtml(_quillIntro));
@@ -2037,16 +2009,13 @@
         const existing = await window._getDoc(ref);
         if (existing.exists()) { toast(`Slug "${slug}" already exists`, 'error'); btn.disabled=false; resetSaveTenantBtn(); return; }
       }
-      // ISO 27001 A.10: Only persist smtp_app_password if a new value was entered
       const data = {
         id: slug, name, slug, plan, status,
         timezone, currency, tenant_contact_email, tenant_contact_phone, location,
-        from_email,
-        smtp_provider,
-        ...(smtp_provider === 'custom' && smtp_host ? { smtp_host } : {}),
+        intro_email_subject,
+        proposal_subject,
         intro_email_html,
         proposal_content_html,
-        ...(smtp_app_password ? { smtp_app_password } : {}),
         ..._editTenantSlug
           ? { updatedAt: window._serverTimestamp() }
           : { createdAt: window._serverTimestamp(), updatedAt: window._serverTimestamp() }
