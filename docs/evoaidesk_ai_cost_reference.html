@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvoAIDesk — AI Cost Reference Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d14;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: rgba(255,255,255,0.07);
+    --border-accent: rgba(99,211,179,0.3);
+    --text: #f1f5f9;
+    --muted: #8b95a8;
+    --dim: #4b5563;
+    --accent: #63d3b3;
+    --accent2: #4f8ef7;
+    --accent3: #f5a623;
+    --accent4: #e05c5c;
+    --openai: #10a37f;
+    --gemini: #4f8ef7;
+    --claude: #c96442;
+    --gradient: linear-gradient(135deg, #63d3b3 0%, #4f8ef7 100%);
+    --card-glow: 0 0 0 1px rgba(99,211,179,0.08), 0 4px 32px rgba(0,0,0,0.4);
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,13,20,0.95);
+    backdrop-filter: blur(12px);
+    padding: 0 40px;
+  }
+
+  .header-inner {
+    max-width: 1280px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-wrap img {
+    height: 32px;
+    filter: brightness(1.1);
+  }
+
+  .logo-divider {
+    width: 1px;
+    height: 22px;
+    background: var(--dim);
+  }
+
+  .logo-tag {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .header-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(99,211,179,0.08);
+    border: 1px solid rgba(99,211,179,0.2);
+    border-radius: 100px;
+    padding: 4px 14px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .header-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 64px 40px 48px;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(99,211,179,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .hero-kicker span {
+    display: inline-block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 560px;
+    margin: 0 auto 36px;
+    font-weight: 400;
+  }
+
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .hero-meta-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .section-header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: var(--card-glow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--gradient);
+    opacity: 0.3;
+  }
+
+  /* ── METRICS GRID ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .metric-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .metric-card.openai::after { background: var(--openai); }
+  .metric-card.gemini::after { background: var(--gemini); }
+  .metric-card.claude::after { background: var(--claude); }
+  .metric-card.neutral::after { background: var(--gradient); }
+
+  .metric-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    font-family: var(--mono);
+  }
+
+  .metric-note {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  tbody td {
+    padding: 14px 16px;
+    vertical-align: top;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .td-label {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13px;
+  }
+
+  .td-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  .sample-text {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.55;
+    font-family: var(--mono);
+    max-width: 260px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    white-space: pre-wrap;
+  }
+
+  /* Provider cost pills */
+  .cost-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .cost-openai { background: rgba(16,163,127,0.12); color: #34d399; border: 1px solid rgba(16,163,127,0.2); }
+  .cost-gemini { background: rgba(79,142,247,0.12); color: #7ba9f7; border: 1px solid rgba(79,142,247,0.2); }
+  .cost-claude-haiku { background: rgba(201,100,66,0.12); color: #e0956e; border: 1px solid rgba(201,100,66,0.2); }
+  .cost-claude-sonnet { background: rgba(201,100,66,0.18); color: #d4734a; border: 1px solid rgba(201,100,66,0.3); }
+  .cost-free { background: rgba(99,211,179,0.1); color: var(--accent); border: 1px solid rgba(99,211,179,0.2); }
+
+  .cost-stack { display: flex; flex-direction: column; gap: 5px; }
+  .cost-provider-label { font-size: 10px; color: var(--dim); margin-bottom: 2px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  .token-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .token-small { font-size: 11px; color: var(--muted); }
+
+  /* ── PROVIDER HEADER CHIPS ── */
+  .provider-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-right: 6px;
+  }
+
+  .chip-openai { background: rgba(16,163,127,0.15); color: #34d399; }
+  .chip-gemini { background: rgba(79,142,247,0.15); color: #7ba9f7; }
+  .chip-claude { background: rgba(201,100,66,0.15); color: #e0956e; }
+
+  /* ── COMPARISON GRID ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .compare-grid { grid-template-columns: 1fr; }
+  }
+
+  .compare-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .compare-card.best-val {
+    border-color: rgba(99,211,179,0.25);
+    background: rgba(99,211,179,0.04);
+  }
+
+  .compare-card .best-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(99,211,179,0.15);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+
+  .provider-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .provider-name.openai-color { color: #34d399; }
+  .provider-name.gemini-color { color: #7ba9f7; }
+  .provider-name.claude-color { color: #e0956e; }
+
+  .provider-model {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    font-family: var(--mono);
+  }
+
+  .compare-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .compare-row:last-child { border-bottom: none; }
+
+  .compare-row .label { color: var(--muted); }
+  .compare-row .val { font-weight: 600; font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+  .rating-dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .dot-filled { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .dot-empty { width: 8px; height: 8px; border-radius: 50%; background: var(--surface); border: 1px solid var(--dim); }
+
+  /* ── RECOMMENDATION ── */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+
+  .rec-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+
+  .rec-card .rec-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .rec-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .rec-card p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  /* ── MONTHLY ESTIMATE ── */
+  .estimate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+
+  .estimate-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .estimate-card h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .estimate-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .estimate-row:last-child { border-bottom: none; font-weight: 600; color: var(--text); }
+  .estimate-row .use { color: var(--muted); }
+
+  /* ── PRICING TABLE HEADER ── */
+  .th-openai { border-top: 2px solid var(--openai) !important; }
+  .th-gemini { border-top: 2px solid var(--gemini) !important; }
+  .th-claude { border-top: 2px solid var(--claude) !important; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 32px 40px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--dim);
+    position: relative;
+    z-index: 1;
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+
+  .footer-logo {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .footer-logo img { height: 24px; filter: brightness(0.7); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0 24px;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    display: flex;
+    gap: 14px;
+    background: rgba(99,211,179,0.05);
+    border: 1px solid rgba(99,211,179,0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--muted);
+    align-items: flex-start;
+  }
+
+  .callout .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout strong { color: var(--accent); }
+
+  /* responsive */
+  @media (max-width: 768px) {
+    header { padding: 0 20px; }
+    .page { padding: 0 20px 60px; }
+    .hero { padding: 40px 20px 32px; }
+  }
+
+  /* ── MODEL TIER BADGE ── */
+  .tier {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  .tier-fast { background: rgba(245,166,35,0.15); color: var(--accent3); }
+  .tier-balanced { background: rgba(79,142,247,0.15); color: var(--gemini); }
+  .tier-power { background: rgba(201,100,66,0.15); color: #e0956e; }
+
+  .section-sep {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 32px 0 24px;
+  }
+
+  .section-sep span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    white-space: nowrap;
+  }
+
+  .section-sep::before, .section-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <img src="https://evoaiglobal.ai/images/logo.png" alt="evoAI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="display:none;font-size:18px;font-weight:700;color:#63d3b3;letter-spacing:-0.02em;">evo<span style="color:#f1f5f9">AI</span></span>
+      <div class="logo-divider"></div>
+      <span class="logo-tag">AiDesk — Cost Reference</span>
+    </div>
+    <div class="header-badge">Updated Apr 2026</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-kicker"><span></span> Internal Reference Document <span></span></div>
+  <h1>AI Cost Reference<br><em>for EvoAIDesk</em></h1>
+  <p class="hero-sub">Token-level cost breakdown across OpenAI, Google Gemini, and Anthropic Claude — designed for validation, planning, and client conversations.</p>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><div class="dot" style="background:#34d399"></div>OpenAI GPT-4o</div>
+    <div class="hero-meta-item"><div class="dot" style="background:#7ba9f7"></div>Google Gemini 2.0</div>
+    <div class="hero-meta-item"><div class="dot" style="background:#e0956e"></div>Anthropic Claude</div>
+    <div class="hero-meta-item"><div class="dot" style="background:#63d3b3"></div>3 Claude Tiers</div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── KEY METRICS ── -->
+  <div class="section-sep"><span>At a glance</span></div>
+
+  <div class="metrics-grid">
+    <div class="metric-card neutral">
+      <div class="metric-label">Est. Monthly Cost</div>
+      <div class="metric-value">$10–25</div>
+      <div class="metric-note">OpenAI · typical SMB load</div>
+    </div>
+    <div class="metric-card openai">
+      <div class="metric-label">Cost per Chat</div>
+      <div class="metric-value">$0.004</div>
+      <div class="metric-note">OpenAI · 700 tokens/msg</div>
+    </div>
+    <div class="metric-card gemini">
+      <div class="metric-label">Cost per Lead</div>
+      <div class="metric-value">~$0.00</div>
+      <div class="metric-note">Gemini 2.0 Flash free tier</div>
+    </div>
+    <div class="metric-card claude">
+      <div class="metric-label">Claude Haiku Cost</div>
+      <div class="metric-value">$0.0004</div>
+      <div class="metric-note">Per chat · 700 tokens</div>
+    </div>
+    <div class="metric-card claude">
+      <div class="metric-label">Claude Sonnet Cost</div>
+      <div class="metric-value">$0.002</div>
+      <div class="metric-note">Per chat · 700 tokens</div>
+    </div>
+    <div class="metric-card neutral">
+      <div class="metric-label">Target Infra Budget</div>
+      <div class="metric-value">&lt;$20/mo</div>
+      <div class="metric-note">Recommended for early stage</div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 1: USAGE SUMMARY ── -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(99,211,179,0.1);">📊</div>
+      <div>
+        <h2>Usage & Cost Summary</h2>
+        <p>Per-action cost and projected monthly spend across all three providers</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="icon">ℹ️</span>
+      <div><strong>Pricing basis (April 2026):</strong> OpenAI GPT-4o at $2.50/$10 per MTok · Gemini 2.0 Flash free tier (limited) then ~$0.075/$0.30 per MTok · Claude Haiku 4.5 at $1/$5 per MTok · Claude Sonnet 4.6 at $3/$15 per MTok</div>
+    </div>
+
+    <div class="callout" style="margin-bottom:14px; background:rgba(245,166,35,0.05); border-color:rgba(245,166,35,0.2);">
+      <span class="icon">📌</span>
+      <div>
+        <strong style="color:var(--accent3);">What does "Daily Volume" mean?</strong><br>
+        <span style="font-size:13px;">Daily Volume is the number of times that AI action is triggered per day. For example, <strong style="color:var(--text);">Lead Qualification = 50</strong> means 50 new leads are processed by AI each day. The monthly cost is simply:<br>
+        <code style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:12px;color:var(--accent3);">Cost per action × Daily Volume × 30 days = Monthly Cost</code><br>
+        e.g. OpenAI Lead Qual: $0.0001 × 50 × 30 = <strong style="color:var(--text);">$0.15/month</strong>. Adjust these volumes to match your actual expected usage.</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Use Case</th>
+            <th>Tokens/Action</th>
+            <th>Daily Vol. <span style="font-weight:400;text-transform:none;font-size:10px;">(actions/day)</span></th>
+            <th class="th-openai">OpenAI / Action</th>
+            <th class="th-gemini">Gemini / Action</th>
+            <th class="th-claude">Claude Haiku</th>
+            <th class="th-claude">Claude Sonnet</th>
+            <th class="th-openai">Monthly (OpenAI)</th>
+            <th class="th-gemini">Monthly (Gemini)</th>
+            <th class="th-claude">Monthly (Haiku)</th>
+            <th class="th-claude">Monthly (Sonnet)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="td-label">Lead Qualification</span><div class="td-sub">~400 tokens</div></td>
+            <td><span class="token-badge">400</span><div class="token-small">250 in + 150 out</div></td>
+            <td>50</td>
+            <td><span class="cost-pill cost-openai">$0.0001</span></td>
+            <td><span class="cost-pill cost-free">~$0.00</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.00010</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.00030</span></td>
+            <td>$0.15</td>
+            <td>$0</td>
+            <td>$0.15</td>
+            <td>$0.45</td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Chat / Support Agent</span><div class="td-sub">~700 tokens</div></td>
+            <td><span class="token-badge">700</span><div class="token-small">400 in + 300 out</div></td>
+            <td>100</td>
+            <td><span class="cost-pill cost-openai">$0.004</span></td>
+            <td><span class="cost-pill cost-gemini">$0.001–0.002</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0004</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0021</span></td>
+            <td>$12.00</td>
+            <td>$3–6</td>
+            <td>$1.20</td>
+            <td>$6.30</td>
+          </tr>
+          <tr>
+            <td><span class="td-label">CRM Summary</span><div class="td-sub">~2,500 tokens</div></td>
+            <td><span class="token-badge">2,500</span><div class="token-small">2000 in + 500 out</div></td>
+            <td>20</td>
+            <td><span class="cost-pill cost-openai">$0.010</span></td>
+            <td><span class="cost-pill cost-gemini">$0.003–0.005</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0045</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0135</span></td>
+            <td>$6.00</td>
+            <td>$2–3</td>
+            <td>$2.70</td>
+            <td>$8.10</td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Sales Email Generator</span><div class="td-sub">~800 tokens</div></td>
+            <td><span class="token-badge">800</span><div class="token-small">400 in + 400 out</div></td>
+            <td>30</td>
+            <td><span class="cost-pill cost-openai">$0.005</span></td>
+            <td><span class="cost-pill cost-gemini">$0.002</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0006</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0024</span></td>
+            <td>$4.50</td>
+            <td>$1.5–2</td>
+            <td>$0.54</td>
+            <td>$2.16</td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Tagging / Notes Agent</span><div class="td-sub">~250 tokens</div></td>
+            <td><span class="token-badge">250</span><div class="token-small">150 in + 100 out</div></td>
+            <td>80</td>
+            <td><span class="cost-pill cost-openai">$0.00008</span></td>
+            <td><span class="cost-pill cost-free">~$0.00</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.000065</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.00020</span></td>
+            <td>$0.19</td>
+            <td>$0</td>
+            <td>$0.16</td>
+            <td>$0.48</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SECTION 2: DETAILED AGENT REFERENCE ── -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(79,142,247,0.1);">🧠</div>
+      <div>
+        <h2>Detailed AI Agent Reference — Full Examples</h2>
+        <p>Real sample prompts, expected outputs, and costs per agent type</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Use Case</th>
+            <th>In Tokens</th>
+            <th>Out Tokens</th>
+            <th>Sample Input</th>
+            <th>Sample Output</th>
+            <th class="th-openai">OpenAI</th>
+            <th class="th-gemini">Gemini</th>
+            <th class="th-claude">Haiku 4.5</th>
+            <th class="th-claude">Sonnet 4.6</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="td-label">Lead Qualification</span></td>
+            <td>250</td>
+            <td>150</td>
+            <td><div class="sample-text">Name: John Miller
+Company: ABC Retail Pvt Ltd
+Team: 12 employees
+Location: Pune
+Message: exploring CRM with WhatsApp integration for automation + follow-ups. Budget flexible.</div></td>
+            <td><div class="sample-text">Classification: High Intent SMB
+Pain Points: Manual tracking
+Score: 8.5/10
+Action: Demo within 24h</div></td>
+            <td><span class="cost-pill cost-openai">$0.0001</span></td>
+            <td><span class="cost-pill cost-free">$0.00</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.00010</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.00030</span></td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Chat / Support Agent</span></td>
+            <td>400</td>
+            <td>300</td>
+            <td><div class="sample-text">Hi, I want to connect WhatsApp so my sales team can respond to leads. Can you guide me step-by-step? Will it work for multiple agents?</div></td>
+            <td><div class="sample-text">1. Settings → Integrations
+2. Select WhatsApp Business API
+3. Connect number
+4. Assign to team members
+Supports multi-agent ✓</div></td>
+            <td><span class="cost-pill cost-openai">$0.004</span></td>
+            <td><span class="cost-pill cost-gemini">$0.001</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0004</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0021</span></td>
+          </tr>
+          <tr>
+            <td><span class="td-label">CRM Summary Agent</span></td>
+            <td>2,000</td>
+            <td>500</td>
+            <td><div class="sample-text">Full conversation history:
+- Initial CRM inquiry
+- Pricing + WhatsApp interest
+- Onboarding concern raised
+- Proposal requested</div></td>
+            <td><div class="sample-text">Client: Retail SMB
+Needs: Automation, WhatsApp
+Concerns: Price, onboarding
+Next: Send proposal + demo
+Sentiment: Positive ✓</div></td>
+            <td><span class="cost-pill cost-openai">$0.010</span></td>
+            <td><span class="cost-pill cost-gemini">$0.004</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0045</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0135</span></td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Sales Email Generator</span></td>
+            <td>400</td>
+            <td>400</td>
+            <td><div class="sample-text">Generate post-demo follow-up email. Client: retail SMB, interested in CRM automation + WhatsApp.</div></td>
+            <td><div class="sample-text">Subject: Great connecting — Next steps
+
+Hi John, thank you for the demo...
+[personalized CTA + proposal link]
+Team EvoAIDesk</div></td>
+            <td><span class="cost-pill cost-openai">$0.005</span></td>
+            <td><span class="cost-pill cost-gemini">$0.002</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0006</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0024</span></td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Tagging / Notes Agent</span></td>
+            <td>150</td>
+            <td>100</td>
+            <td><div class="sample-text">Client asked about pricing, onboarding, and WhatsApp in base plan.</div></td>
+            <td><div class="sample-text">Tags: Pricing, Onboarding, Integration
+Intent: Medium
+Priority: Follow-up 48h</div></td>
+            <td><span class="cost-pill cost-openai">$0.00008</span></td>
+            <td><span class="cost-pill cost-free">$0.00</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.000065</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.00020</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SECTION 3: CLAUDE MODEL TIERS ── -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(201,100,66,0.1);">🔶</div>
+      <div>
+        <h2>Anthropic Claude — Model Tier Breakdown</h2>
+        <p>Three tiers optimised for different use cases and budgets (April 2026 official pricing)</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Tier</th>
+            <th>Input / MTok</th>
+            <th>Output / MTok</th>
+            <th>Context</th>
+            <th>Best For</th>
+            <th>Chat Cost (700 tok)</th>
+            <th>Summary Cost (2,500 tok)</th>
+            <th>Monthly Chat × 100/day</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="td-label">Claude Haiku 4.5</span></td>
+            <td><span class="tier tier-fast">Fast</span></td>
+            <td style="font-family:var(--mono);color:var(--accent)">$1.00</td>
+            <td style="font-family:var(--mono);color:var(--accent)">$5.00</td>
+            <td>200K</td>
+            <td>Tagging, lead scoring, high-volume routing</td>
+            <td><span class="cost-pill cost-claude-haiku">$0.00040</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0045</span></td>
+            <td style="font-family:var(--mono);font-weight:600;color:#e0956e">$1.20</td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Claude Sonnet 4.6</span></td>
+            <td><span class="tier tier-balanced">Balanced</span></td>
+            <td style="font-family:var(--mono);color:var(--accent)">$3.00</td>
+            <td style="font-family:var(--mono);color:var(--accent)">$15.00</td>
+            <td>1M</td>
+            <td>Chat agents, email gen, CRM summaries</td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0021</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0135</span></td>
+            <td style="font-family:var(--mono);font-weight:600;color:#d4734a">$6.30</td>
+          </tr>
+          <tr>
+            <td><span class="td-label">Claude Opus 4.6</span></td>
+            <td><span class="tier tier-power">Flagship</span></td>
+            <td style="font-family:var(--mono);color:var(--accent)">$5.00</td>
+            <td style="font-family:var(--mono);color:var(--accent)">$25.00</td>
+            <td>1M</td>
+            <td>Complex reasoning, high-stakes analysis</td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0035</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0225</span></td>
+            <td style="font-family:var(--mono);font-weight:600;color:#d4734a">$10.50</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+      <div class="callout" style="margin:0;flex:1;min-width:220px;">
+        <span class="icon">💡</span>
+        <div><strong>Prompt Caching:</strong> Cache repeated system prompts at <strong>10% of input price</strong> — saves up to 90% on input tokens for chat flows.</div>
+      </div>
+      <div class="callout" style="margin:0;flex:1;min-width:220px;">
+        <span class="icon">⚡</span>
+        <div><strong>Batch API:</strong> <strong>50% discount</strong> on all tokens for async workloads (summaries, bulk tagging, reporting) processed within 24h.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 4: PLATFORM COMPARISON ── -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,166,35,0.1);">⚖️</div>
+      <div>
+        <h2>Platform Comparison</h2>
+        <p>OpenAI vs Gemini vs Claude — capability, cost, and fit for EvoAIDesk</p>
+      </div>
+    </div>
+
+    <div class="compare-grid">
+
+      <!-- OpenAI -->
+      <div class="compare-card">
+        <div class="provider-name openai-color">OpenAI</div>
+        <div class="provider-model">GPT-4o · $2.50/$10 per MTok</div>
+        <div class="compare-row"><span class="label">Cost to Start</span><span class="val">$5–10 credit</span></div>
+        <div class="compare-row"><span class="label">Output Quality</span><div class="rating-dots"><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div></div></div>
+        <div class="compare-row"><span class="label">Integration Ease</span><div class="rating-dots"><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-empty"></div></div></div>
+        <div class="compare-row"><span class="label">Chat Cost / msg</span><span class="val">$0.004</span></div>
+        <div class="compare-row"><span class="label">Monthly (100 chats/d)</span><span class="val">$12.00</span></div>
+        <div class="compare-row"><span class="label">Best For</span><span class="val">Production flows</span></div>
+        <div class="compare-row"><span class="label">Ecosystem</span><span class="val">Largest</span></div>
+      </div>
+
+      <!-- Gemini -->
+      <div class="compare-card best-val">
+        <div class="best-badge">Free Tier</div>
+        <div class="provider-name gemini-color">Google Gemini</div>
+        <div class="provider-model">Flash 2.0 · Free → $0.075/$0.30 per MTok</div>
+        <div class="compare-row"><span class="label">Cost to Start</span><span class="val" style="color:var(--accent)">Free</span></div>
+        <div class="compare-row"><span class="label">Output Quality</span><div class="rating-dots"><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-empty"></div></div></div>
+        <div class="compare-row"><span class="label">Integration Ease</span><div class="rating-dots"><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-empty"></div><div class="dot-empty"></div></div></div>
+        <div class="compare-row"><span class="label">Chat Cost / msg</span><span class="val" style="color:var(--accent)">~$0.00</span></div>
+        <div class="compare-row"><span class="label">Monthly (100 chats/d)</span><span class="val">$0–6</span></div>
+        <div class="compare-row"><span class="label">Best For</span><span class="val">Validation / MVP</span></div>
+        <div class="compare-row"><span class="label">Ecosystem</span><span class="val">Google Suite</span></div>
+      </div>
+
+      <!-- Claude -->
+      <div class="compare-card">
+        <div class="provider-name claude-color">Anthropic Claude</div>
+        <div class="provider-model">Haiku $1/$5 · Sonnet $3/$15 · Opus $5/$25 per MTok</div>
+        <div class="compare-row"><span class="label">Cost to Start</span><span class="val">$5 credit</span></div>
+        <div class="compare-row"><span class="label">Output Quality</span><div class="rating-dots"><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div></div></div>
+        <div class="compare-row"><span class="label">Integration Ease</span><div class="rating-dots"><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-filled"></div><div class="dot-empty"></div></div></div>
+        <div class="compare-row"><span class="label">Chat Cost / msg</span><span class="val">$0.0004–0.002</span></div>
+        <div class="compare-row"><span class="label">Monthly (100 chats/d)</span><span class="val">$1.20–6.30</span></div>
+        <div class="compare-row"><span class="label">Best For</span><span class="val">Reasoning + safety</span></div>
+        <div class="compare-row"><span class="label">Ecosystem</span><span class="val">AWS / GCP / API</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION 5: MONTHLY COST PROJECTION ── -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(99,211,179,0.1);">📈</div>
+      <div>
+        <h2>Monthly Cost Projection</h2>
+        <p>Full workload across all 5 use cases — typical early-stage SMB load</p>
+      </div>
+    </div>
+
+    <div class="estimate-grid">
+
+      <div class="estimate-card">
+        <h4 style="color:#34d399">OpenAI GPT-4o</h4>
+        <div class="estimate-row"><span class="use">Lead Qualification (50/d)</span><span>$0.15</span></div>
+        <div class="estimate-row"><span class="use">Chat Agent (100/d)</span><span>$12.00</span></div>
+        <div class="estimate-row"><span class="use">CRM Summary (20/d)</span><span>$6.00</span></div>
+        <div class="estimate-row"><span class="use">Sales Email (30/d)</span><span>$4.50</span></div>
+        <div class="estimate-row"><span class="use">Tagging (80/d)</span><span>$0.19</span></div>
+        <div class="estimate-row"><span class="use" style="font-weight:600;color:var(--text)">Total Monthly</span><span style="color:#34d399">~$22.84</span></div>
+      </div>
+
+      <div class="estimate-card">
+        <h4 style="color:#7ba9f7">Google Gemini Flash</h4>
+        <div class="estimate-row"><span class="use">Lead Qualification (50/d)</span><span>$0.00</span></div>
+        <div class="estimate-row"><span class="use">Chat Agent (100/d)</span><span>$3–6</span></div>
+        <div class="estimate-row"><span class="use">CRM Summary (20/d)</span><span>$2–3</span></div>
+        <div class="estimate-row"><span class="use">Sales Email (30/d)</span><span>$1.5–2</span></div>
+        <div class="estimate-row"><span class="use">Tagging (80/d)</span><span>$0.00</span></div>
+        <div class="estimate-row"><span class="use" style="font-weight:600;color:var(--text)">Total Monthly</span><span style="color:#7ba9f7">~$6.50–11</span></div>
+      </div>
+
+      <div class="estimate-card">
+        <h4 style="color:#e0956e">Claude Haiku 4.5</h4>
+        <div class="estimate-row"><span class="use">Lead Qualification (50/d)</span><span>$0.15</span></div>
+        <div class="estimate-row"><span class="use">Chat Agent (100/d)</span><span>$1.20</span></div>
+        <div class="estimate-row"><span class="use">CRM Summary (20/d)</span><span>$2.70</span></div>
+        <div class="estimate-row"><span class="use">Sales Email (30/d)</span><span>$0.54</span></div>
+        <div class="estimate-row"><span class="use">Tagging (80/d)</span><span>$0.16</span></div>
+        <div class="estimate-row"><span class="use" style="font-weight:600;color:var(--text)">Total Monthly</span><span style="color:#e0956e">~$4.75</span></div>
+      </div>
+
+      <div class="estimate-card">
+        <h4 style="color:#d4734a">Claude Sonnet 4.6</h4>
+        <div class="estimate-row"><span class="use">Lead Qualification (50/d)</span><span>$0.45</span></div>
+        <div class="estimate-row"><span class="use">Chat Agent (100/d)</span><span>$6.30</span></div>
+        <div class="estimate-row"><span class="use">CRM Summary (20/d)</span><span>$8.10</span></div>
+        <div class="estimate-row"><span class="use">Sales Email (30/d)</span><span>$2.16</span></div>
+        <div class="estimate-row"><span class="use">Tagging (80/d)</span><span>$0.48</span></div>
+        <div class="estimate-row"><span class="use" style="font-weight:600;color:var(--text)">Total Monthly</span><span style="color:#d4734a">~$17.49</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SECTION 6: STRATEGY ── -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,166,35,0.1);">🚀</div>
+      <div>
+        <h2>Recommended Strategy for EvoAIDesk</h2>
+        <p>Phased approach to maximise quality while keeping costs predictable</p>
+      </div>
+    </div>
+
+    <div class="rec-grid">
+      <div class="rec-card">
+        <div class="rec-num">Phase 01 — Validate</div>
+        <h4>Use Gemini Flash for MVP</h4>
+        <p>Free tier covers most validation workloads. Zero cost to test lead qualification, tagging, and basic chat flows before committing to production providers.</p>
+      </div>
+      <div class="rec-card">
+        <div class="rec-num">Phase 02 — High-Volume Ops</div>
+        <h4>Claude Haiku for automation</h4>
+        <p>At $1/$5 per MTok, Haiku is the cheapest production-grade model. Ideal for tagging, lead scoring, and routing where volume is high but quality demands are moderate.</p>
+      </div>
+      <div class="rec-card">
+        <div class="rec-num">Phase 03 — Customer Facing</div>
+        <h4>OpenAI or Claude Sonnet for chat</h4>
+        <p>Both deliver excellent quality for customer-facing chat. Claude Sonnet is ~50% cheaper than GPT-4o for the same output quality at typical EvoAIDesk conversation lengths.</p>
+      </div>
+      <div class="rec-card">
+        <div class="rec-num">Phase 04 — Cost Optimisation</div>
+        <h4>Batch API + Prompt Caching</h4>
+        <p>Enable Claude Batch API (50% off) for async jobs like CRM summaries and reports. Add prompt caching for shared system prompts to save up to 90% on input tokens.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;" class="callout">
+      <span class="icon">🎯</span>
+      <div><strong>Bottom line:</strong> A full EvoAIDesk workload (all 5 agents, typical SMB volume) costs <strong>~$4.75/month on Claude Haiku</strong>, <strong>~$17.50 on Sonnet</strong>, and <strong>~$22.84 on GPT-4o</strong>. All well within the <strong>$20/month initial budget</strong> — leaving room to scale.</div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 7: GENERIC AGENT REFERENCE (X/Y TOKEN TEMPLATE) ── -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(99,211,179,0.1);">🧩</div>
+      <div>
+        <h2>Generic AI Agent Reference Table</h2>
+        <p>Reusable template — estimate cost for <em>any</em> AI agent by defining your own input (X) and output (Y) tokens</p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-bottom:20px;">
+      <span class="icon">📐</span>
+      <div>
+        <strong>How to use this table:</strong> For any new agent you design, count your expected <strong style="color:var(--text);">Input Tokens (X)</strong> — the prompt + context you send — and <strong style="color:var(--text);">Output Tokens (Y)</strong> — the response you expect back. Then apply the formula:<br>
+        <code style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:12px;color:var(--accent);">Cost = (X × input rate + Y × output rate) ÷ 1,000,000</code><br>
+        <span style="font-size:12px;color:var(--dim);margin-top:4px;display:block;">Rule of thumb: ~1 token ≈ 0.75 words ≈ 4 characters. A 300-word prompt ≈ 400 tokens.</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Use Case</th>
+            <th>Input Tokens (X)</th>
+            <th>Output Tokens (Y)</th>
+            <th>Total Tokens</th>
+            <th>Approx Words</th>
+            <th>Approx Sentences</th>
+            <th class="th-openai">OpenAI / Action</th>
+            <th class="th-gemini">Gemini / Action</th>
+            <th class="th-claude">Haiku / Action</th>
+            <th class="th-claude">Sonnet / Action</th>
+            <th>Daily Vol.</th>
+            <th class="th-openai">Monthly (OpenAI)</th>
+            <th class="th-gemini">Monthly (Gemini)</th>
+            <th class="th-claude">Monthly (Haiku)</th>
+            <th class="th-claude">Monthly (Sonnet)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="td-label">Use Case #1</span>
+              <div class="td-sub">e.g. Lead Qualification AI</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--accent);font-weight:600;">X = 250</span>
+              <div class="td-sub">Short prompt + lead data</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--accent);font-weight:600;">Y = 150</span>
+              <div class="td-sub">Structured score + tags</div>
+            </td>
+            <td><span class="token-badge">400</span></td>
+            <td>~300</td>
+            <td>15–20</td>
+            <td><span class="cost-pill cost-openai">$0.0001</span></td>
+            <td><span class="cost-pill cost-free">~$0.00</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.00010</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.00030</span></td>
+            <td>50</td>
+            <td>$0.15</td>
+            <td>$0</td>
+            <td>$0.15</td>
+            <td>$0.45</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="td-label">Use Case #2</span>
+              <div class="td-sub">e.g. Chat / Support Agent</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--accent);font-weight:600;">X = 400</span>
+              <div class="td-sub">User message + history</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--accent);font-weight:600;">Y = 300</span>
+              <div class="td-sub">Conversational reply</div>
+            </td>
+            <td><span class="token-badge">700</span></td>
+            <td>~500</td>
+            <td>25–35</td>
+            <td><span class="cost-pill cost-openai">$0.004</span></td>
+            <td><span class="cost-pill cost-gemini">$0.001–0.002</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0004</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0021</span></td>
+            <td>100</td>
+            <td>$12.00</td>
+            <td>$3–6</td>
+            <td>$1.20</td>
+            <td>$6.30</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="td-label">Use Case #3</span>
+              <div class="td-sub">e.g. CRM Summary Agent</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--accent);font-weight:600;">X = 2,000</span>
+              <div class="td-sub">Full conversation history</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--accent);font-weight:600;">Y = 500</span>
+              <div class="td-sub">Structured summary</div>
+            </td>
+            <td><span class="token-badge">2,500</span></td>
+            <td>~1,500</td>
+            <td>75–100</td>
+            <td><span class="cost-pill cost-openai">$0.010</span></td>
+            <td><span class="cost-pill cost-gemini">$0.003–0.005</span></td>
+            <td><span class="cost-pill cost-claude-haiku">$0.0045</span></td>
+            <td><span class="cost-pill cost-claude-sonnet">$0.0135</span></td>
+            <td>20</td>
+            <td>$6.00</td>
+            <td>$2–3</td>
+            <td>$2.70</td>
+            <td>$8.10</td>
+          </tr>
+          <tr style="background:rgba(99,211,179,0.03);border:1px dashed rgba(99,211,179,0.15);">
+            <td>
+              <span class="td-label" style="color:var(--accent);">Custom Agent</span>
+              <div class="td-sub">Your new use case here</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--dim);font-size:15px;font-weight:600;">X = ___</span>
+              <div class="td-sub">Define your prompt size</div>
+            </td>
+            <td>
+              <span style="font-family:var(--mono);color:var(--dim);font-size:15px;font-weight:600;">Y = ___</span>
+              <div class="td-sub">Define expected output</div>
+            </td>
+            <td><span style="color:var(--dim);font-family:var(--mono);">X + Y</span></td>
+            <td><span style="color:var(--dim);">÷ 1.33</span></td>
+            <td><span style="color:var(--dim);">Auto</span></td>
+            <td><span style="color:var(--dim);font-size:12px;">(X×$2.5 + Y×$10) ÷ 1M</span></td>
+            <td><span style="color:var(--dim);font-size:12px;">(X×$0.075 + Y×$0.30) ÷ 1M</span></td>
+            <td><span style="color:var(--dim);font-size:12px;">(X×$1 + Y×$5) ÷ 1M</span></td>
+            <td><span style="color:var(--dim);font-size:12px;">(X×$3 + Y×$15) ÷ 1M</span></td>
+            <td><span style="color:var(--dim);">—</span></td>
+            <td colspan="4" style="color:var(--dim);font-size:12px;font-style:italic;">Cost/action × Daily Vol × 30</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Token quick reference -->
+    <div style="margin-top:20px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);margin-bottom:12px;">Quick Token Reference</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">1 Token ≈</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;">0.75 words / 4 chars</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">100 words ≈</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;">~133 tokens</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">1 sentence ≈</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;">15–20 tokens</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Short email ≈</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;">200–400 tokens</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Long chat history ≈</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;">1,500–3,000 tokens</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">1 MTok =</div>
+          <div style="font-family:var(--mono);font-size:13px;font-weight:600;">1,000,000 tokens</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <img src="https://evoaiglobal.ai/images/logo.png" alt="evoAI" onerror="this.style.display='none'">
+    <span style="font-size:14px;font-weight:600;color:#4b5563;">AiDesk</span>
+  </div>
+  <p style="margin-bottom:6px;">Prices sourced from Anthropic, OpenAI, and Google official documentation · April 2026</p>
+  <p>Evolve. Automate. Accelerate. · <a href="https://evoaiglobal.ai">evoaiglobal.ai</a> · <a href="https://desk.evoaiglobal.ai">desk.evoaiglobal.ai</a></p>
+</footer>
+
+</body>
+</html>

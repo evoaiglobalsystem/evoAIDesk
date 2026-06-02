@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>evoAIDesk — Scaling & Cost Tiers</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0a0c10;
+    --bg2:      #111418;
+    --bg3:      #181c22;
+    --bg4:      #1e2330;
+    --border:   #252b38;
+    --border2:  #2e3647;
+    --text:     #e8edf5;
+    --text2:    #8a95a8;
+    --text3:    #5a6478;
+    --accent:   #3b82f6;
+    --accent2:  #60a5fa;
+    --green:    #22c55e;
+    --green-bg: rgba(34,197,94,.10);
+    --amber:    #f59e0b;
+    --amber-bg: rgba(245,158,11,.10);
+    --red:      #ef4444;
+    --red-bg:   rgba(239,68,68,.10);
+    --blue:     #38bdf8;
+    --blue-bg:  rgba(56,189,248,.10);
+    --purple:   #a78bfa;
+    --purple-bg: rgba(167,139,250,.10);
+    --mono:     'DM Mono', monospace;
+    --sans:     'Sora', sans-serif;
+    --radius:   10px;
+    --radius-lg: 14px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  .page-header {
+    background: linear-gradient(135deg, #0d1117 0%, #0f1724 50%, #0a0f1a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 36px;
+    position: relative; overflow: hidden;
+  }
+  .page-header::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% -20%, rgba(59,130,246,.15) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at -10% 80%, rgba(34,197,94,.07) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .header-inner { position: relative; max-width: 1080px; margin: 0 auto; }
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: #fff;
+    box-shadow: 0 4px 16px rgba(59,130,246,.35);
+  }
+  .logo-text { font-size: 15px; font-weight: 600; color: var(--text); }
+  .logo-text span { color: var(--accent2); }
+  .page-title { font-size: 30px; font-weight: 700; letter-spacing: -.6px; color: var(--text); line-height: 1.2; margin-bottom: 10px; }
+  .page-title em { font-style: normal; color: var(--accent2); }
+  .page-meta { font-size: 13px; color: var(--text2); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .meta-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3px 11px; font-size: 11.5px; color: var(--text2);
+  }
+  .meta-pill .dot       { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .meta-pill .dot-amber { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+
+  .main { max-width: 1080px; margin: 0 auto; padding: 40px 48px 0; }
+
+  .section-label {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--text3); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Callout ── */
+  .callout {
+    border: 1px solid var(--border2); border-radius: var(--radius-lg);
+    background: var(--bg2); padding: 20px 24px; margin-bottom: 40px;
+    display: flex; gap: 20px; align-items: flex-start;
+  }
+  .callout-icon {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    background: var(--blue-bg); border: 1px solid rgba(56,189,248,.2);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .callout-title { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .callout-body { font-size: 12.5px; color: var(--text2); line-height: 1.7; }
+  .callout-body strong { color: var(--text); font-weight: 600; }
+
+  /* ── Model banner ── */
+  .model-banner {
+    background: linear-gradient(135deg, rgba(34,197,94,.06) 0%, rgba(59,130,246,.06) 100%);
+    border: 1px solid rgba(34,197,94,.18);
+    border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 40px;
+    display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center;
+  }
+  .model-banner-left { display: flex; gap: 16px; align-items: flex-start; }
+  .model-banner-icon {
+    width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+    background: var(--green-bg); border: 1px solid rgba(34,197,94,.25);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .model-banner-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .model-banner-desc { font-size: 12px; color: var(--text2); line-height: 1.7; }
+  .model-banner-desc strong { color: var(--green); font-weight: 600; }
+  .model-pills { display: flex; flex-direction: column; gap: 8px; min-width: 210px; }
+  .model-pill {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px; gap: 10px;
+  }
+  .model-pill-label { font-size: 11px; color: var(--text2); }
+  .model-pill-val { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+  .model-pill-val.g { color: var(--green); }
+  .model-pill-val.a { color: var(--amber); }
+  .model-pill-val.p { color: var(--purple); }
+
+  /* ── Tier cards ── */
+  .tier-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 40px; }
+  .tier-card {
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; background: var(--bg2);
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+  }
+  .tier-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.4); }
+  .tier-card.green { border-top: 2px solid var(--green); }
+  .tier-card.green:hover { border-color: var(--green); box-shadow: 0 8px 32px rgba(34,197,94,.12); }
+  .tier-card.blue  { border-top: 2px solid var(--blue); }
+  .tier-card.blue:hover  { border-color: var(--blue);  box-shadow: 0 8px 32px rgba(56,189,248,.12); }
+  .tier-card.amber { border-top: 2px solid var(--amber); }
+  .tier-card.amber:hover { border-color: var(--amber); box-shadow: 0 8px 32px rgba(245,158,11,.12); }
+  .tier-card.red   { border-top: 2px solid var(--red); }
+  .tier-card.red:hover   { border-color: var(--red);   box-shadow: 0 8px 32px rgba(239,68,68,.12); }
+
+  .tier-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
+  .tier-name { font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+  .green .tier-name { color: var(--green); }
+  .blue  .tier-name { color: var(--blue); }
+  .amber .tier-name { color: var(--amber); }
+  .red   .tier-name { color: var(--red); }
+  .tier-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+  .tier-body { padding: 12px 16px; }
+  .tier-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+  }
+  .tier-row:last-child { border-bottom: none; }
+  .tier-row.divider { border-top: 1px dashed var(--border2); margin-top: 4px; padding-top: 8px; }
+  .tier-key { color: var(--text2); }
+  .tier-val { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--text); }
+  .tier-val.free   { color: var(--green); }
+  .tier-val.warn   { color: var(--amber); }
+  .tier-val.danger { color: var(--red); }
+
+  .tier-total {
+    padding: 10px 16px; border-top: 1px solid var(--border2);
+    background: var(--bg3); display: flex; justify-content: space-between; align-items: center;
+  }
+  .tier-total-label { font-size: 11px; color: var(--text2); }
+  .tier-total-val { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -.5px; }
+
+  /* ── Add-on section ── */
+  .addon-wrap {
+    border: 1px solid rgba(167,139,250,.2);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(167,139,250,.05) 0%, rgba(59,130,246,.04) 100%);
+    padding: 24px; margin-bottom: 40px;
+  }
+  .addon-head { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .addon-icon {
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+    background: var(--purple-bg); border: 1px solid rgba(167,139,250,.25);
+    display: flex; align-items: center; justify-content: center; font-size: 19px;
+  }
+  .addon-head-title { font-size: 14px; font-weight: 700; color: var(--text); }
+  .addon-head-sub   { font-size: 11.5px; color: var(--text2); margin-top: 2px; }
+  .addon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .addon-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .addon-tier { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .addon-row { display: flex; justify-content: space-between; font-size: 11.5px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .addon-row:last-child { border-bottom: none; }
+  .addon-k { color: var(--text2); }
+  .addon-v { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--purple); }
+  .addon-v.g { color: var(--green); }
+  .addon-rev { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border2); display: flex; justify-content: space-between; align-items: center; }
+  .addon-rev-label { font-size: 10px; color: var(--text3); }
+  .addon-rev-val   { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--green); }
+
+  /* ── Opt grid ── */
+  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 40px; }
+  .opt-card { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg2); padding: 16px; transition: transform .2s; }
+  .opt-card:hover { transform: translateY(-1px); }
+  .opt-card-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .opt-card-title { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .opt-card-desc  { font-size: 11.5px; color: var(--text2); line-height: 1.6; }
+  .opt-saving { margin-top: 10px; font-family: var(--mono); font-size: 13px; color: var(--green); font-weight: 600; }
+
+  /* ── Table ── */
+  .table-wrap { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 40px; background: var(--bg2); }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; table-layout: fixed; }
+  thead tr { background: var(--bg3); }
+  th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--text2); text-transform: uppercase; border-bottom: 1px solid var(--border2); }
+  th.r { text-align: right; }
+  td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; line-height: 1.5; }
+  td.r { text-align: right; font-family: var(--mono); font-size: 11.5px; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,.025); }
+  .section-row td { background: var(--bg4) !important; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); padding: 6px 14px; border-bottom: 1px solid var(--border2); }
+  .highlight-row td { background: rgba(59,130,246,.06); font-weight: 600; }
+  .savings-row td { background: rgba(34,197,94,.04); }
+
+  .sub  { font-size: 10.5px; color: var(--text3); margin-top: 2px; display: block; }
+  .best { color: var(--green); font-weight: 600; }
+
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px; display: inline-block; white-space: nowrap; font-family: var(--mono); }
+  .badge-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(34,197,94,.2); }
+  .badge-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid rgba(245,158,11,.2); }
+  .badge-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(239,68,68,.2); }
+  .badge-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid rgba(56,189,248,.2); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(167,139,250,.2); }
+
+  /* ── Action cards ── */
+  .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 40px; }
+  .action-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; background: var(--bg2); display: flex; flex-direction: column; gap: 10px; transition: border-color .2s, box-shadow .2s; }
+  .action-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  .action-card.green { border-left: 3px solid var(--green); }
+  .action-card.blue  { border-left: 3px solid var(--blue); }
+  .action-card.amber { border-left: 3px solid var(--amber); }
+  .action-card.red   { border-left: 3px solid var(--red); }
+  .action-title { font-size: 12.5px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 7px; }
+  .action-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .green .action-icon { background: var(--green-bg); color: var(--green); }
+  .blue  .action-icon { background: var(--blue-bg);  color: var(--blue); }
+  .amber .action-icon { background: var(--amber-bg); color: var(--amber); }
+  .red   .action-icon { background: var(--red-bg);   color: var(--red); }
+  .action-items { display: flex; flex-direction: column; gap: 7px; }
+  .action-item { font-size: 11.5px; color: var(--text2); line-height: 1.5; display: flex; gap: 7px; align-items: flex-start; }
+  .action-item::before { content: '›'; color: var(--text3); flex-shrink: 0; font-size: 14px; line-height: 1.4; }
+
+  /* ── Footer ── */
+  .page-footer {
+    max-width: 1080px; margin: 40px auto 0; padding: 0 48px;
+    border-top: 1px solid var(--border); padding-top: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11.5px; color: var(--text3);
+  }
+  .page-footer a { color: var(--accent2); text-decoration: none; }
+  .page-footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="header-inner">
+    <div class="logo-row">
+      <div class="logo-mark">e</div>
+      <div class="logo-text">evo<span>AI</span>Desk</div>
+    </div>
+    <h1 class="page-title">Infrastructure Scaling &amp; <em>Cost Tiers</em></h1>
+    <div class="page-meta">
+      <span class="meta-pill"><span class="dot"></span> Internal Review Document</span>
+      <span class="meta-pill">5 → 25 → 50 → 100 Clients</span>
+      <span class="meta-pill"><span class="dot-amber"></span> Rev 2 — 1 Bot / Client Model</span>
+      <span class="meta-pill">Firebase · n8n · Redis · nginx</span>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Callout -->
+  <div class="callout">
+    <div class="callout-icon">📊</div>
+    <div>
+      <div class="callout-title">Model update — 1 chatbot per client (revised from 3)</div>
+      <div class="callout-body">
+        This document reflects the revised client model: <strong>1 client = 3 dashboard users + 1 chatbot included free on signup</strong>. Additional bots are sold as self-serve add-ons at <strong>$5/bot/month</strong>. Baseline Firestore reads drop ~67% vs. the previous 3-bot assumption — Firebase costs fall from ~$162/mo to ~$54/mo at 100 clients. The bot workflow (Smart Version, n8n) is pre-built and production-ready; onboarding a new client's bot requires only a Telegram token and Firestore tenant registration — no custom setup.
+      </div>
+    </div>
+  </div>
+
+  <!-- Model banner -->
+  <p class="section-label">Client model — what every plan includes</p>
+  <div class="model-banner">
+    <div class="model-banner-left">
+      <div class="model-banner-icon">🏢</div>
+      <div>
+        <div class="model-banner-title">Standard bundle — included on every plan at signup</div>
+        <div class="model-banner-desc">
+          Every client gets <strong>3 dashboard users</strong> for full CRM access and <strong>1 Telegram chatbot</strong> live from day one — no manual setup required. The bot is scoped to the client's Firestore tenant via the existing n8n Smart Workflow and is ready to capture leads, run the <code>/addlead</code> wizard, and deliver pipeline summaries immediately. Clients who see value in the free bot convert naturally to the <strong>$5/bot/month</strong> add-on — ~89% gross margin on each extra bot since the marginal infra cost is only ~$0.55/bot/month.
+        </div>
+      </div>
+    </div>
+    <div class="model-pills">
+      <div class="model-pill">
+        <span class="model-pill-label">👥 Dashboard users</span>
+        <span class="model-pill-val g">3 included</span>
+      </div>
+      <div class="model-pill">
+        <span class="model-pill-label">🤖 Chatbot (baseline)</span>
+        <span class="model-pill-val g">1 free</span>
+      </div>
+      <div class="model-pill">
+        <span class="model-pill-label">➕ Extra bots</span>
+        <span class="model-pill-val a">$5 / bot / mo</span>
+      </div>
+      <div class="model-pill">
+        <span class="model-pill-label">📁 Lead docs / client</span>
+        <span class="model-pill-val">1.5 K–5 K</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tier cards — plan-aware matrix -->
+  <p class="section-label">Infrastructure cost — by plan × client tier (1 bot / client)</p>
+
+  <div class="callout" style="margin-bottom:20px;background:rgba(59,130,246,.05);border-color:rgba(59,130,246,.2);">
+    <div class="callout-icon" style="background:var(--blue-bg);border-color:rgba(56,189,248,.2);">📐</div>
+    <div>
+      <div class="callout-title">Recalculated per actual plan lead limits</div>
+      <div class="callout-body">
+        Firebase reads scale with lead count per client, not a fixed 5 K. <strong>Starter = 1,500 leads</strong> (9 K reads/bot/day) · <strong>Growth = 3,000 leads</strong> (18 K reads/bot/day) · <strong>Team = 5,000 leads</strong> (30 K reads/bot/day). All figures use 4-hr TTL (6 cache misses/day). Storage stays within Firebase's 1 GB free tier across all plans and tiers. Droplet and Redis costs are shared infra — identical for all plans at the same client count.
+      </div>
+    </div>
+  </div>
+
+  <!-- STARTER plan row -->
+  <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);">Starter plan</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--green);font-weight:600;">$39 / mo · 1,500 leads · 3 users</span>
+    <span style="flex:1;height:1px;background:var(--border);"></span>
+  </div>
+  <div class="tier-grid" style="margin-bottom:24px;">
+
+    <div class="tier-card green">
+      <div class="tier-header">
+        <div class="tier-name">5 Clients</div>
+        <div class="tier-sub">MVP · 7.5 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">15</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">5</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">7.5 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">52.5 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$12</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val free">~$0</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val">—</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$12</span>
+      </div>
+    </div>
+
+    <div class="tier-card blue">
+      <div class="tier-header">
+        <div class="tier-name">25 Clients</div>
+        <div class="tier-sub">Growth · 37.5 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">75</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">25</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">37.5 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">262.5 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$24</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val free">~$4</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val">—</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$28</span>
+      </div>
+    </div>
+
+    <div class="tier-card amber">
+      <div class="tier-header">
+        <div class="tier-name">50 Clients</div>
+        <div class="tier-sub">Scale · 75 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">150</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">50</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">75 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">525 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$48</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val warn">~$9</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val warn">$15 rec.</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$72</span>
+      </div>
+    </div>
+
+    <div class="tier-card red">
+      <div class="tier-header">
+        <div class="tier-name">100 Clients</div>
+        <div class="tier-sub">Full scale · 150 K docs</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">300</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">100</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">150 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">1.05 M</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$48</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val warn">~$18</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val danger">$15 urgent</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$81</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GROWTH plan row -->
+  <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);">Growth plan</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--blue);font-weight:600;">$69 / mo · 3,000 leads · 3 users</span>
+    <span style="flex:1;height:1px;background:var(--border);"></span>
+  </div>
+  <div class="tier-grid" style="margin-bottom:24px;">
+
+    <div class="tier-card green">
+      <div class="tier-header">
+        <div class="tier-name">5 Clients</div>
+        <div class="tier-sub">MVP · 15 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">15</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">5</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">15 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">97.5 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$12</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val free">~$1</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val">—</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$13</span>
+      </div>
+    </div>
+
+    <div class="tier-card blue">
+      <div class="tier-header">
+        <div class="tier-name">25 Clients</div>
+        <div class="tier-sub">Growth · 75 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">75</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">25</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">75 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">487.5 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$24</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val">~$8</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val">—</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$32</span>
+      </div>
+    </div>
+
+    <div class="tier-card amber">
+      <div class="tier-header">
+        <div class="tier-name">50 Clients</div>
+        <div class="tier-sub">Scale · 150 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">150</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">50</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">150 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">975 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$48</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val warn">~$17</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val warn">$15 rec.</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$80</span>
+      </div>
+    </div>
+
+    <div class="tier-card red">
+      <div class="tier-header">
+        <div class="tier-name">100 Clients</div>
+        <div class="tier-sub">Full scale · 300 K docs</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">300</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">100</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">300 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">1.95 M</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$48</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val warn">~$34</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val danger">$15 urgent</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$97</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TEAM plan row -->
+  <div style="margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);">Team plan</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--amber);font-weight:600;">$109 / mo · 5,000 leads · 5 users</span>
+    <span style="flex:1;height:1px;background:var(--border);"></span>
+  </div>
+  <div class="tier-grid" style="margin-bottom:40px;">
+
+    <div class="tier-card green">
+      <div class="tier-header">
+        <div class="tier-name">5 Clients</div>
+        <div class="tier-sub">MVP · 25 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">25</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">5</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">25 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">162.5 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$12</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val free">~$2</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val">—</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$14</span>
+      </div>
+    </div>
+
+    <div class="tier-card blue">
+      <div class="tier-header">
+        <div class="tier-name">25 Clients</div>
+        <div class="tier-sub">Growth · 125 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">125</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">25</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">125 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">812.5 K</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$24</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val">~$14</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val">—</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$38</span>
+      </div>
+    </div>
+
+    <div class="tier-card amber">
+      <div class="tier-header">
+        <div class="tier-name">50 Clients</div>
+        <div class="tier-sub">Scale · 250 K docs total</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">250</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">50</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">250 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">1.625 M</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$48</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val warn">~$28</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val warn">$15 rec.</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$91</span>
+      </div>
+    </div>
+
+    <div class="tier-card red">
+      <div class="tier-header">
+        <div class="tier-name">100 Clients</div>
+        <div class="tier-sub">Full scale · 500 K docs</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Dashboard users</span><span class="tier-val">500</span></div>
+        <div class="tier-row"><span class="tier-key">Chatbots (baseline)</span><span class="tier-val">100</span></div>
+        <div class="tier-row"><span class="tier-key">Total lead docs</span><span class="tier-val">500 K</span></div>
+        <div class="tier-row"><span class="tier-key">Reads / day</span><span class="tier-val">3.25 M</span></div>
+        <div class="tier-row divider"><span class="tier-key">n8n Droplet</span><span class="tier-val">$48</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase reads</span><span class="tier-val warn">~$58</span></div>
+        <div class="tier-row"><span class="tier-key">Firebase storage</span><span class="tier-val free">Free</span></div>
+        <div class="tier-row"><span class="tier-key">Redis</span><span class="tier-val danger">$15 urgent</span></div>
+        <div class="tier-row"><span class="tier-key">nginx / SSL</span><span class="tier-val">Free</span></div>
+      </div>
+      <div class="tier-total">
+        <span class="tier-total-label">Infra / month</span>
+        <span class="tier-total-val">~$121</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Add-on section -->
+  <p class="section-label">Bot add-on economics — $5 / bot / month</p>
+  <div class="addon-wrap">
+    <div class="addon-head">
+      <div class="addon-icon">🤖</div>
+      <div>
+        <div class="addon-head-title">Additional chatbot add-ons — ~89 % gross margin per bot</div>
+        <div class="addon-head-sub">Infra cost per extra bot: ~$0.55/mo (30 K reads/day × $0.06/100 K). Revenue per bot: $5/mo. Scenarios assume avg. 1 extra bot purchased per client.</div>
+      </div>
+    </div>
+    <div class="addon-grid">
+
+      <div class="addon-card">
+        <div class="addon-tier">5 clients</div>
+        <div class="addon-row"><span class="addon-k">Baseline bots</span><span class="addon-v g">5 (free)</span></div>
+        <div class="addon-row"><span class="addon-k">Avg add-on bots</span><span class="addon-v">+5</span></div>
+        <div class="addon-row"><span class="addon-k">Extra reads / day</span><span class="addon-v">150 K</span></div>
+        <div class="addon-row"><span class="addon-k">Extra infra cost</span><span class="addon-v">~$3/mo</span></div>
+        <div class="addon-rev">
+          <span class="addon-rev-label">Add-on revenue</span>
+          <span class="addon-rev-val">+$25/mo</span>
+        </div>
+      </div>
+
+      <div class="addon-card">
+        <div class="addon-tier">25 clients</div>
+        <div class="addon-row"><span class="addon-k">Baseline bots</span><span class="addon-v g">25 (free)</span></div>
+        <div class="addon-row"><span class="addon-k">Avg add-on bots</span><span class="addon-v">+25</span></div>
+        <div class="addon-row"><span class="addon-k">Extra reads / day</span><span class="addon-v">750 K</span></div>
+        <div class="addon-row"><span class="addon-k">Extra infra cost</span><span class="addon-v">~$14/mo</span></div>
+        <div class="addon-rev">
+          <span class="addon-rev-label">Add-on revenue</span>
+          <span class="addon-rev-val">+$125/mo</span>
+        </div>
+      </div>
+
+      <div class="addon-card">
+        <div class="addon-tier">50 clients</div>
+        <div class="addon-row"><span class="addon-k">Baseline bots</span><span class="addon-v g">50 (free)</span></div>
+        <div class="addon-row"><span class="addon-k">Avg add-on bots</span><span class="addon-v">+50</span></div>
+        <div class="addon-row"><span class="addon-k">Extra reads / day</span><span class="addon-v">1.5 M</span></div>
+        <div class="addon-row"><span class="addon-k">Extra infra cost</span><span class="addon-v">~$27/mo</span></div>
+        <div class="addon-rev">
+          <span class="addon-rev-label">Add-on revenue</span>
+          <span class="addon-rev-val">+$250/mo</span>
+        </div>
+      </div>
+
+      <div class="addon-card">
+        <div class="addon-tier">100 clients</div>
+        <div class="addon-row"><span class="addon-k">Baseline bots</span><span class="addon-v g">100 (free)</span></div>
+        <div class="addon-row"><span class="addon-k">Avg add-on bots</span><span class="addon-v">+100</span></div>
+        <div class="addon-row"><span class="addon-k">Extra reads / day</span><span class="addon-v">3 M</span></div>
+        <div class="addon-row"><span class="addon-k">Extra infra cost</span><span class="addon-v">~$54/mo</span></div>
+        <div class="addon-rev">
+          <span class="addon-rev-label">Add-on revenue</span>
+          <span class="addon-rev-val">+$500/mo</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Opt grid -->
+  <p class="section-label">Cost optimisation levers</p>
+  <div class="opt-grid">
+    <div class="opt-card">
+      <div class="opt-card-label">Option A</div>
+      <div class="opt-card-title">Extend TTL to 8 hours</div>
+      <div class="opt-card-desc">Halves cache-miss Firestore reads. At the 1-bot baseline the bill is already low — but matters more as add-on bots accumulate and push read volume higher.</div>
+      <div class="opt-saving">Saves ~40 % on Firebase reads</div>
+    </div>
+    <div class="opt-card">
+      <div class="opt-card-label">Option B · Recommended</div>
+      <div class="opt-card-title">24-hr TTL + Redis</div>
+      <div class="opt-card-desc">Aggressive TTL combined with a $15/mo Managed Redis instance eliminates restart-spike read floods. Baseline restart spike at 100 clients is only 500 K reads — still worth it for reliability SLAs.</div>
+      <div class="opt-saving">Best case: ~$13 → ~$80 / month</div>
+    </div>
+    <div class="opt-card">
+      <div class="opt-card-label">Option C · Long-term</div>
+      <div class="opt-card-title">Event-driven cache invalidation</div>
+      <div class="opt-card-desc">Replace TTL entirely with change-stream or webhook-driven expiry. Cache only refreshes when lead data actually changes — eliminates unnecessary reads regardless of bot count.</div>
+      <div class="opt-saving">Replaces TTL — max efficiency</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <p class="section-label">Detailed breakdown — all tiers side by side</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24%">Factor</th>
+          <th class="r" style="width:13%">5 clients</th>
+          <th class="r" style="width:13%">25 clients</th>
+          <th class="r" style="width:13%">50 clients</th>
+          <th class="r" style="width:13%">100 clients</th>
+          <th style="width:24%">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr class="section-row"><td colspan="6">Scale metrics — 1 bot per client</td></tr>
+        <tr>
+          <td>Dashboard users</td>
+          <td class="r">15</td><td class="r">75</td><td class="r">150</td><td class="r">300</td>
+          <td><span class="sub">3 per client, unchanged</span></td>
+        </tr>
+        <tr>
+          <td>Chatbots (baseline, free)</td>
+          <td class="r">5</td><td class="r">25</td><td class="r">50</td><td class="r">100</td>
+          <td><span class="sub">1 per client — revised down from 3</span></td>
+        </tr>
+        <tr>
+          <td>Add-on bots (avg 1 extra)</td>
+          <td class="r"><span class="badge badge-purple">+5</span></td>
+          <td class="r"><span class="badge badge-purple">+25</span></td>
+          <td class="r"><span class="badge badge-purple">+50</span></td>
+          <td class="r"><span class="badge badge-purple">+100</span></td>
+          <td><span class="sub">$5/bot/mo · ~89% gross margin</span></td>
+        </tr>
+        <tr>
+          <td>Total lead docs</td>
+          <td class="r">25 K</td><td class="r">125 K</td><td class="r">250 K</td><td class="r">500 K</td>
+          <td><span class="sub">5 K per client</span></td>
+        </tr>
+        <tr>
+          <td>n8n cache RAM (baseline)</td>
+          <td class="r">~2.5 MB</td><td class="r">~12.5 MB</td><td class="r">~25 MB</td><td class="r">~50 MB</td>
+          <td><span class="sub">well within 8 GB droplet</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Firestore reads — 4-hr TTL, baseline bots only</td></tr>
+        <tr>
+          <td>Cache misses / bot / day</td>
+          <td class="r">6</td><td class="r">6</td><td class="r">6</td><td class="r">6</td>
+          <td><span class="sub">fixed by TTL, not client count</span></td>
+        </tr>
+        <tr>
+          <td>Reads from cache miss</td>
+          <td class="r">150 K</td><td class="r">750 K</td><td class="r">1.5 M</td><td class="r">3 M</td>
+          <td><span class="sub">misses × bots × 5 K docs</span></td>
+        </tr>
+        <tr>
+          <td>Dashboard reads</td>
+          <td class="r">2.5 K</td><td class="r">12.5 K</td><td class="r">25 K</td><td class="r">50 K</td>
+          <td><span class="sub">&lt;2 % of total — noise</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td>Total reads / day (baseline)</td>
+          <td class="r">~153 K</td><td class="r">~763 K</td><td class="r">~1.53 M</td><td class="r">~3.05 M</td>
+          <td><span class="sub">scales linearly with clients</span></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">Reduction vs. 3-bot model</td>
+          <td class="r best">−67 %</td><td class="r best">−67 %</td><td class="r best">−67 %</td><td class="r best">−67 %</td>
+          <td><span class="sub">9 M → 3 M reads/day at 100 clients</span></td>
+        </tr>
+        <tr>
+          <td>Firebase free tier (50 K/day)</td>
+          <td class="r"><span class="badge badge-amber">3× over</span></td>
+          <td class="r"><span class="badge badge-red">15× over</span></td>
+          <td class="r"><span class="badge badge-red">30× over</span></td>
+          <td class="r"><span class="badge badge-red">61× over</span></td>
+          <td><span class="sub">Blaze plan required at all tiers</span></td>
+        </tr>
+        <tr>
+          <td>Restart spike (1 restart)</td>
+          <td class="r">25 K</td><td class="r">125 K</td><td class="r">250 K</td><td class="r">500 K</td>
+          <td><span class="sub">was 75 K / 375 K / 750 K / 1.5 M</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Infrastructure — compute</td></tr>
+        <tr>
+          <td>n8n droplet size</td>
+          <td class="r">2 vCPU / 2 GB</td><td class="r">2 vCPU / 4 GB</td><td class="r">4 vCPU / 8 GB</td><td class="r">4 vCPU / 8 GB</td>
+          <td><span class="sub">upgrade at ~30 clients</span></td>
+        </tr>
+        <tr>
+          <td>n8n droplet cost</td>
+          <td class="r">$12</td><td class="r">$24</td><td class="r">$48</td><td class="r">$48</td>
+          <td><span class="sub">DO Basic droplet</span></td>
+        </tr>
+        <tr>
+          <td>n8n DB (SQLite)</td>
+          <td class="r"><span class="badge badge-green">Fine</span></td>
+          <td class="r"><span class="badge badge-green">Fine</span></td>
+          <td class="r"><span class="badge badge-green">Fine</span></td>
+          <td class="r"><span class="badge badge-amber">Monitor</span></td>
+          <td><span class="sub">lower concurrency — SQLite safer at 50</span></td>
+        </tr>
+        <tr>
+          <td>Redis needed?</td>
+          <td class="r"><span class="badge badge-green">No</span></td>
+          <td class="r"><span class="badge badge-green">No</span></td>
+          <td class="r"><span class="badge badge-amber">Recommend</span></td>
+          <td class="r"><span class="badge badge-red">Yes</span></td>
+          <td><span class="sub">restart spike smaller but still grows with add-ons</span></td>
+        </tr>
+        <tr>
+          <td>Redis cost</td>
+          <td class="r">—</td><td class="r">—</td><td class="r">$15</td><td class="r">$15</td>
+          <td><span class="sub">DO Managed Redis 1 GB</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Firebase costs — Blaze plan</td></tr>
+        <tr>
+          <td>Read cost / month</td>
+          <td class="r">~$3</td><td class="r">~$14</td><td class="r">~$27</td><td class="r">~$54</td>
+          <td><span class="sub">$0.06 per 100 K reads</span></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">vs. old model reads</td>
+          <td class="r best">was ~$8</td><td class="r best">was ~$40</td><td class="r best">was ~$81</td><td class="r best">was ~$162</td>
+          <td><span class="sub">~67 % cost reduction across all tiers</span></td>
+        </tr>
+        <tr>
+          <td>Write cost / month</td>
+          <td class="r">~$0.3</td><td class="r">~$1</td><td class="r">~$2</td><td class="r">~$4</td>
+          <td><span class="sub">$0.18 per 100 K writes</span></td>
+        </tr>
+        <tr>
+          <td>Storage cost / month</td>
+          <td class="r">~$1</td><td class="r">~$4</td><td class="r">~$8</td><td class="r">~$15</td>
+          <td><span class="sub">$0.108 / GB after 1 GB free</span></td>
+        </tr>
+        <tr>
+          <td>Firebase Auth</td>
+          <td class="r">Free</td><td class="r">Free</td><td class="r">Free</td><td class="r">Free</td>
+          <td><span class="sub">free up to 10 K MAU</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td>Total Firebase / month</td>
+          <td class="r">~$4</td><td class="r">~$19</td><td class="r">~$37</td><td class="r">~$73</td>
+          <td></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">vs. old model Firebase</td>
+          <td class="r best">was ~$10</td><td class="r best">was ~$47</td><td class="r best">was ~$95</td><td class="r best">was ~$189</td>
+          <td><span class="sub">~61 % Firebase saving at 100 clients</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Total monthly infra cost — scenarios</td></tr>
+        <tr class="highlight-row">
+          <td style="font-weight:600">Baseline (1 bot/client, 4-hr TTL)</td>
+          <td class="r" style="font-size:14px;font-weight:700">~$16</td>
+          <td class="r" style="font-size:14px;font-weight:700">~$43</td>
+          <td class="r" style="font-size:14px;font-weight:700">~$100</td>
+          <td class="r" style="font-size:14px;font-weight:700">~$136</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>With avg 1 add-on bot per client</td>
+          <td class="r">~$19</td><td class="r">~$57</td><td class="r">~$127</td><td class="r">~$190</td>
+          <td><span class="sub">reads double; add-on revenue covers cost 9×</span></td>
+        </tr>
+        <tr>
+          <td>If TTL → 8 hrs</td>
+          <td class="r">~$13</td><td class="r">~$33</td><td class="r">~$76</td><td class="r">~$103</td>
+          <td><span class="sub">halves Firestore read bill</span></td>
+        </tr>
+        <tr>
+          <td class="best">Best case (24-hr TTL + Redis)</td>
+          <td class="r best">~$13</td>
+          <td class="r best">~$29</td>
+          <td class="r best">~$66</td>
+          <td class="r best">~$80</td>
+          <td><span class="sub">ideal long-term target</span></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">vs. old model best case</td>
+          <td class="r best">was ~$14</td><td class="r best">was ~$32</td><td class="r best">was ~$78</td><td class="r best">was ~$120</td>
+          <td><span class="sub">further ~33 % saving at 100 clients</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Add-on bot economics — per extra bot</td></tr>
+        <tr>
+          <td>Infra cost / extra bot / mo</td>
+          <td class="r">~$0.55</td><td class="r">~$0.55</td><td class="r">~$0.55</td><td class="r">~$0.55</td>
+          <td><span class="sub">30 K reads/day × $0.06/100 K × 30 days</span></td>
+        </tr>
+        <tr>
+          <td>Revenue / extra bot / mo</td>
+          <td class="r">$5.00</td><td class="r">$5.00</td><td class="r">$5.00</td><td class="r">$5.00</td>
+          <td><span class="sub">self-serve add-on, no setup overhead</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td>Gross margin per add-on bot</td>
+          <td class="r best">~89 %</td><td class="r best">~89 %</td><td class="r best">~89 %</td><td class="r best">~89 %</td>
+          <td><span class="sub">high-margin upsell, consistent at every tier</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Profit Projections -->
+  <p class="section-label">Profit projections — by plan × client tier</p>
+
+  <div class="callout" style="margin-bottom:28px;background:linear-gradient(135deg,rgba(34,197,94,.05) 0%,rgba(59,130,246,.04) 100%);border-color:rgba(34,197,94,.2);">
+    <div class="callout-icon" style="background:var(--green-bg);border-color:rgba(34,197,94,.2);">💰</div>
+    <div>
+      <div class="callout-title">How profit is calculated</div>
+      <div class="callout-body">
+        <strong>Revenue</strong> = clients × plan price (Starter $39 · Growth $69 · Team $109 per month). <strong>Infra cost</strong> = recalculated per actual plan lead limits — Starter (1.5 K leads) cheapest, Team (5 K leads) highest Firebase. Storage stays within Firebase free tier across all plans. <strong>Profit</strong> = Revenue − Infra. Margin = Profit ÷ Revenue. Add-on bot revenue ($5/bot) shown separately as pure upside.
+      </div>
+    </div>
+  </div>
+
+  <!-- Pure-plan profit table -->
+  <div class="table-wrap" style="margin-bottom:32px;">
+    <table>
+      <colgroup>
+        <col style="width:22%">
+        <col style="width:13%">
+        <col style="width:13%">
+        <col style="width:13%">
+        <col style="width:13%">
+        <col style="width:26%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th class="r">5 Clients</th>
+          <th class="r">25 Clients</th>
+          <th class="r">50 Clients</th>
+          <th class="r">100 Clients</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr class="section-row"><td colspan="6">Infra cost — Starter plan (1,500 leads · 9 K reads/bot/day)</td></tr>
+        <tr>
+          <td>Starter infra / month</td>
+          <td class="r">~$12</td><td class="r">~$28</td><td class="r">~$72</td><td class="r">~$81</td>
+          <td><span class="sub">Droplet + Firebase reads + Redis where needed · storage free</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">All clients on Starter — $39 / client / mo · 1,500 leads</td></tr>
+        <tr>
+          <td>Monthly revenue</td>
+          <td class="r">$195</td><td class="r">$975</td><td class="r">$1,950</td><td class="r">$3,900</td>
+          <td><span class="sub">5 × $39 → 100 × $39</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td style="font-weight:600">Gross profit / mo</td>
+          <td class="r best">$183</td><td class="r best">$947</td><td class="r best">$1,878</td><td class="r best">$3,819</td>
+          <td></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">Gross margin</td>
+          <td class="r best">93.8 %</td><td class="r best">97.1 %</td><td class="r best">96.3 %</td><td class="r best">97.9 %</td>
+          <td><span class="sub">Lowest revenue but also lowest infra cost — still excellent margin</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Infra cost — Growth plan (3,000 leads · 18 K reads/bot/day)</td></tr>
+        <tr>
+          <td>Growth infra / month</td>
+          <td class="r">~$13</td><td class="r">~$32</td><td class="r">~$80</td><td class="r">~$97</td>
+          <td><span class="sub">2× reads vs Starter, same droplet + Redis thresholds</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">All clients on Growth — $69 / client / mo · 3,000 leads</td></tr>
+        <tr>
+          <td>Monthly revenue</td>
+          <td class="r">$345</td><td class="r">$1,725</td><td class="r">$3,450</td><td class="r">$6,900</td>
+          <td><span class="sub">5 × $69 → 100 × $69</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td style="font-weight:600">Gross profit / mo</td>
+          <td class="r best">$332</td><td class="r best">$1,693</td><td class="r best">$3,370</td><td class="r best">$6,803</td>
+          <td></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">Gross margin</td>
+          <td class="r best">96.2 %</td><td class="r best">98.1 %</td><td class="r best">97.7 %</td><td class="r best">98.6 %</td>
+          <td><span class="sub">Sweet spot — 77 % more revenue, only marginally higher infra</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Infra cost — Team plan (5,000 leads · 30 K reads/bot/day)</td></tr>
+        <tr>
+          <td>Team infra / month</td>
+          <td class="r">~$14</td><td class="r">~$38</td><td class="r">~$91</td><td class="r">~$121</td>
+          <td><span class="sub">Highest Firebase reads — same as original 5 K assumption · storage still free</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">All clients on Team — $109 / client / mo · 5,000 leads</td></tr>
+        <tr>
+          <td>Monthly revenue</td>
+          <td class="r">$545</td><td class="r">$2,725</td><td class="r">$5,450</td><td class="r">$10,900</td>
+          <td><span class="sub">5 × $109 → 100 × $109</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td style="font-weight:600">Gross profit / mo</td>
+          <td class="r best">$531</td><td class="r best">$2,687</td><td class="r best">$5,359</td><td class="r best">$10,779</td>
+          <td></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">Gross margin</td>
+          <td class="r best">97.4 %</td><td class="r best">98.6 %</td><td class="r best">98.3 %</td><td class="r best">98.9 %</td>
+          <td><span class="sub">Best margin despite highest infra — revenue gap dominates</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Realistic mix — 60 % Starter · 30 % Growth · 10 % Team</td></tr>
+        <tr>
+          <td>Blended rev / client</td>
+          <td class="r">$55.20</td><td class="r">$55.20</td><td class="r">$55.20</td><td class="r">$55.20</td>
+          <td><span class="sub">0.6×$39 + 0.3×$69 + 0.1×$109 = $55.20 avg</span></td>
+        </tr>
+        <tr>
+          <td>Blended infra / month</td>
+          <td class="r">~$12</td><td class="r">~$29</td><td class="r">~$74</td><td class="r">~$85</td>
+          <td><span class="sub">0.6×Starter + 0.3×Growth + 0.1×Team infra weighted</span></td>
+        </tr>
+        <tr>
+          <td>Monthly revenue</td>
+          <td class="r">$276</td><td class="r">$1,380</td><td class="r">$2,760</td><td class="r">$5,520</td>
+          <td></td>
+        </tr>
+        <tr class="highlight-row">
+          <td style="font-weight:600">Gross profit / mo</td>
+          <td class="r best">$264</td><td class="r best">$1,351</td><td class="r best">$2,686</td><td class="r best">$5,435</td>
+          <td></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">Gross margin</td>
+          <td class="r best">95.7 %</td><td class="r best">97.9 %</td><td class="r best">97.3 %</td><td class="r best">98.5 %</td>
+          <td><span class="sub">Conservative real-world blend — improves as clients upsell</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Add-on bot upside — if avg 1 extra bot per client at $5 / bot / mo</td></tr>
+        <tr>
+          <td>Add-on revenue</td>
+          <td class="r">+$25</td><td class="r">+$125</td><td class="r">+$250</td><td class="r">+$500</td>
+          <td><span class="sub">Pure upsell — $5 × n clients</span></td>
+        </tr>
+        <tr>
+          <td>Add-on infra cost</td>
+          <td class="r">~$3</td><td class="r">~$14</td><td class="r">~$28</td><td class="r">~$55</td>
+          <td><span class="sub">~$0.55 / extra bot / mo</span></td>
+        </tr>
+        <tr class="highlight-row">
+          <td>Add-on net profit</td>
+          <td class="r best">+$22</td><td class="r best">+$111</td><td class="r best">+$222</td><td class="r best">+$445</td>
+          <td><span class="sub">~89 % margin on every add-on bot sold</span></td>
+        </tr>
+
+        <tr class="section-row"><td colspan="6">Best-case monthly profit — realistic mix + add-on bots</td></tr>
+        <tr class="highlight-row">
+          <td style="font-weight:700;color:var(--green)">Total profit / mo</td>
+          <td class="r best" style="font-size:14px;font-weight:700">~$286</td>
+          <td class="r best" style="font-size:14px;font-weight:700">~$1,462</td>
+          <td class="r best" style="font-size:14px;font-weight:700">~$2,908</td>
+          <td class="r best" style="font-size:14px;font-weight:700">~$5,880</td>
+          <td><span class="sub">Mix blend + add-on bots − corrected per-plan infra</span></td>
+        </tr>
+        <tr class="savings-row">
+          <td class="best">Annual run rate</td>
+          <td class="r best">~$3.4 K</td>
+          <td class="r best">~$17.5 K</td>
+          <td class="r best">~$34.9 K</td>
+          <td class="r best">~$70.6 K</td>
+          <td><span class="sub">× 12 — margins better than prev. estimate (storage was overstated)</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mini profit cards -->
+  <div class="tier-grid" style="margin-bottom:40px;">
+
+    <div class="tier-card green">
+      <div class="tier-header">
+        <div class="tier-name">5 Clients</div>
+        <div class="tier-sub">Profit snapshot</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Starter infra</span><span class="tier-val danger">~$12</span></div>
+        <div class="tier-row"><span class="tier-key">Growth infra</span><span class="tier-val danger">~$13</span></div>
+        <div class="tier-row"><span class="tier-key">Team infra</span><span class="tier-val danger">~$14</span></div>
+        <div class="tier-row"><span class="tier-key">Starter profit</span><span class="tier-val free">$183 · 93.8 %</span></div>
+        <div class="tier-row"><span class="tier-key">Growth profit</span><span class="tier-val free">$332 · 96.2 %</span></div>
+        <div class="tier-row"><span class="tier-key">Team profit</span><span class="tier-val free">$531 · 97.4 %</span></div>
+        <div class="tier-row divider"><span class="tier-key">Add-on bots (+1ea)</span><span class="tier-val free">+$22 net</span></div>
+      </div>
+      <div class="tier-total" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <span class="tier-total-label">Profit (mix + add-ons)</span>
+        <span class="tier-total-val" style="color:var(--green)">~$286</span>
+        <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">margin ~95.7 %</span>
+      </div>
+    </div>
+
+    <div class="tier-card blue">
+      <div class="tier-header">
+        <div class="tier-name">25 Clients</div>
+        <div class="tier-sub">Profit snapshot</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Starter infra</span><span class="tier-val danger">~$28</span></div>
+        <div class="tier-row"><span class="tier-key">Growth infra</span><span class="tier-val danger">~$32</span></div>
+        <div class="tier-row"><span class="tier-key">Team infra</span><span class="tier-val danger">~$38</span></div>
+        <div class="tier-row"><span class="tier-key">Starter profit</span><span class="tier-val free">$947 · 97.1 %</span></div>
+        <div class="tier-row"><span class="tier-key">Growth profit</span><span class="tier-val free">$1,693 · 98.1 %</span></div>
+        <div class="tier-row"><span class="tier-key">Team profit</span><span class="tier-val free">$2,687 · 98.6 %</span></div>
+        <div class="tier-row divider"><span class="tier-key">Add-on bots (+1ea)</span><span class="tier-val free">+$111 net</span></div>
+      </div>
+      <div class="tier-total" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <span class="tier-total-label">Profit (mix + add-ons)</span>
+        <span class="tier-total-val" style="color:var(--blue)">~$1,462</span>
+        <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">margin ~97.9 %</span>
+      </div>
+    </div>
+
+    <div class="tier-card amber">
+      <div class="tier-header">
+        <div class="tier-name">50 Clients</div>
+        <div class="tier-sub">Profit snapshot</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Starter infra</span><span class="tier-val warn">~$72</span></div>
+        <div class="tier-row"><span class="tier-key">Growth infra</span><span class="tier-val warn">~$80</span></div>
+        <div class="tier-row"><span class="tier-key">Team infra</span><span class="tier-val warn">~$91</span></div>
+        <div class="tier-row"><span class="tier-key">Starter profit</span><span class="tier-val free">$1,878 · 96.3 %</span></div>
+        <div class="tier-row"><span class="tier-key">Growth profit</span><span class="tier-val free">$3,370 · 97.7 %</span></div>
+        <div class="tier-row"><span class="tier-key">Team profit</span><span class="tier-val free">$5,359 · 98.3 %</span></div>
+        <div class="tier-row divider"><span class="tier-key">Add-on bots (+1ea)</span><span class="tier-val free">+$222 net</span></div>
+      </div>
+      <div class="tier-total" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <span class="tier-total-label">Profit (mix + add-ons)</span>
+        <span class="tier-total-val" style="color:var(--amber)">~$2,908</span>
+        <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">margin ~97.3 %</span>
+      </div>
+    </div>
+
+    <div class="tier-card red">
+      <div class="tier-header">
+        <div class="tier-name">100 Clients</div>
+        <div class="tier-sub">Profit snapshot</div>
+      </div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tier-key">Starter infra</span><span class="tier-val warn">~$81</span></div>
+        <div class="tier-row"><span class="tier-key">Growth infra</span><span class="tier-val warn">~$97</span></div>
+        <div class="tier-row"><span class="tier-key">Team infra</span><span class="tier-val warn">~$121</span></div>
+        <div class="tier-row"><span class="tier-key">Starter profit</span><span class="tier-val free">$3,819 · 97.9 %</span></div>
+        <div class="tier-row"><span class="tier-key">Growth profit</span><span class="tier-val free">$6,803 · 98.6 %</span></div>
+        <div class="tier-row"><span class="tier-key">Team profit</span><span class="tier-val free">$10,779 · 98.9 %</span></div>
+        <div class="tier-row divider"><span class="tier-key">Add-on bots (+1ea)</span><span class="tier-val free">+$445 net</span></div>
+      </div>
+      <div class="tier-total" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <span class="tier-total-label">Profit (mix + add-ons)</span>
+        <span class="tier-total-val" style="color:var(--green)">~$5,880</span>
+        <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">margin ~98.5 % · $70.6 K ARR</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Actions -->
+  <p class="section-label">Actions by tier — what to do and when</p>
+  <div class="action-grid">
+
+    <div class="action-card green">
+      <div class="action-title">
+        <div class="action-icon">▶</div>
+        5 clients — now
+      </div>
+      <div class="action-items">
+        <div class="action-item">Smallest DO droplet (2 vCPU / 2 GB, $12/mo) — easily handles 5 bots with headroom for add-ons</div>
+        <div class="action-item">Blaze plan required — 153 K reads/day is 3× free tier but costs only ~$3/mo</div>
+        <div class="action-item">No Redis needed — restart spike is only 25 K reads ($0.015)</div>
+        <div class="action-item">SQLite is fine — 5 bots means minimal write concurrency</div>
+        <div class="action-item">Focus: get the free bot live within 48 hrs of signup so clients see lead capture value immediately</div>
+      </div>
+    </div>
+
+    <div class="action-card blue">
+      <div class="action-title">
+        <div class="action-icon">↑</div>
+        25 clients — near term
+      </div>
+      <div class="action-items">
+        <div class="action-item">Upgrade droplet to 2 vCPU / 4 GB ($24/mo) around 20 clients</div>
+        <div class="action-item">Firebase reads only ~$14/mo — significantly better than old model; no urgency on TTL extension</div>
+        <div class="action-item">Restart spike is 125 K reads ($0.075) — still cheap, monitor restart frequency</div>
+        <div class="action-item">Actively promote the $5 add-on — clients actively using the free bot are the warmest upsell targets</div>
+        <div class="action-item">Begin Redis planning for the 50-client milestone</div>
+      </div>
+    </div>
+
+    <div class="action-card amber">
+      <div class="action-title">
+        <div class="action-icon">⚠</div>
+        50 clients — action needed
+      </div>
+      <div class="action-items">
+        <div class="action-item">Upgrade droplet to 4 vCPU / 8 GB ($48/mo) — do this before reaching 50 clients</div>
+        <div class="action-item">Add Redis ($15/mo) — 250 K restart spike + add-on bots can push this higher</div>
+        <div class="action-item">Firebase baseline ~$27/mo — extend TTL to 8 hrs if add-on bots are selling well</div>
+        <div class="action-item">Review Firestore security rules — tenant isolation becomes critical at this scale</div>
+        <div class="action-item">SQLite still fine at 50 baseline bots — monitor if add-ons push concurrency above 80–100 bots</div>
+      </div>
+    </div>
+
+    <div class="action-card red">
+      <div class="action-title">
+        <div class="action-icon">🔥</div>
+        100 clients — optimise now
+      </div>
+      <div class="action-items">
+        <div class="action-item">Redis non-negotiable — 500 K baseline restart spike; add-on bots can push this to 1 M+</div>
+        <div class="action-item">Extend TTL to 8–24 hrs — saves $27–$45/mo at baseline, substantially more with add-ons</div>
+        <div class="action-item">Consider event-driven cache invalidation to replace TTL entirely</div>
+        <div class="action-item">Monitor SQLite under high add-on bot concurrency — Managed Postgres if write locking appears</div>
+        <div class="action-item">Plan second n8n node if selling uptime SLAs — bot reliability becomes a paid expectation</div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="page-footer">
+  <span>evoAIDesk · Infrastructure Reference · Rev 2 — 1 bot / client model</span>
+  <span><a href="https://desk.evoaiglobal.ai/evoAIDesk_KnowMore">desk.evoaiglobal.ai</a></span>
+</footer>
+
+</body>
+</html>

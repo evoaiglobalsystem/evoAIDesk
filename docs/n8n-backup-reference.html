@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>evoAI — n8n Backup & Restore Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/x-icon" href="https://evoaiglobal.ai/images/favicon.ico"/>
+<style>
+  :root {
+    --bg:       #080c10;
+    --surface:  #0e1420;
+    --surface2: #141c2a;
+    --border:   #1e2d42;
+    --accent:   #00e5a0;
+    --accent2:  #00b8ff;
+    --warn:     #ffb730;
+    --text:     #e8f0fe;
+    --muted:    #6b7fa3;
+    --font:     'Sora', sans-serif;
+    --mono:     'DM Mono', monospace;
+    --nav-h:    60px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,12,16,.92); backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px; height: var(--nav-h);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo img { height: 26px; }
+  .nav-back {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .75rem; color: var(--muted); font-family: var(--mono);
+    text-decoration: none; transition: color .15s;
+  }
+  .nav-back:hover { color: var(--accent); }
+
+  /* ── MAIN ── */
+  main { max-width: 760px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  /* ── PAGE HEADER ── */
+  .page-eyebrow {
+    font-family: var(--mono); font-size: .63rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .eyebrow-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.7)} }
+
+  .page-title { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1.2; margin-bottom: 14px; }
+  .page-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .meta-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: .67rem; color: var(--muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 3px 10px;
+  }
+
+  .summary-box {
+    background: rgba(0,229,160,.05); border: 1px solid rgba(0,229,160,.16);
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 48px;
+  }
+  .summary-box-label {
+    font-family: var(--mono); font-size: .6rem; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+  }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+  .summary-item {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: .76rem; color: var(--muted); line-height: 1.5;
+  }
+  .summary-item svg { flex-shrink: 0; color: var(--accent); margin-top: 2px; }
+
+  .header-divider { height: 1px; background: var(--border); margin-bottom: 48px; }
+
+  /* ── SECTIONS ── */
+  .policy-section { margin-bottom: 48px; scroll-margin-top: 24px; }
+  .policy-section:last-child { margin-bottom: 0; }
+  .section-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .section-num {
+    font-family: var(--mono); font-size: .65rem; font-weight: 700;
+    color: var(--accent); background: rgba(0,229,160,.1);
+    border: 1px solid rgba(0,229,160,.2); border-radius: 5px;
+    padding: 3px 8px; flex-shrink: 0; letter-spacing: .05em;
+  }
+  .section-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .section-divider { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── PROSE ── */
+  .prose { font-size: .84rem; color: var(--muted); line-height: 1.8; }
+  .prose p { margin-bottom: 12px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { color: var(--text); font-weight: 600; }
+
+  /* ── INFRA TABLE ── */
+  .infra-table {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+  }
+  .infra-row {
+    display: grid; grid-template-columns: 200px 1fr;
+    border-bottom: 1px solid var(--border); font-size: .78rem;
+  }
+  .infra-row:last-child { border-bottom: none; }
+  .infra-label {
+    padding: 12px 16px; color: var(--muted); font-weight: 500;
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,.015);
+  }
+  .infra-value {
+    padding: 12px 16px; color: var(--text);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+
+  /* ── CHIPS ── */
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: .68rem; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    font-family: var(--mono); letter-spacing: .03em; flex-shrink: 0;
+  }
+  .chip.green  { background: rgba(0,229,160,.1);   color: var(--accent);  border: 1px solid rgba(0,229,160,.2); }
+  .chip.blue   { background: rgba(0,184,255,.1);   color: var(--accent2); border: 1px solid rgba(0,184,255,.2); }
+  .chip.purple { background: rgba(167,139,250,.1); color: #a78bfa;        border: 1px solid rgba(167,139,250,.2); }
+  .chip.warn   { background: rgba(255,183,48,.1);  color: var(--warn);    border: 1px solid rgba(255,183,48,.2); }
+  .infra-note { font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex; flex-direction: column; gap: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+  }
+  .flow-step {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 18px; border-bottom: 1px solid var(--border);
+    font-size: .78rem;
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(0,229,160,.1); border: 1px solid rgba(0,229,160,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: .6rem; font-weight: 700; color: var(--accent);
+  }
+  .flow-label { color: var(--text); font-weight: 500; flex: 1; }
+  .flow-note { font-family: var(--mono); font-size: .66rem; color: var(--muted); }
+  .flow-arrow {
+    padding: 4px 18px 0 42px;
+    font-size: .75rem; color: var(--border);
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; margin: 12px 0;
+    font-family: var(--mono); font-size: .73rem; color: var(--accent);
+    overflow-x: auto; line-height: 1.7;
+  }
+  .code-block .comment { color: var(--muted); }
+
+  /* ── STATUS GRID ── */
+  .status-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+  .status-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 9px; padding: 14px 15px;
+    display: flex; align-items: flex-start; gap: 9px;
+    transition: border-color .16s;
+  }
+  .status-item:hover { border-color: rgba(0,229,160,.22); }
+  .status-check {
+    width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+    background: rgba(0,229,160,.1); display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .status-label { font-size: .76rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .status-desc  { font-size: .68rem; color: var(--muted); line-height: 1.45; }
+
+  /* ── ALERT CARD ── */
+  .alert-card {
+    background: rgba(255,183,48,.04); border: 1px solid rgba(255,183,48,.18);
+    border-radius: 10px; padding: 18px 20px;
+    display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px;
+  }
+  .alert-icon {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(255,183,48,.1); display: flex; align-items: center; justify-content: center;
+    color: var(--warn);
+  }
+  .alert-title { font-size: .82rem; font-weight: 700; color: var(--warn); margin-bottom: 5px; }
+  .alert-desc  { font-size: .76rem; color: var(--muted); line-height: 1.65; }
+
+  /* ── CONTACT CARD ── */
+  .contact-card {
+    background: rgba(0,229,160,.04); border: 1px solid rgba(0,229,160,.15);
+    border-radius: 10px; padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    flex-wrap: wrap;
+  }
+  .contact-left { display: flex; align-items: center; gap: 12px; }
+  .contact-icon {
+    width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(0,229,160,.1); display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .contact-title { font-size: .84rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .contact-desc  { font-size: .72rem; color: var(--muted); }
+  .contact-email {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 8px 14px;
+    font-family: var(--mono); font-size: .78rem; color: var(--accent);
+    text-decoration: none; font-weight: 500; transition: border-color .16s;
+    white-space: nowrap;
+  }
+  .contact-email:hover { border-color: var(--accent); }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .footer-left { font-size: .7rem; color: var(--muted); line-height: 1.6; }
+  .footer-left a { color: var(--accent); text-decoration: none; }
+  .footer-right {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: .65rem; color: var(--muted);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 680px) {
+    main { padding: 36px 20px 60px; }
+    nav  { padding: 0 16px; }
+    .status-grid { grid-template-columns: repeat(2,1fr); }
+    .infra-row   { grid-template-columns: 130px 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .status-grid { grid-template-columns: 1fr; }
+    .infra-row { grid-template-columns: 1fr; }
+    .infra-label { border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .contact-card { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="https://evoaiglobal.ai/">
+    <img src="https://desk.evoaiglobal.ai/images/evoaidesk.png" alt="evoAI"/>
+  </a>
+  <a class="nav-back" href="https://evoaiglobal.ai/">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to Home
+  </a>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+
+  <!-- PAGE HEADER -->
+  <div class="page-eyebrow">
+    <span class="eyebrow-dot"></span>
+    Internal Ops · Infrastructure
+  </div>
+  <h1 class="page-title">n8n Backup &amp; Restore</h1>
+  <div class="page-meta">
+    <span class="meta-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Implemented: May 2026
+    </span>
+    <span class="meta-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      evoAI Internal · n8n on DigitalOcean
+    </span>
+    <span class="meta-chip">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Daily · 2:00 AM IST
+    </span>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-box-label">Summary</div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Fully automated — no manual action required
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Runs outside the DO server via GitHub Actions
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Backups stored on Google Drive — 7 day retention
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        One-click restore from any date via GitHub UI
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Email alert on backup failure
+      </div>
+      <div class="summary-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        100% free — no billing on any service
+      </div>
+    </div>
+  </div>
+
+  <div class="header-divider"></div>
+
+  <!-- 1. ARCHITECTURE -->
+  <div class="policy-section" id="architecture">
+    <div class="section-heading">
+      <span class="section-num">01</span>
+      <span class="section-title">Architecture overview</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose" style="margin-bottom:16px;">
+      <p>The backup system runs entirely outside the DigitalOcean server. GitHub Actions acts as the scheduler and orchestrator — it SSHes into the DO server, creates the backup, streams it back, and uploads it to Google Drive. The DO server itself requires no extra tools.</p>
+    </div>
+    <div class="infra-table">
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Scheduler
+        </div>
+        <div class="infra-value">
+          <span class="chip blue">GitHub Actions</span>
+          <span class="infra-note">Cron · 2AM IST daily</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          n8n server
+        </div>
+        <div class="infra-value">
+          <span class="chip blue">DigitalOcean</span>
+          <span class="infra-note">Toronto · tor1 · Ubuntu 24</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          n8n data path
+        </div>
+        <div class="infra-value" style="font-family:var(--mono);font-size:.71rem;color:var(--accent);">
+          /var/lib/docker/volumes/n8n_n8n_data/_data
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/></svg>
+          Backup storage
+        </div>
+        <div class="infra-value">
+          <span class="chip green">Google Drive</span>
+          <span class="infra-note">7 day retention · auto-cleanup</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Secrets storage
+        </div>
+        <div class="infra-value">
+          <span class="chip purple">GitHub Secrets</span>
+          <span class="infra-note">SSH key · Google Drive OAuth tokens</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg>
+          GitHub repo
+        </div>
+        <div class="infra-value">
+          <span class="chip green">Private</span>
+          <span class="infra-note">evoaiglobalsystem/n8n-backup</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. BACKUP FLOW -->
+  <div class="policy-section" id="backup-flow">
+    <div class="section-heading">
+      <span class="section-num">02</span>
+      <span class="section-title">Backup flow — automatic</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose" style="margin-bottom:16px;">
+      <p>The <strong>backup.yml</strong> workflow triggers automatically at 2AM IST every day. n8n downtime during backup is minimal — typically under 60 seconds.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-label">GitHub Actions cron fires at 2AM IST</div>
+        <div class="flow-note">20:30 UTC · daily</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-label">Runner SSHes into DO server</div>
+        <div class="flow-note">using DO_SSH_PRIVATE_KEY secret</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-label">n8n container stopped</div>
+        <div class="flow-note">docker stop n8n</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-label">Volume data tarred to /tmp</div>
+        <div class="flow-note">n8n-backup-YYYY-MM-DD.tar.gz</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-label">n8n container started back up</div>
+        <div class="flow-note">docker start n8n</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-label">Runner pulls tar via SCP</div>
+        <div class="flow-note">streamed to GitHub Actions runner /tmp</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">7</div>
+        <div class="flow-label">Tar deleted from DO server /tmp</div>
+        <div class="flow-note">keeps DO server clean</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">8</div>
+        <div class="flow-label">Runner uploads to Google Drive</div>
+        <div class="flow-note">via Drive API · OAuth refresh token</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">9</div>
+        <div class="flow-label">Backups older than 7 days deleted from Drive</div>
+        <div class="flow-note">auto-cleanup on every run</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. RESTORE FLOW -->
+  <div class="policy-section" id="restore-flow">
+    <div class="section-heading">
+      <span class="section-num">03</span>
+      <span class="section-title">Restore flow — manual trigger</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="prose" style="margin-bottom:16px;">
+      <p>The <strong>restore.yml</strong> workflow is triggered manually from GitHub Actions UI. Enter the backup date and GitHub handles everything — the current live data is always preserved before overwrite.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-label">Open GitHub → Actions → n8n Restore → Run workflow</div>
+        <div class="flow-note">enter date: YYYY-MM-DD</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-label">Runner downloads backup from Google Drive</div>
+        <div class="flow-note">by exact filename match</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-label">Any previous _data_before_restore_* folders deleted</div>
+        <div class="flow-note">keeps DO server clean</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-label">n8n container stopped</div>
+        <div class="flow-note">docker stop n8n</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-label">Current live _data renamed as safety backup</div>
+        <div class="flow-note">_data_before_restore_YYYY-MM-DD</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-label">Backup extracted to fresh _data folder</div>
+        <div class="flow-note">permissions fixed: chown -R 1000:1000</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">7</div>
+        <div class="flow-label">n8n container started</div>
+        <div class="flow-note">docker start n8n</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">8</div>
+        <div class="flow-label">File list printed to GitHub Actions log</div>
+        <div class="flow-note">visible in Actions → restore job → step details</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. GITHUB SECRETS -->
+  <div class="policy-section" id="secrets">
+    <div class="section-heading">
+      <span class="section-num">04</span>
+      <span class="section-title">GitHub secrets reference</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="infra-table">
+      <div class="infra-row">
+        <div class="infra-label">DO_HOST</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">DigitalOcean server IP address</div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">DO_USER</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">SSH username — <code style="font-family:var(--mono);font-size:.71rem;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent);">root</code></div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">DO_SSH_PRIVATE_KEY</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">ed25519 private key — GitHub Actions uses this to SSH into DO</div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">GDRIVE_CLIENT_ID</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">Google OAuth app client ID</div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">GDRIVE_CLIENT_SECRET</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">Google OAuth app client secret</div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">GDRIVE_REFRESH_TOKEN</div>
+        <div class="infra-value" style="font-size:.76rem;color:var(--muted);font-family:var(--font);">Long-lived OAuth refresh token for Drive API access</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. SERVER HEALTH -->
+  <div class="policy-section" id="server-health">
+    <div class="section-heading">
+      <span class="section-num">05</span>
+      <span class="section-title">Server health &amp; configuration</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="infra-table" style="margin-bottom:16px;">
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+          Droplet size
+        </div>
+        <div class="infra-value">
+          <span class="chip blue">512 MB RAM · 1 vCPU · 24 GB disk</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          n8n CPU
+        </div>
+        <div class="infra-value">
+          <span class="chip green">~0.3% idle</span>
+          <span class="infra-note">healthy</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+          n8n memory
+        </div>
+        <div class="infra-value">
+          <span class="chip warn">~373 MB / 961 MB (38%)</span>
+          <span class="infra-note">monitor if grows</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Disk used
+        </div>
+        <div class="infra-value">
+          <span class="chip green">9.4 GB / 24 GB (41%)</span>
+          <span class="infra-note">healthy</span>
+        </div>
+      </div>
+      <div class="infra-row">
+        <div class="infra-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Swap
+        </div>
+        <div class="infra-value">
+          <span class="chip green">1 GB swap enabled</span>
+          <span class="infra-note">/swapfile · persistent across reboots</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. WHAT'S BACKED UP -->
+  <div class="policy-section" id="what-backed-up">
+    <div class="section-heading">
+      <span class="section-num">06</span>
+      <span class="section-title">What gets backed up</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="status-grid">
+      <div class="status-item">
+        <div class="status-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="status-label">database.sqlite</div>
+          <div class="status-desc">All workflows, credentials, and execution history.</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="status-label">config</div>
+          <div class="status-desc">Instance settings and encryption keys.</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="status-label">nodes/</div>
+          <div class="status-desc">Any custom community nodes installed.</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="status-label">storage/</div>
+          <div class="status-desc">Binary data and file attachments.</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="status-label">n8nEventLog*.log</div>
+          <div class="status-desc">Activity and audit logs.</div>
+        </div>
+      </div>
+      <div class="status-item">
+        <div class="status-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="status-label">Full volume tar</div>
+          <div class="status-desc">~200 MB compressed archive per day.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. FAILURE HANDLING -->
+  <div class="policy-section" id="failure">
+    <div class="section-heading">
+      <span class="section-num">07</span>
+      <span class="section-title">Failure handling</span>
+      <span class="section-divider"></span>
+    </div>
+    <div class="alert-card">
+      <div class="alert-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div>
+        <div class="alert-title">If backup fails</div>
+        <div class="alert-desc">GitHub automatically sends a failure email to the repository owner. No backup is created that day. The next scheduled run will attempt again at 2AM IST. You can also manually trigger backup.yml at any time from the Actions tab.</div>
+      </div>
+    </div>
+    <div class="prose">
+      <p><strong>If DO server is unreachable</strong> — GitHub Actions will fail at the SSH step and send a failure notification. No data is affected.</p>
+      <p><strong>If Google Drive upload fails</strong> — the backup tar is already downloaded to the runner. The runner will fail and notify. The DO server is unaffected and n8n remains running.</p>
+      <p><strong>During restore</strong> — the current live data is always renamed to <code style="font-family:var(--mono);font-size:.78rem;background:var(--surface2);padding:1px 6px;border-radius:4px;color:var(--accent);">_data_before_restore_YYYY-MM-DD</code> before any changes, providing a rollback path.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="page-footer">
+    <div class="footer-left">
+      © 2026 evoAI. All rights reserved. &nbsp;·&nbsp;
+      <a href="https://evoaiglobal.ai/privacy-policy">Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="https://evoaiglobal.ai/terms">Terms &amp; Conditions</a>
+    </div>
+    <div class="footer-right">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      evoaiglobal.ai
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

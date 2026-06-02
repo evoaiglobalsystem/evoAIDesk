@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firestore CRM Scaling Reference</title>
+  <style>
+    :root {
+      --bg: #071018;
+      --surface: #0f1722;
+      --surface2: #162131;
+      --border: #223247;
+      --text: #e8f0ff;
+      --muted: #8da2c0;
+      --accent: #00e5a0;
+      --accent2: #00b8ff;
+      --warn: #ffb730;
+      --danger: #ff5c7c;
+      --success: #00d27a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(180deg, #050b12 0%, #09131d 100%);
+      color: var(--text);
+      font-family: Inter, system-ui, sans-serif;
+      padding: 40px 20px 80px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      margin-bottom: 40px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 229, 160, 0.08);
+      border: 1px solid rgba(0, 229, 160, 0.22);
+      color: var(--accent);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      line-height: 1.05;
+      margin-bottom: 16px;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 900px;
+      font-size: 1.05rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin: 36px 0 44px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      transition: 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(0, 229, 160, 0.28);
+    }
+
+    .card-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.74rem;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    .card-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .card-sub {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .section {
+      margin-top: 44px;
+    }
+
+    .section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .section p {
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+
+    thead {
+      background: var(--surface2);
+    }
+
+    th {
+      text-align: left;
+      padding: 16px;
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.92rem;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .good {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .warn {
+      color: var(--warn);
+      font-weight: 700;
+    }
+
+    .bad {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .pill.good {
+      background: rgba(0, 210, 122, 0.1);
+      border: 1px solid rgba(0, 210, 122, 0.24);
+    }
+
+    .pill.warn {
+      background: rgba(255, 183, 48, 0.1);
+      border: 1px solid rgba(255, 183, 48, 0.24);
+    }
+
+    .pill.bad {
+      background: rgba(255, 92, 124, 0.1);
+      border: 1px solid rgba(255, 92, 124, 0.24);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .info-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .info-box h3 {
+      margin-bottom: 14px;
+      font-size: 1.05rem;
+    }
+
+    .info-box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .info-box li {
+      color: var(--muted);
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .info-box li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    .footer {
+      margin-top: 50px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 700px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .card-value {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <div class="badge">Firestore CRM Scaling Reference</div>
+      <h1>How Firestore Scales for Multi‑Tenant CRM SaaS</h1>
+      <p>
+        Reference estimates for Firestore usage, daily reads, active users, and approximate monthly costs based on your current CRM dashboard architecture using pagination, tenant isolation, and Firestore document queries.
+      </p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Pagination</div>
+        <div class="card-value">Excellent</div>
+        <div class="card-sub">Your cursor-based pagination is already production-grade.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Search</div>
+        <div class="card-value">Weak</div>
+        <div class="card-sub">Client-side filtering becomes expensive at scale.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Kanban Board</div>
+        <div class="card-value">Medium</div>
+        <div class="card-sub">Large stage loads can spike Firestore reads.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Long-Term DB</div>
+        <div class="card-value">PostgreSQL</div>
+        <div class="card-sub">Preferred once SaaS grows beyond ~150 clients.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Estimated Firestore Scaling Table</h2>
+      <p>
+        Approximate SaaS scaling reference for your CRM dashboard.
+        Rows with <strong>5k leads per client</strong> are specially highlighted because this is typically where Firestore operational and cost pressure starts becoming noticeable for CRM SaaS platforms.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Clients</th>
+              <th>Avg Leads / Client</th>
+              <th>Total Leads</th>
+              <th>Daily Active Users</th>
+              <th>Estimated Reads / Day</th>
+              <th>Estimated Writes / Day</th>
+              <th>Approx Monthly Cost</th>
+              <th>Avg Cost / Client</th>
+              <th>Total Client Revenue Needed*</th>
+              <th>Recommendation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>100</td>
+              <td>500</td>
+              <td>50k</td>
+              <td>50–100</td>
+              <td>100k–300k</td>
+              <td>10k–30k</td>
+              <td>$20–$80</td>
+              <td>$0.20–$0.80</td>
+              <td>$500–$1k/mo</td>
+              <td><span class="pill good">Healthy</span></td>
+            </tr>
+
+            <tr>
+              <td>100</td>
+              <td>1k</td>
+              <td>100k</td>
+              <td>100–150</td>
+              <td>250k–700k</td>
+              <td>20k–50k</td>
+              <td>$50–$180</td>
+              <td>$0.50–$1.80</td>
+              <td>$1k–$2k/mo</td>
+              <td><span class="pill warn">Optimize Search</span></td>
+            </tr>
+
+            <tr style="background: rgba(255, 183, 48, 0.08); box-shadow: inset 4px 0 0 var(--warn);">
+              <td><strong>100</strong></td>
+              <td><strong>5k</strong></td>
+              <td>500k</td>
+              <td>150–300</td>
+              <td>1M–3M</td>
+              <td>50k–150k</td>
+              <td>$250–$900</td>
+              <td>$2.50–$9</td>
+              <td>$5k–$10k/mo</td>
+              <td><span class="pill warn">Monitor Costs</span></td>
+            </tr>
+
+            <tr>
+              <td>200</td>
+              <td>500</td>
+              <td>100k</td>
+              <td>100–200</td>
+              <td>250k–700k</td>
+              <td>20k–60k</td>
+              <td>$60–$220</td>
+              <td>$0.30–$1.10</td>
+              <td>$2k–$4k/mo</td>
+              <td><span class="pill good">Manageable</span></td>
+            </tr>
+
+            <tr>
+              <td>200</td>
+              <td>1k</td>
+              <td>200k</td>
+              <td>150–300</td>
+              <td>500k–1.5M</td>
+              <td>40k–100k</td>
+              <td>$120–$450</td>
+              <td>$0.60–$2.25</td>
+              <td>$4k–$8k/mo</td>
+              <td><span class="pill warn">Search Bottleneck</span></td>
+            </tr>
+
+            <tr style="background: rgba(255, 92, 124, 0.08); box-shadow: inset 4px 0 0 var(--danger);">
+              <td><strong>200</strong></td>
+              <td><strong>5k</strong></td>
+              <td>1M</td>
+              <td>300–700</td>
+              <td>3M–10M</td>
+              <td>150k–400k</td>
+              <td>$800–$3000</td>
+              <td>$4–$15</td>
+              <td>$10k–$30k/mo</td>
+              <td><span class="pill bad">PostgreSQL Recommended</span></td>
+            </tr>
+
+            <tr>
+              <td>300</td>
+              <td>500</td>
+              <td>150k</td>
+              <td>150–300</td>
+              <td>400k–1M</td>
+              <td>30k–90k</td>
+              <td>$100–$350</td>
+              <td>$0.33–$1.16</td>
+              <td>$6k–$12k/mo</td>
+              <td><span class="pill good">Still Fine</span></td>
+            </tr>
+
+            <tr>
+              <td>300</td>
+              <td>1k</td>
+              <td>300k</td>
+              <td>250–500</td>
+              <td>1M–3M</td>
+              <td>80k–200k</td>
+              <td>$300–$1200</td>
+              <td>$1–$4</td>
+              <td>$12k–$25k/mo</td>
+              <td><span class="pill warn">Heavy Optimization Needed</span></td>
+            </tr>
+
+            <tr style="background: rgba(255, 92, 124, 0.14); box-shadow: inset 4px 0 0 var(--danger);">
+              <td><strong>300</strong></td>
+              <td><strong>5k</strong></td>
+              <td>1.5M</td>
+              <td>500–1200</td>
+              <td>5M–20M</td>
+              <td>250k–700k</td>
+              <td>$1500–$6000+</td>
+              <td>$5–$20+</td>
+              <td>$25k–$60k+/mo</td>
+              <td><span class="pill bad">Move to PostgreSQL</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Important Findings</h2>
+
+      <div class="grid-2">
+        <div class="info-box">
+          <h3>What Scales Well</h3>
+          <ul>
+            <li>Cursor-based pagination using limit() and startAfter()</li>
+            <li>Tenant isolation with tenant_id filtering</li>
+            <li>Small page sizes (15 docs)</li>
+            <li>Firestore count aggregation queries</li>
+            <li>Soft-delete filtering</li>
+          </ul>
+        </div>
+
+        <div class="info-box">
+          <h3>Primary Bottlenecks</h3>
+          <ul>
+            <li>Client-side search filtering</li>
+            <li>Large kanban board stage loading</li>
+            <li>Realtime listeners on dashboards</li>
+            <li>Repeated analytics refreshes</li>
+            <li>Large multi-stage board queries</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Migration Guidance</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Growth Stage</th>
+              <th>Recommended Database</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0–50 Clients</td>
+              <td class="good">Firestore</td>
+              <td>Fast development, low infrastructure overhead</td>
+            </tr>
+
+            <tr>
+              <td>50–150 Clients</td>
+              <td class="warn">Firestore + Optimizations</td>
+              <td>Need better search and caching strategies</td>
+            </tr>
+
+            <tr>
+              <td>150–300 Clients</td>
+              <td class="warn">Hybrid Architecture</td>
+              <td>Search and analytics become expensive</td>
+            </tr>
+
+            <tr>
+              <td>300+ Clients</td>
+              <td class="bad">PostgreSQL</td>
+              <td>More predictable scaling and lower operational costs</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">
+      Reference estimates based on your uploaded Firestore CRM dashboard architecture and common SaaS CRM usage patterns. *Revenue estimates assume a healthy SaaS gross margin and typical SMB CRM pricing strategy.
+    </div>
+  </div>
+</body>
+</html>
