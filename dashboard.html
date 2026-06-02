@@ -4753,19 +4753,21 @@ async function openDashReport(type, btnEl) {
 
     // Render HTML in a sandboxed iframe
     body.innerHTML = `<div class="dash-report-content-wrap">
-      <iframe class="dash-report-html-frame" id="dashRepFrame" sandbox="allow-same-origin allow-scripts"></iframe>
+      <iframe class="dash-report-html-frame" id="dashRepFrame" sandbox="allow-scripts"></iframe>
     </div>`;
 
     const frame = document.getElementById('dashRepFrame');
-    const doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open(); doc.write(htmlContent); doc.close();
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const blobUrl = URL.createObjectURL(blob);
+    frame.src = blobUrl;
 
-    setTimeout(() => {
+    frame.onload = () => {
+      URL.revokeObjectURL(blobUrl);
       try {
-        const h = doc.body ? doc.body.scrollHeight : 400;
-        frame.style.minHeight = Math.max(400, h + 20) + 'px';
+        const h = frame.contentDocument?.body?.scrollHeight;
+        frame.style.minHeight = Math.max(400, (h || 0) + 20) + 'px';
       } catch(e) {}
-    }, 300);
+    };
 
     if (btnEl) { btnEl.classList.remove('loading'); btnEl.classList.add('active'); }
 
