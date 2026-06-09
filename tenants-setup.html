@@ -1208,6 +1208,10 @@
             <p>Latest 200 entries from <span style="font-family:var(--mono);color:var(--accent);font-size:.68rem;">token_log</span> table</p>
           </div>
           <div class="table-head-bar-right" style="gap:8px;flex-wrap:wrap;">
+            <button class="pill-btn outline" onclick="downloadTokenLogCsv()" style="gap:6px;" title="Download all filtered rows as CSV">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download CSV
+            </button>
             <select id="tkTenantFilter" onchange="resetTokenLogPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 8px center;">
               <option value="">All Tenants</option>
             </select>
@@ -1232,6 +1236,7 @@
               <th>Workflow</th>
               <th>Model</th>
               <th>Prompt</th>
+              <th>Result</th>
               <th style="text-align:right;">Prompt Tkns</th>
               <th style="text-align:right;">Completion</th>
               <th style="text-align:right;">Total</th>
@@ -1240,7 +1245,7 @@
             </tr>
           </thead>
           <tbody id="tokenLogTableBody">
-            <tr><td colspan="11"><div class="empty-state">
+            <tr><td colspan="12"><div class="empty-state">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               <p>No token logs loaded</p><p class="empty-sub">Click "Refresh" to fetch from Neon.</p>
             </div></td></tr>
@@ -1281,6 +1286,37 @@
         Copy JSON
       </button>
       <button class="btn btn-outline" onclick="closeMetaModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ TOKEN RESULT MODAL ════════════════════ -->
+<div class="overlay" id="tkResultModal">
+  <div class="modal meta-modal" style="max-width:600px;">
+    <div class="modal-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent2)"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <div class="modal-title">AI Result</div>
+      </div>
+      <button class="modal-close" onclick="closeTkResultModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="tkResultMeta" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+      <div id="tkResultContent" style="
+        background:#0d1117;border:1px solid #30363d;border-radius:8px;
+        padding:16px 18px;font-family:var(--mono);font-size:.78rem;
+        line-height:1.7;color:#c9d1d9;white-space:pre-wrap;word-break:break-word;
+        max-height:440px;overflow-y:auto;
+      "></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" id="tkResultCopyBtn" onclick="copyTkResult()" style="display:flex;align-items:center;gap:6px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Text
+      </button>
+      <button class="btn btn-outline" onclick="closeTkResultModal()">Close</button>
     </div>
   </div>
 </div>
@@ -3922,7 +3958,7 @@
   async function loadTokenLog(force) {
     if (_tkLoaded && !force) return;
     const tbody = document.getElementById('tokenLogTableBody');
-    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
       <p>Loading token logs…</p>
     </div></td></tr>`;
@@ -3939,7 +3975,7 @@
       document.getElementById('tabCntTokenLog').textContent = cnt;
       document.getElementById('cntTokenLog').textContent    = cnt;
     } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <p style="color:var(--danger);">Failed to load token logs</p>
         <p class="empty-sub">${esc(e.message)}</p>
@@ -4003,7 +4039,7 @@
     );
 
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
+      tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         <p>No token log entries match</p><p class="empty-sub">Try adjusting the filters.</p>
       </div></td></tr>`;
@@ -4045,6 +4081,13 @@
       const latency = r.latency_seconds ? `<span style="font-family:var(--mono);font-size:.72rem;color:var(--muted);">${parseFloat(r.latency_seconds).toFixed(3)}s</span>`  : '—';
       const mono    = v => `<span style="font-family:var(--mono);font-size:.78rem;font-weight:600;">${v ?? '—'}</span>`;
 
+      const resultPill = r.result
+        ? `<span class="meta-pill" style="border-color:rgba(0,184,255,.25);color:var(--accent2);" onclick='showTkResultModal(${JSON.stringify(JSON.stringify(r))})'>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            result
+          </span>`
+        : '<span style="color:var(--muted);font-size:.7rem;">—</span>';
+
       return `<tr>
         <td><span class="mono" style="font-size:.7rem;">${time}</span></td>
         <td>${tenantCell}</td>
@@ -4052,6 +4095,7 @@
         <td>${wfBadge}</td>
         <td>${mdBadge}</td>
         <td>${promptTxt}</td>
+        <td>${resultPill}</td>
         <td style="text-align:right;">${mono(r.prompt_tokens)}</td>
         <td style="text-align:right;">${mono(r.completion_tokens)}</td>
         <td style="text-align:right;"><span style="font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--accent2);">${r.total_tokens ?? '—'}</span></td>
@@ -4086,6 +4130,93 @@
       ).join('') +
       `<button class="page-btn" onclick="goTkPage(${_tkPage + 1})" ${_tkPage === totalPages ? 'disabled' : ''}>›</button>`;
   }
+  /* ══════════════ TOKEN LOG — RESULT MODAL ══════════════ */
+  let _currentTkResult = '';
+
+  function showTkResultModal(rowJson) {
+    let r;
+    try { r = JSON.parse(rowJson); } catch(e) { r = {}; }
+    _currentTkResult = r.result || '';
+
+    // Context badges (workflow, model, tenant, cost)
+    const meta = document.getElementById('tkResultMeta');
+    const badges = [];
+    if (r.workflow_name) badges.push(`<span style="font-family:var(--mono);font-size:.67rem;background:rgba(0,184,255,.08);border:1px solid rgba(0,184,255,.2);color:var(--accent2);padding:2px 10px;border-radius:20px;">${esc(r.workflow_name)}</span>`);
+    if (r.model)         badges.push(`<span style="font-family:var(--mono);font-size:.67rem;background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.18);color:var(--accent);padding:2px 10px;border-radius:20px;">${esc(r.model)}</span>`);
+    if (r.tenant_id)     badges.push(`<span class="tenant-chip">${esc(r.tenant_id)}</span>`);
+    if (r.cost_usd)      badges.push(`<span style="font-family:var(--mono);font-size:.67rem;background:rgba(255,183,48,.08);border:1px solid rgba(255,183,48,.2);color:var(--warn);padding:2px 10px;border-radius:20px;">$${parseFloat(r.cost_usd).toFixed(8)}</span>`);
+    meta.innerHTML = badges.join('');
+
+    const content = document.getElementById('tkResultContent');
+    if (_currentTkResult) {
+      content.textContent = _currentTkResult;
+    } else {
+      content.innerHTML = `<span style="color:var(--muted);font-style:italic;">No result text available.</span>`;
+    }
+    document.getElementById('tkResultModal').classList.add('open');
+  }
+
+  function closeTkResultModal() {
+    document.getElementById('tkResultModal').classList.remove('open');
+  }
+  document.getElementById('tkResultModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTkResultModal();
+  });
+
+  function copyTkResult() {
+    if (!_currentTkResult) return;
+    navigator.clipboard.writeText(_currentTkResult).then(() => {
+      const btn = document.getElementById('tkResultCopyBtn');
+      btn.textContent = '✓ Copied';
+      setTimeout(() => { btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Text'; }, 2000);
+    });
+  }
+
+  /* ══════════════ TOKEN LOG — CSV DOWNLOAD ══════════════ */
+  function downloadTokenLogCsv() {
+    // Use currently filtered rows (respects active filters)
+    const tnFilt  = document.getElementById('tkTenantFilter').value;
+    const wfFilt  = document.getElementById('tkWorkflowFilter').value;
+    const mdFilt  = document.getElementById('tkModelFilter').value;
+    const search  = (document.getElementById('tkSearch').value || '').toLowerCase();
+
+    let rows = _tokenLogs;
+    if (tnFilt)  rows = rows.filter(r => r.tenant_id     === tnFilt);
+    if (wfFilt)  rows = rows.filter(r => r.workflow_name === wfFilt);
+    if (mdFilt)  rows = rows.filter(r => r.model         === mdFilt);
+    if (search)  rows = rows.filter(r =>
+      (r.prompt        || '').toLowerCase().includes(search) ||
+      (r.result        || '').toLowerCase().includes(search) ||
+      (r.model         || '').toLowerCase().includes(search) ||
+      (r.workflow_name || '').toLowerCase().includes(search) ||
+      (r.tenant_id     || '').toLowerCase().includes(search) ||
+      (r.user_id       || '').toLowerCase().includes(search)
+    );
+
+    if (!rows.length) { showToast('No rows to export', 'warn'); return; }
+
+    const cols = ['log_time','tenant_id','user_id','workflow_name','model','prompt','result',
+                  'prompt_tokens','completion_tokens','total_tokens','cost_usd','latency_seconds'];
+    const csvEsc = v => {
+      if (v == null) return '';
+      const s = String(v);
+      return (s.includes(',') || s.includes('"') || s.includes('\n'))
+        ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = cols.join(',');
+    const body   = rows.map(r => cols.map(c => csvEsc(r[c])).join(',')).join('\n');
+    const csv    = header + '\n' + body;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    const ts   = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    a.href     = url;
+    a.download = `token_log_${ts}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${rows.length} rows`, 'success');
+  }
 </script>
-</body>
-</html>
