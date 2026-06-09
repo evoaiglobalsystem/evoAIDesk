@@ -3823,6 +3823,7 @@
   });
 
   function renderLogsTable() {
+    const tbody      = document.getElementById('logsTableBody');
     const levelFilt  = document.getElementById('logLevelFilter').value;
     const statusFilt = document.getElementById('logStatusFilter').value;
     const moduleFilt = document.getElementById('logModuleFilter').value;
@@ -3941,6 +3942,7 @@
       tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <p style="color:var(--danger);">Failed to load token logs</p>
+        <p class="empty-sub">${esc(e.message)}</p>
         <p class="empty-sub">Check the n8n webhook: <span style="font-family:var(--mono);color:var(--accent);">N8N_TOKEN_LOG_READ</span></p>
       </div></td></tr>`;
       console.error('[loadTokenLog]', e);
