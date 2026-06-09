@@ -660,6 +660,11 @@
           Logs
           <span class="aside-count" id="cntLogs">—</span>
         </a>
+        <a class="aside-item" href="#" onclick="switchTab('tokenlog');return false;" id="sideTokenLogLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Token Log
+          <span class="aside-count" id="cntTokenLog">—</span>
+        </a>
         <a class="aside-item" href="#" onclick="filterActiveUsers();return false;" id="sideActiveUsersLink">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Active Users
@@ -722,6 +727,11 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Logs
         <span class="tab-count" id="tabCntLogs">—</span>
+      </button>
+      <button class="tab-btn" id="tabBtnTokenLog" onclick="switchTab('tokenlog')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Token Log
+        <span class="tab-count" id="tabCntTokenLog">—</span>
       </button>
     </div>
 
@@ -1153,6 +1163,95 @@
         </div>
       </div>
     </div><!-- /panelLogs -->
+
+    <!-- ════════════════════════════════════ TOKEN LOG TAB ═══════════════ -->
+    <div class="tab-panel" id="panelTokenLog">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Token Log</div>
+          <div class="page-sub">AI token usage across all workflows — pulled from <span style="font-family:var(--mono);color:var(--accent);font-size:.78rem;">token_log</span> table in Neon.</div>
+        </div>
+        <button class="pill-btn outline" onclick="loadTokenLog(true)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Token stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Calls</div>
+          <div class="stat-value" id="tkStatTotal">—</div>
+          <div class="stat-sub">Log entries loaded</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Tokens</div>
+          <div class="stat-value" style="color:var(--accent2);" id="tkStatTokens">—</div>
+          <div class="stat-sub">Prompt + completion</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Cost</div>
+          <div class="stat-value" style="color:var(--warn);" id="tkStatCost">—</div>
+          <div class="stat-sub">USD (estimated)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Latency</div>
+          <div class="stat-value" id="tkStatLatency">—</div>
+          <div class="stat-sub">Seconds per call</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-head-bar">
+          <div>
+            <h3>Token Usage</h3>
+            <p>Latest 200 entries from <span style="font-family:var(--mono);color:var(--accent);font-size:.68rem;">token_log</span> table</p>
+          </div>
+          <div class="table-head-bar-right" style="gap:8px;flex-wrap:wrap;">
+            <select id="tkTenantFilter" onchange="resetTokenLogPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Tenants</option>
+            </select>
+            <select id="tkWorkflowFilter" onchange="resetTokenLogPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Workflows</option>
+            </select>
+            <select id="tkModelFilter" onchange="resetTokenLogPage()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:.76rem;border-radius:7px;padding:5px 28px 5px 10px;outline:none;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7fa3' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 8px center;">
+              <option value="">All Models</option>
+            </select>
+            <div class="search-wrap">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="search-input" id="tkSearch" placeholder="Search prompt, user…" oninput="resetTokenLogPage()" style="width:200px;"/>
+            </div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Tenant</th>
+              <th>User</th>
+              <th>Workflow</th>
+              <th>Model</th>
+              <th>Prompt</th>
+              <th style="text-align:right;">Prompt Tkns</th>
+              <th style="text-align:right;">Completion</th>
+              <th style="text-align:right;">Total</th>
+              <th style="text-align:right;">Cost (USD)</th>
+              <th style="text-align:right;">Latency (s)</th>
+            </tr>
+          </thead>
+          <tbody id="tokenLogTableBody">
+            <tr><td colspan="11"><div class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <p>No token logs loaded</p><p class="empty-sub">Click "Refresh" to fetch from Neon.</p>
+            </div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination-bar" id="tkPagBar" style="display:none;">
+          <span class="pagination-info" id="tkPagInfo"></span>
+          <div class="pagination-btns" id="tkPagBtns"></div>
+        </div>
+      </div>
+    </div><!-- /panelTokenLog -->
 
   </main>
 </div>
@@ -1704,6 +1803,7 @@
   ═════════════════════════════════════════════════ */
   const N8N_LOG_WRITE   = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/write'; // POST
   const N8N_LOG_READ    = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/log/read';  // GET
+  const N8N_TOKEN_LOG_READ = 'https://n8n.evoaiglobal.ai/webhook/evoaidesk/tokenlog/read'; // GET
   const N8N_ALL_LEADS_COUNT = 'https://evoaidesk-tenant-setup-api.evoaiglobal-system.workers.dev/api/all-tenants-leads-count';
 
   /* ── Trial Requests (Neon via n8n) ── */
@@ -1888,17 +1988,21 @@
     document.getElementById('panelSchedules').classList.toggle('active', tab === 'schedules');
     document.getElementById('panelTrials').classList.toggle('active', tab === 'trials');
     document.getElementById('panelLogs').classList.toggle('active', tab === 'logs');
+    document.getElementById('panelTokenLog').classList.toggle('active', tab === 'tokenlog');
     document.getElementById('tabBtnTenants').classList.toggle('active', tab === 'tenants');
     document.getElementById('tabBtnUsers').classList.toggle('active', tab === 'users');
     document.getElementById('tabBtnSchedules').classList.toggle('active', tab === 'schedules');
     document.getElementById('tabBtnTrials').classList.toggle('active', tab === 'trials');
     document.getElementById('tabBtnLogs').classList.toggle('active', tab === 'logs');
+    document.getElementById('tabBtnTokenLog').classList.toggle('active', tab === 'tokenlog');
     document.getElementById('sideTenantsLink').classList.toggle('active', tab === 'tenants');
     document.getElementById('sideSchedulesLink').classList.toggle('active', tab === 'schedules');
     document.getElementById('sideTrialsLink').classList.toggle('active', tab === 'trials');
     document.getElementById('sideLogsLink').classList.toggle('active', tab === 'logs');
-    if (tab === 'logs')   loadLogs(false);
-    if (tab === 'trials') loadTrials(false);
+    document.getElementById('sideTokenLogLink').classList.toggle('active', tab === 'tokenlog');
+    if (tab === 'logs')     loadLogs(false);
+    if (tab === 'trials')   loadTrials(false);
+    if (tab === 'tokenlog') loadTokenLog(false);
   }
 
   function updateSidebarUserHighlights() {
@@ -3655,7 +3759,7 @@
     toast(`Exported ${_trials.length} record${_trials.length !== 1 ? 's' : ''} to CSV`, 'success');
   }
 
-  /* ═════════════════════════════════════════════════════════ */
+  /* ═══════════════════════════════════════════════════════ */
 
   function renderLogStats() {
     const total    = _logs.length;
@@ -3719,7 +3823,6 @@
   });
 
   function renderLogsTable() {
-    const tbody      = document.getElementById('logsTableBody');
     const levelFilt  = document.getElementById('logLevelFilter').value;
     const statusFilt = document.getElementById('logStatusFilter').value;
     const moduleFilt = document.getElementById('logModuleFilter').value;
@@ -3807,6 +3910,179 @@
         : `<button class="page-btn ${p === _logsPage ? 'active' : ''}" onclick="goLogsPage(${p})">${p}</button>`
       ).join('') +
       `<button class="page-btn" onclick="goLogsPage(${_logsPage + 1})" ${_logsPage === totalPages ? 'disabled' : ''}>›</button>`;
+  }
+
+  /* ══════════════ TOKEN LOG ══════════════ */
+  const TK_PER_PAGE = 50;
+  let _tokenLogs    = [];
+  let _tkPage       = 1;
+  let _tkLoaded     = false;
+
+  async function loadTokenLog(force) {
+    if (_tkLoaded && !force) return;
+    const tbody = document.getElementById('tokenLogTableBody');
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+      <p>Loading token logs…</p>
+    </div></td></tr>`;
+    try {
+      const res  = await fetch(N8N_TOKEN_LOG_READ);
+      const data = await res.json();
+      _tokenLogs = Array.isArray(data) ? data : (data.rows || data.data || []);
+      _tkLoaded  = true;
+      populateTkFilters();
+      renderTokenLogStats();
+      _tkPage = 1;
+      renderTokenLogTable();
+      const cnt = _tokenLogs.length;
+      document.getElementById('tabCntTokenLog').textContent = cnt;
+      document.getElementById('cntTokenLog').textContent    = cnt;
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p style="color:var(--danger);">Failed to load token logs</p>
+        <p class="empty-sub">Check the n8n webhook: <span style="font-family:var(--mono);color:var(--accent);">N8N_TOKEN_LOG_READ</span></p>
+      </div></td></tr>`;
+      console.error('[loadTokenLog]', e);
+    }
+  }
+
+  function populateTkFilters() {
+    const tenants   = [...new Set(_tokenLogs.map(r => r.tenant_id).filter(Boolean))].sort();
+    const workflows = [...new Set(_tokenLogs.map(r => r.workflow_name).filter(Boolean))].sort();
+    const models    = [...new Set(_tokenLogs.map(r => r.model).filter(Boolean))].sort();
+
+    const tSel = document.getElementById('tkTenantFilter');
+    const wSel = document.getElementById('tkWorkflowFilter');
+    const mSel = document.getElementById('tkModelFilter');
+    const tVal = tSel.value, wVal = wSel.value, mVal = mSel.value;
+
+    tSel.innerHTML = '<option value="">All Tenants</option>'   + tenants.map(t   => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+    wSel.innerHTML = '<option value="">All Workflows</option>' + workflows.map(w => `<option value="${esc(w)}">${esc(w)}</option>`).join('');
+    mSel.innerHTML = '<option value="">All Models</option>'    + models.map(m    => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+
+    tSel.value = tVal; wSel.value = wVal; mSel.value = mVal;
+  }
+
+  function renderTokenLogStats() {
+    const total       = _tokenLogs.length;
+    const totalTokens = _tokenLogs.reduce((s, r) => s + (parseInt(r.total_tokens)      || 0), 0);
+    const totalCost   = _tokenLogs.reduce((s, r) => s + (parseFloat(r.cost_usd)        || 0), 0);
+    const avgLatency  = total
+      ? (_tokenLogs.reduce((s, r) => s + (parseFloat(r.latency_seconds) || 0), 0) / total)
+      : 0;
+    document.getElementById('tkStatTotal').textContent   = total.toLocaleString();
+    document.getElementById('tkStatTokens').textContent  = totalTokens.toLocaleString();
+    document.getElementById('tkStatCost').textContent    = '$' + totalCost.toFixed(6);
+    document.getElementById('tkStatLatency').textContent = avgLatency.toFixed(3) + 's';
+  }
+
+  function resetTokenLogPage() { _tkPage = 1; renderTokenLogTable(); }
+  function goTkPage(p)         { _tkPage = p; renderTokenLogTable(); }
+
+  function renderTokenLogTable() {
+    const tbody    = document.getElementById('tokenLogTableBody');
+    const tnFilt   = document.getElementById('tkTenantFilter').value;
+    const wfFilt   = document.getElementById('tkWorkflowFilter').value;
+    const mdFilt   = document.getElementById('tkModelFilter').value;
+    const search   = (document.getElementById('tkSearch').value || '').toLowerCase();
+
+    let rows = _tokenLogs;
+    if (tnFilt)  rows = rows.filter(r => r.tenant_id     === tnFilt);
+    if (wfFilt)  rows = rows.filter(r => r.workflow_name === wfFilt);
+    if (mdFilt)  rows = rows.filter(r => r.model         === mdFilt);
+    if (search)  rows = rows.filter(r =>
+      (r.prompt        || '').toLowerCase().includes(search) ||
+      (r.result        || '').toLowerCase().includes(search) ||
+      (r.model         || '').toLowerCase().includes(search) ||
+      (r.workflow_name || '').toLowerCase().includes(search) ||
+      (r.tenant_id     || '').toLowerCase().includes(search) ||
+      (r.user_id       || '').toLowerCase().includes(search)
+    );
+
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <p>No token log entries match</p><p class="empty-sub">Try adjusting the filters.</p>
+      </div></td></tr>`;
+      document.getElementById('tkPagBar').style.display = 'none';
+      return;
+    }
+
+    const totalPages = Math.ceil(rows.length / TK_PER_PAGE);
+    if (_tkPage > totalPages) _tkPage = totalPages;
+    const start = (_tkPage - 1) * TK_PER_PAGE;
+    const page  = rows.slice(start, start + TK_PER_PAGE);
+
+    tbody.innerHTML = page.map(r => {
+      const time = r.log_time
+        ? new Date(r.log_time).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+        : '—';
+
+      const tenantCell = r.tenant_id
+        ? `<span class="tenant-chip">${esc(r.tenant_id)}</span>`
+        : '<span style="color:var(--muted);font-size:.7rem;">—</span>';
+
+      const userCell = r.user_id
+        ? `<span style="font-size:.72rem;font-family:var(--mono);color:var(--muted);" title="${esc(r.user_id)}">${esc(r.user_id.length > 22 ? r.user_id.slice(0,20) + '…' : r.user_id)}</span>`
+        : '<span style="color:var(--muted);font-size:.7rem;">—</span>';
+
+      const wfBadge = r.workflow_name
+        ? `<span style="font-family:var(--mono);font-size:.67rem;background:rgba(0,184,255,.08);border:1px solid rgba(0,184,255,.2);color:var(--accent2);padding:2px 8px;border-radius:20px;white-space:nowrap;">${esc(r.workflow_name)}</span>`
+        : '—';
+
+      const mdBadge = r.model
+        ? `<span style="font-family:var(--mono);font-size:.67rem;background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.18);color:var(--accent);padding:2px 8px;border-radius:20px;white-space:nowrap;">${esc(r.model)}</span>`
+        : '—';
+
+      const promptTxt = r.prompt
+        ? `<span title="${esc(r.prompt)}" style="font-size:.76rem;display:block;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.prompt)}</span>`
+        : '<span style="color:var(--muted);font-size:.7rem;">—</span>';
+
+      const cost    = r.cost_usd        ? `<span style="font-family:var(--mono);font-size:.72rem;color:var(--warn);">$${parseFloat(r.cost_usd).toFixed(8)}</span>`           : '—';
+      const latency = r.latency_seconds ? `<span style="font-family:var(--mono);font-size:.72rem;color:var(--muted);">${parseFloat(r.latency_seconds).toFixed(3)}s</span>`  : '—';
+      const mono    = v => `<span style="font-family:var(--mono);font-size:.78rem;font-weight:600;">${v ?? '—'}</span>`;
+
+      return `<tr>
+        <td><span class="mono" style="font-size:.7rem;">${time}</span></td>
+        <td>${tenantCell}</td>
+        <td>${userCell}</td>
+        <td>${wfBadge}</td>
+        <td>${mdBadge}</td>
+        <td>${promptTxt}</td>
+        <td style="text-align:right;">${mono(r.prompt_tokens)}</td>
+        <td style="text-align:right;">${mono(r.completion_tokens)}</td>
+        <td style="text-align:right;"><span style="font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--accent2);">${r.total_tokens ?? '—'}</span></td>
+        <td style="text-align:right;">${cost}</td>
+        <td style="text-align:right;">${latency}</td>
+      </tr>`;
+    }).join('');
+
+    /* Pagination */
+    const bar  = document.getElementById('tkPagBar');
+    const info = document.getElementById('tkPagInfo');
+    const btns = document.getElementById('tkPagBtns');
+    bar.style.display = 'flex';
+    info.textContent  = `${start + 1}–${Math.min(start + TK_PER_PAGE, rows.length)} of ${rows.length}`;
+
+    let pages = [];
+    if (totalPages <= 7) {
+      pages = Array.from({length: totalPages}, (_, i) => i + 1);
+    } else {
+      pages = [1];
+      if (_tkPage > 3) pages.push('…');
+      for (let i = Math.max(2, _tkPage - 1); i <= Math.min(totalPages - 1, _tkPage + 1); i++) pages.push(i);
+      if (_tkPage < totalPages - 2) pages.push('…');
+      pages.push(totalPages);
+    }
+
+    btns.innerHTML =
+      `<button class="page-btn" onclick="goTkPage(${_tkPage - 1})" ${_tkPage === 1 ? 'disabled' : ''}>‹</button>` +
+      pages.map(p => p === '…'
+        ? `<span class="page-btn" style="cursor:default;opacity:.4;">…</span>`
+        : `<button class="page-btn ${p === _tkPage ? 'active' : ''}" onclick="goTkPage(${p})">${p}</button>`
+      ).join('') +
+      `<button class="page-btn" onclick="goTkPage(${_tkPage + 1})" ${_tkPage === totalPages ? 'disabled' : ''}>›</button>`;
   }
 </script>
 </body>
