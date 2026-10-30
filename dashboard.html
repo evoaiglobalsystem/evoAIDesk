@@ -2857,7 +2857,7 @@
         <div id="importDropZone" class="import-drop-zone" onclick="document.getElementById('importFileInput').click()" ondragover="importDragOver(event)" ondragleave="importDragLeave(event)" ondrop="importDrop(event)">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="12"/><line x1="15" y1="15" x2="12" y2="12"/></svg>
           <div class="import-drop-title">Drop your CSV file here</div>
-          <div class="import-drop-sub">or click to browse &nbsp;·&nbsp; .csv supported</div>
+          <div class="import-drop-sub">or click to browse &nbsp;·&nbsp; .csv supported &nbsp;·&nbsp; max 500 leads per import</div>
           <input type="file" id="importFileInput" accept=".csv" style="display:none;" onchange="importFileSelected(this.files[0])"/>
         </div>
 
@@ -4928,7 +4928,7 @@ function toast(msg, type='success') {
   document.getElementById('toastMsg').textContent = msg;
   el.className = 'show ' + type;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+  toastTimer = setTimeout(() => el.classList.remove('show'), type === 'error' ? 6500 : 3200);
 }
 function toggleHelpPanel() {
   const panel   = document.getElementById('helpPanel');
@@ -5162,6 +5162,7 @@ This CANNOT be undone.`)) return;
 ════════════════════════════════════════════════════ */
 let _importRows    = [];   // parsed valid rows ready to write
 let _importSkipped = 0;    // rows skipped (no name or email)
+const IMPORT_MAX_ROWS = 500; // hard cap on leads per import
 
 /* Column name aliases → internal lead field */
 const IMPORT_COL_MAP = {
@@ -5590,6 +5591,16 @@ function parseImportSheet(fileName, raw) {
     });
   }
 
+  /* Enforce row cap — reject the whole file rather than silently truncating */
+  if (validRows.length > IMPORT_MAX_ROWS) {
+    toast(`Import blocked: file has ${validRows.length} valid rows. Maximum is ${IMPORT_MAX_ROWS} per import — please split your file.`, 'error');
+    const fi = document.getElementById('importFileInput');
+    if (fi) fi.value = '';          // allow re-selecting the same file after editing
+    _importRows    = [];
+    _importSkipped = 0;
+    return;                          // stay on step 1
+  }
+
   _importRows    = validRows;
   _importSkipped = skipped;
 
@@ -5661,6 +5672,10 @@ function resetImport() {
 
 async function runImport() {
   if (!_importRows.length) return;
+  if (_importRows.length > IMPORT_MAX_ROWS) {
+    toast(`Import blocked: maximum ${IMPORT_MAX_ROWS} leads per import.`, 'error');
+    return;
+  }
 
   /* Switch to progress step */
   document.getElementById('importStep2').style.display = 'none';
