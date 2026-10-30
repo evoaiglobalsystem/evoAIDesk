@@ -671,6 +671,7 @@
 	// ── Fetch tenant doc for currency + timezone ──
     // Set safe defaults FIRST — before any async call that could fail
     window._tenantCurrency = 'USD';
+    window._tenantPlan     = 'trial';   // trial | starter | growth | team (default: trial)
     window._tenantTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
     // Helper: validate an IANA timezone string by testing it with Intl
@@ -692,6 +693,10 @@
 
         // ── Gmail connection state (cached to avoid extra Firestore calls) ──
         window._tenantGmailConnected = td.gmail_connected === true || td.gmail_connected === 'true';
+
+        // ── Plan: trial | starter | growth | team (anything else → trial) ──
+        const _plan = String(td.plan || '').trim().toLowerCase();
+        window._tenantPlan = ['trial','starter','growth','team'].includes(_plan) ? _plan : 'trial';
 
         // ── Timezone: tenant field → browser tz → UTC ──
         if (isValidTz(td.timezone)) {
@@ -723,6 +728,7 @@
       id: tenantId,
       currency: window._tenantCurrency,
       timezone: window._tenantTimezone,
+      plan: window._tenantPlan,
     });
     // ends
 
@@ -734,6 +740,15 @@
     document.getElementById('userInitials').textContent     = initials;
     document.getElementById('userName').textContent         = name;
     document.getElementById('userTenantName').textContent   = tenantDisplay;
+    // Plan badge next to tenant name
+    const planBadgeEl = document.getElementById('userPlanBadge');
+    if (planBadgeEl) {
+      const pl = window._tenantPlan || 'trial';
+      planBadgeEl.textContent = pl;
+      planBadgeEl.className   = 'plan-badge plan-' + pl;
+      planBadgeEl.style.display = 'inline-block';
+      planBadgeEl.title       = 'Current plan: ' + pl.charAt(0).toUpperCase() + pl.slice(1);
+    }
     document.getElementById('userChipWrap').title           = email;
     document.getElementById('sideUserInitials').textContent = initials;
     document.getElementById('sideUserName').textContent     = name;
@@ -831,6 +846,12 @@
   .user-info { line-height: 1.2; }
   .user-info-name   { font-size: .75rem; font-weight: 600; color: var(--text); }
   .user-info-tenant { font-size: .63rem; color: var(--accent); font-family: var(--mono); letter-spacing: .04em; opacity: .85; }
+  .user-info-tenant-row { display: flex; align-items: center; gap: 6px; }
+  .plan-badge { display: none; font-size: .54rem; font-family: var(--mono); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; border: 1px solid transparent; line-height: 1.5; }
+  .plan-badge.plan-trial   { background: rgba(255,183,48,.12); color: var(--warn);    border-color: rgba(255,183,48,.3); }
+  .plan-badge.plan-starter { background: rgba(0,184,255,.12);  color: var(--accent2); border-color: rgba(0,184,255,.3); }
+  .plan-badge.plan-growth  { background: rgba(0,229,160,.12);  color: var(--accent);  border-color: rgba(0,229,160,.3); }
+  .plan-badge.plan-team    { background: rgba(192,132,252,.14); color: #c084fc;       border-color: rgba(192,132,252,.3); }
 
   .signout-btn {
     display: flex; align-items: center; gap: 6px;
@@ -1947,7 +1968,10 @@
       <div class="user-avatar" id="userInitials">—</div>
       <div class="user-info">
         <div class="user-info-name" id="userName">—</div>
-        <div class="user-info-tenant" id="userTenantName">—</div>
+        <div class="user-info-tenant-row">
+          <div class="user-info-tenant" id="userTenantName">—</div>
+          <span class="plan-badge" id="userPlanBadge" title="Current plan"></span>
+        </div>
       </div>
     </div>
     <button id="settingsBtn" class="pill-btn outline" onclick="window.location.href='email-settings.html'" style="display:none;align-items:center;gap:6px;font-size:.76rem;">
