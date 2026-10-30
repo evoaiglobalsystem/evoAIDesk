@@ -245,6 +245,24 @@
     return snap.data().count;
   };
 
+  /* ─── Lead capacity: tenant max_leads vs ACTIVE leads (deleted leads are NOT counted) ───
+     Single source for every limit check (create, import, restore). Reads the tenant doc and
+     the live active count each time, so plan/limit changes apply without reloading.
+     "Active" uses the same definition as the dashboard total (deleted != true).
+     max === null  →  no limit (blank/unlimited, or never set on the tenant).            */
+  window.dbGetLeadCapacity = async () => {
+    const tenantId = window._currentTenantId || '';
+    const [tSnap, cSnap] = await Promise.all([
+      getDoc(doc(db, 'tenants', tenantId)),
+      getCountFromServer(query(collection(db, 'leads'),
+        where('tenant_id', '==', tenantId), where('deleted', '!=', true)))
+    ]);
+    const raw = tSnap.exists() ? tSnap.data().max_leads : null;
+    const n   = (raw === null || raw === undefined || raw === '') ? NaN : Number(raw);
+    const max = (Number.isFinite(n) && n > 0) ? Math.floor(n) : null;
+    return { max, active: cSnap.data().count };
+  };
+
   window.dbCountAllStatuses = async () => {
     const ref = collection(db, 'leads');
     const tenantId = window._currentTenantId || '';
@@ -672,6 +690,7 @@
     // Set safe defaults FIRST — before any async call that could fail
     window._tenantCurrency = 'USD';
     window._tenantPlan     = 'trial';   // trial | starter | growth | team (default: trial)
+    window._tenantMaxLeads = null;      // max ACTIVE leads for this tenant (null = no limit)
     window._tenantTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
     // Helper: validate an IANA timezone string by testing it with Intl
@@ -697,6 +716,10 @@
         // ── Plan: trial | starter | growth | team (anything else → trial) ──
         const _plan = String(td.plan || '').trim().toLowerCase();
         window._tenantPlan = ['trial','starter','growth','team'].includes(_plan) ? _plan : 'trial';
+
+        // ── Max active leads (cached for display; limit checks re-read it live) ──
+        const _ml = Number(td.max_leads);
+        window._tenantMaxLeads = (td.max_leads !== null && td.max_leads !== '' && Number.isFinite(_ml) && _ml > 0) ? Math.floor(_ml) : null;
 
         // ── Timezone: tenant field → browser tz → UTC ──
         if (isValidTz(td.timezone)) {
@@ -2803,6 +2826,19 @@
 	  </div>
 	</div>
     <div class="help-section">
+      <div class="help-section-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Plan &amp; Lead Limits
+      </div>
+      <div class="help-tip" style="margin-bottom:8px;"><div class="help-tip-icon">📦</div><div class="help-tip-text" id="helpPlanSummaryText">Loading your plan…</div></div>
+      <div class="help-row"><div class="help-row-key">Max leads</div><div class="help-row-val">Your plan sets the maximum number of <strong>active</strong> leads for this workspace. Your plan is shown as a badge next to your name in the top bar — hover it to see usage.</div></div>
+      <div class="help-row"><div class="help-row-key">What counts</div><div class="help-row-val">Only active leads. Leads in <strong>Trash</strong> (deleted) are <strong>not</strong> counted.</div></div>
+      <div class="help-row"><div class="help-row-key">Add a lead</div><div class="help-row-val">Allowed only while your active leads are <strong>below</strong> the maximum. At the limit, Create Lead is blocked with a message.</div></div>
+      <div class="help-row"><div class="help-row-key">Import CSV</div><div class="help-row-val">Blocked if <strong>active leads + leads in the file</strong> would exceed the maximum. The message shows how many more you can import. Max 500 rows per file.</div></div>
+      <div class="help-row"><div class="help-row-key">Restore</div><div class="help-row-val">Restoring a lead from Trash makes it active again, so it is only allowed while you are below the maximum.</div></div>
+      <div class="help-row"><div class="help-row-key">Free up space</div><div class="help-row-val">Delete leads you no longer need (they move to Trash and stop counting), or ask your admin to upgrade your plan / raise the limit.</div></div>
+    </div>
+    <div class="help-section">
       <div class="help-section-title">Pro Tips</div>
       <div class="help-tip"><div class="help-tip-icon">👤</div><div class="help-tip-text"><strong>Assignment:</strong> Use "Assign to Me" in the form or bulk bar for one-click ownership. The timestamp (assignedAt) is set automatically when you assign.</div></div>
       <div class="help-tip"><div class="help-tip-icon">🗂️</div><div class="help-tip-text"><strong>Server-side pagination:</strong> Only 15 leads are fetched per page. Use "Last" to jump to the final page, or type a page number in the "Go to" box.</div></div>
@@ -3195,6 +3231,14 @@ async function refreshCounts() {
     if (trashEl) trashEl.textContent = counts['trash'] || 0;
 
     document.getElementById('s-total').textContent = counts['ALL']       || 0;
+
+    // Plan badge tooltip: plan + active leads vs max
+    const planBadgeTip = document.getElementById('userPlanBadge');
+    if (planBadgeTip) {
+      const pl = window._tenantPlan || 'trial', mx = window._tenantMaxLeads;
+      planBadgeTip.title = 'Current plan: ' + pl.charAt(0).toUpperCase() + pl.slice(1) +
+        ' · Active leads: ' + (counts['ALL'] || 0).toLocaleString() + ' / ' + (mx ? mx.toLocaleString() : 'no limit');
+    }
     document.getElementById('s-new').textContent   = counts['New']       || 0;
     document.getElementById('s-qual').textContent  = counts['Qualified'] || 0;
     document.getElementById('s-won').textContent   = counts['Won']       || 0;
@@ -3958,6 +4002,12 @@ async function submitForm() {
       }
       renderCurrentView();
     } else {
+      // ── Plan limit: allow only while ACTIVE leads < tenant max ──
+      const cap = await checkLeadCapacity(1);
+      if (!cap.ok) {
+        toast(`Lead limit reached (${cap.active.toLocaleString()} / ${cap.max.toLocaleString()} active leads). Delete leads or upgrade your plan to add more.`, 'error');
+        return;
+      }
       const newId = await window.dbAddLead(lead);
       if (_setAssignedAt && newAssignedTo) {
         await window.dbAddActivity(newId, {
@@ -4960,6 +5010,15 @@ function toggleHelpPanel() {
   const isOpen  = panel.classList.contains('open');
   panel.classList.toggle('open',!isOpen);
   overlay.classList.toggle('open',!isOpen);
+  if (!isOpen) updateHelpPlanSummary();
+}
+function updateHelpPlanSummary() {
+  const el = document.getElementById('helpPlanSummaryText');
+  if (!el) return;
+  const pl  = window._tenantPlan || 'trial';
+  const mx  = window._tenantMaxLeads;
+  const act = (document.getElementById('cnt-all') || {}).textContent || '0';
+  el.innerHTML = `<strong>Your plan: ${pl.charAt(0).toUpperCase() + pl.slice(1)}</strong> · Active leads: <strong>${act}</strong> / ${mx ? Number(mx).toLocaleString() : 'no limit set'}`;
 }
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -5114,10 +5173,31 @@ async function softDeleteFromModal() {
   await softDeleteLead(lead._docId, lead.name || lead.email || lead.leadId);
 }
 
+/* ── Lead limit check — tenant max_leads vs ACTIVE leads (leads in Trash don't count) ──
+   One shared check used by: create lead, CSV import, restore from Trash.
+   adding = number of leads about to become active. ok = (active + adding) <= max. */
+async function checkLeadCapacity(adding = 1) {
+  try {
+    const { max, active } = await window.dbGetLeadCapacity();
+    window._tenantMaxLeads = max;                       // keep cached value fresh
+    if (max === null) return { ok: true, active, max: null, remaining: Infinity };
+    return { ok: active + adding <= max, active, max, remaining: Math.max(0, max - active) };
+  } catch (e) {
+    console.warn('[evoAIDesk] Lead limit check failed — allowing action', e);
+    return { ok: true, active: 0, max: null, remaining: Infinity, failed: true };
+  }
+}
+
 /* ── Restore a lead from trash ── */
 async function restoreLead(docId, displayName) {
   const label = displayName || docId;
   try {
+    // Restoring makes the lead active again → counts toward the plan limit
+    const cap = await checkLeadCapacity(1);
+    if (!cap.ok) {
+      toast(`Cannot restore "${label}": lead limit reached (${cap.active.toLocaleString()} / ${cap.max.toLocaleString()} active leads). Delete other leads or upgrade your plan first.`, 'error');
+      return;
+    }
     await window.dbRestoreLead(docId);
     toast(`"${label}" restored successfully`, 'success');
     trashLeads = trashLeads.filter(l => l._docId !== docId);
@@ -5677,12 +5757,29 @@ function renderImportPreview(fileName, rows, skipped, detectedFields) {
     : '';
 
   if (rows.length > 0) {
-    const btn = document.getElementById('importConfirmBtn');
-    btn.style.display = '';
     document.getElementById('importConfirmCount').textContent = rows.length;
+    document.getElementById('importConfirmBtn').style.display = 'none';   // shown only if the lead limit allows it
+    enforceImportCapacity(rows.length);
   } else {
     document.getElementById('importConfirmBtn').style.display = 'none';
   }
+}
+
+/* Blocks the import when ACTIVE leads + rows in the file would exceed the tenant's max leads */
+function importBlockedMessage(cap, n) {
+  const room = cap.remaining > 0
+    ? `You can import up to <strong>${cap.remaining.toLocaleString()}</strong> more lead${cap.remaining === 1 ? '' : 's'} — reduce the file`
+    : `There is no space left — free up space`;
+  return `Import blocked: your plan allows <strong>${cap.max.toLocaleString()}</strong> active leads, you have <strong>${cap.active.toLocaleString()}</strong>, and this file adds <strong>${n.toLocaleString()}</strong> (total ${(cap.active + n).toLocaleString()}). ${room} or upgrade your plan.`;
+}
+async function enforceImportCapacity(n) {
+  const btn = document.getElementById('importConfirmBtn');
+  const cap = await checkLeadCapacity(n);
+  if (_importRows.length !== n) return;                 // file was changed/reset while checking
+  if (cap.ok) { btn.style.display = ''; return; }
+  btn.style.display = 'none';
+  document.getElementById('importValidationMsg').innerHTML =
+    `<div class="import-validation-warn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>${importBlockedMessage(cap, n)}</span></div>`;
 }
 
 function resetImport() {
@@ -5699,6 +5796,17 @@ async function runImport() {
   if (_importRows.length > IMPORT_MAX_ROWS) {
     toast(`Import blocked: maximum ${IMPORT_MAX_ROWS} leads per import.`, 'error');
     return;
+  }
+  // Re-check the plan limit live right before writing (counts may have changed since the preview)
+  {
+    const cap = await checkLeadCapacity(_importRows.length);
+    if (!cap.ok) {
+      document.getElementById('importConfirmBtn').style.display = 'none';
+      document.getElementById('importValidationMsg').innerHTML =
+        `<div class="import-validation-warn"><span>${importBlockedMessage(cap, _importRows.length)}</span></div>`;
+      toast('Import blocked: it would exceed your plan\'s lead limit.', 'error');
+      return;
+    }
   }
 
   /* Switch to progress step */
