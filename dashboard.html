@@ -3802,6 +3802,7 @@ function getDragAfterElement(container, y) {
 async function moveLead(leadId, fromStage, newStage) {
   const lead = (boardLeads[fromStage]||[]).find(l => l.leadId === leadId);
   if (!lead) return;
+  if (!(await canUpdateLeads())) return;
   boardLeads[fromStage] = (boardLeads[fromStage]||[]).filter(l => l.leadId !== leadId);
   const updated = { ...lead, status: newStage };
   boardLeads[newStage] = [updated, ...(boardLeads[newStage]||[])];
@@ -3961,6 +3962,7 @@ async function submitForm() {
   try {
     const user = document.getElementById('sideUserName').textContent||'Team';
     if (editingLeadId) {	
+      if (!(await canUpdateLeads())) return;
       await window.dbUpdateLead(editingDocId, lead);
       const idx = currentLeads.findIndex(l => l.leadId === editingLeadId);
       if(idx !== -1) currentLeads[idx] = { ...currentLeads[idx], ...lead };
@@ -4222,6 +4224,7 @@ async function quickAssignToMe(docId) {
   const name  = window._currentUserName  || '';
   const email = window._currentUserEmail || '';
   if (!name && !email) { toast('No user info available','warn'); return; }
+  if (!(await canUpdateLeads())) return;
   try {
     const lead = await window.dbGetLead(docId);
     if (!lead) { toast('Lead not found','error'); return; }
@@ -4680,6 +4683,7 @@ async function bulkAssignToMe() {
   const name  = window._currentUserName  || '';
   const email = window._currentUserEmail || '';
   if (!name && !email) { toast('No user info — please sign in again', 'warn'); return; }
+  if (!(await canUpdateLeads())) return;
 
   const user = document.getElementById('sideUserName').textContent || 'Team';
   toast(`Assigning ${entries.length} lead${entries.length > 1 ? 's' : ''} to ${name}...`, 'success');
@@ -4710,6 +4714,8 @@ async function applyBulkStatus() {
   const newStatus = document.getElementById('bulkStatusSelect').value;
   const entries   = [...selectedLeads.values()];
   closeModal('bulkStatusOverlay');
+  if (!entries.length) return;
+  if (!(await canUpdateLeads())) return;
   toast(`Updating ${entries.length} leads to "${newStatus}"...`, 'success');
   const user = document.getElementById('sideUserName').textContent || 'Team';
 
@@ -5186,6 +5192,16 @@ async function checkLeadCapacity(adding = 1) {
     console.warn('[evoAIDesk] Lead limit check failed — allowing action', e);
     return { ok: true, active: 0, max: null, remaining: Infinity, failed: true };
   }
+}
+
+/* ── Update guard — updates allowed only while ACTIVE leads <= tenant max_leads ──
+   (create/import/restore use a stricter check because they ADD active leads;
+    an update adds none, so adding = 0.) Shows the error toast and returns false if blocked. */
+async function canUpdateLeads() {
+  const cap = await checkLeadCapacity(0);
+  if (cap.ok) return true;
+  toast(`Updates are blocked: your workspace has ${cap.active.toLocaleString()} active leads, above the plan limit of ${cap.max.toLocaleString()}. Delete leads (move to Trash) or upgrade your plan to edit leads again.`, 'error');
+  return false;
 }
 
 /* ── Restore a lead from trash ── */
