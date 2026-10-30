@@ -322,6 +322,8 @@
     display: flex; align-items: center; justify-content: center; transition: all .14s;
   }
   .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,.06); }
+  .icon-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .icon-btn:disabled:hover { border-color: var(--border); color: var(--muted); background: transparent; }
   .icon-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,77,109,.06); }
 
   /* MONO TEXT */
@@ -2132,6 +2134,14 @@
     return pct >= 1 ? 'var(--danger)' : pct >= 0.8 ? 'var(--warn)' : 'var(--accent2)';
   }
 
+  // Attached user count vs tenant max_users. Missing (undefined) or null (unlimited) = never reached.
+  function tenantUserLimitInfo(slug) {
+    const t     = _tenants.find(x => x.slug === slug);
+    const max   = t ? t.max_users : undefined;
+    const count = _users.filter(u => u.tenant_id === slug).length;
+    return { count, max, reached: typeof max === 'number' && max > 0 && count >= max };
+  }
+
   function applyPlanDefaults() {
     const d = PLAN_LIMITS[document.getElementById('fPlan').value] || PLAN_LIMITS.trial;
     document.getElementById('fMaxLeads').value = d.leads;
@@ -2392,8 +2402,17 @@
   /* ══════════════ USER MODAL ══════════════ */
   function populateTenantDropdowns() {
     const opts = _tenants.map(t => `<option value="${esc(t.slug)}">${esc(t.name)} (${esc(t.slug)})</option>`).join('');
+    // User modal dropdown: tenants at their Max Users are disabled. When editing a user,
+    // that user's own current tenant stays selectable (they are already counted in it).
+    const editing    = _editUserId ? _users.find(x => x._id === _editUserId) : null;
+    const ownTenant  = editing ? editing.tenant_id : null;
+    const userOpts = _tenants.map(t => {
+      const lim  = tenantUserLimitInfo(t.slug);
+      const full = lim.reached && t.slug !== ownTenant;
+      return `<option value="${esc(t.slug)}"${full ? ' disabled' : ''}>${esc(t.name)} (${esc(t.slug)})${full ? ' — user limit reached ' + lim.count + '/' + lim.max : ''}</option>`;
+    }).join('');
     const uSel = document.getElementById('uTenantId');
-    uSel.innerHTML = '<option value="">— Select a tenant —</option>' + opts;
+    uSel.innerHTML = '<option value="">— Select a tenant —</option>' + userOpts;
     const fSel = document.getElementById('userTenantFilter');
     fSel.innerHTML = '<option value="">All Tenants</option>' + opts;
   }
@@ -2445,6 +2464,15 @@
     const telegram_user_id = document.getElementById('uTelegramUserId').value.trim();
     if (!google_id)  { toast('Google ID / Email is required', 'error'); return; }
     if (!tenant_id)  { toast('Please select a tenant', 'error'); return; }
+    // Enforce tenant Max Users when adding a user, or moving a user into a different tenant
+    const prevTenant = _editUserId ? (_users.find(x => x._id === _editUserId) || {}).tenant_id : null;
+    if (!_editUserId || prevTenant !== tenant_id) {
+      const lim = tenantUserLimitInfo(tenant_id);
+      if (lim.reached) {
+        toast(`User limit reached for this tenant (${lim.count} / ${lim.max}). Increase Max Users on the tenant to add more.`, 'error');
+        return;
+      }
+    }
     const btn = document.getElementById('saveUserBtn');
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
@@ -2605,6 +2633,7 @@
       const planBadge = `<span class="badge badge-${t.plan||'trial'}">${cap(t.plan||'trial')}</span>`;
       const stBadge   = `<span class="badge badge-${t.status||'active'}">${cap(t.status||'active')}</span>`;
       const userCount = _users.filter(u => u.tenant_id === t.slug).length;
+      const ulim      = tenantUserLimitInfo(t.slug);
       return `<tr>
         <td><strong>${esc(t.name||'—')}</strong></td>
         <td><span class="slug-chip">${esc(t.slug||t._id||'—')}</span></td>
@@ -2622,7 +2651,7 @@
             <button class="icon-btn" title="Edit" onclick="openEditTenantModal('${esc(t.slug||t._id)}')">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button class="icon-btn" title="Add User to Tenant" onclick="openCreateUserForTenant('${esc(t.slug)}')">
+            <button class="icon-btn" ${ulim.reached ? 'disabled' : ''} title="${ulim.reached ? 'User limit reached (' + ulim.count + ' / ' + ulim.max + ') — increase Max Users to add more' : 'Add User to Tenant'}" onclick="openCreateUserForTenant('${esc(t.slug)}')">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
             </button>
           </div>
@@ -2632,6 +2661,11 @@
   }
 
   function openCreateUserForTenant(slug) {
+    const lim = tenantUserLimitInfo(slug);
+    if (lim.reached) {
+      toast(`User limit reached for this tenant (${lim.count} / ${lim.max}). Increase Max Users to add more.`, 'error');
+      return;
+    }
     openCreateUserModal();
     setTimeout(() => { document.getElementById('uTenantId').value = slug; }, 80);
     switchTab('users');
