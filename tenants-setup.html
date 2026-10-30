@@ -1356,7 +1356,7 @@
         </div>
         <div class="field">
           <label>Plan</label>
-          <select id="fPlan">
+          <select id="fPlan" onchange="onPlanChange()">
             <option value="trial" selected>Trial</option>
             <option value="starter">Starter</option>
             <option value="growth">Growth</option>
@@ -1369,6 +1369,16 @@
             <option value="active">Active</option>
             <option value="suspended">Suspended</option>
           </select>
+        </div>
+        <div class="field">
+          <label>Max Leads</label>
+          <input type="number" id="fMaxLeads" min="1" step="1" placeholder="Unlimited" oninput="updateLimitHints()"/>
+          <div class="field-hint" id="hintMaxLeads"></div>
+        </div>
+        <div class="field">
+          <label>Max Users</label>
+          <input type="number" id="fMaxUsers" min="1" step="1" placeholder="Unlimited" oninput="updateLimitHints()"/>
+          <div class="field-hint" id="hintMaxUsers"></div>
         </div>
 
         <div class="form-section-title">Contact &amp; Locale</div>
@@ -1904,7 +1914,9 @@
       return `<span style="font-family:var(--mono);font-size:.7rem;color:var(--danger);">err</span>`;
     }
     const count = _leadsCounts[slug] ?? 0;
-    return `<span style="font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--accent2);">${count}</span>`;
+    const max   = (_tenants.find(x => x.slug === slug) || {}).max_leads;
+    const tip   = max === undefined ? 'Max leads not set — edit tenant to set' : 'Attached leads / max leads';
+    return `<span title="${tip}" style="font-family:var(--mono);font-size:.8rem;font-weight:600;color:${limitColor(count, max)};">${Number(count).toLocaleString()} / ${limitText(max)}</span>`;
   }
 
   async function writeLog({ level = 'info', status = null, module, source, message, meta = {}, tenant_id = null }) {
@@ -2097,6 +2109,64 @@
     document.getElementById('fPlan').value = VALID_PLANS.includes(plan) ? plan : 'trial';
   }
 
+  /* ══════════════ PLAN LIMITS (max leads / max users) ══════════════
+     Default limits applied when a plan is selected. The admin can override
+     either value per tenant. Blank = unlimited (stored as null).
+     Tenants that have never had limits saved have the fields missing
+     (undefined) and show "—" in the table until saved.
+     Trial uses the Starter limits for now — change here if needed.        */
+  const PLAN_LIMITS = {
+    trial:   { leads: 1500, users: 3 },
+    starter: { leads: 1500, users: 3 },
+    growth:  { leads: 3000, users: 3 },
+    team:    { leads: 5000, users: 5 }
+  };
+
+  // undefined = never set, null = unlimited, number = limit
+  function limitText(max) {
+    return max === undefined ? '—' : (max === null ? '∞' : Number(max).toLocaleString());
+  }
+  function limitColor(count, max) {
+    if (max === undefined || max === null || !(max > 0)) return 'var(--accent2)';
+    const pct = count / max;
+    return pct >= 1 ? 'var(--danger)' : pct >= 0.8 ? 'var(--warn)' : 'var(--accent2)';
+  }
+
+  function applyPlanDefaults() {
+    const d = PLAN_LIMITS[document.getElementById('fPlan').value] || PLAN_LIMITS.trial;
+    document.getElementById('fMaxLeads').value = d.leads;
+    document.getElementById('fMaxUsers').value = d.users;
+    updateLimitHints();
+  }
+  function onPlanChange() { applyPlanDefaults(); }
+
+  function loadLimitsForEdit(t) {
+    const d = PLAN_LIMITS[t.plan] || PLAN_LIMITS.trial;
+    // missing field → prefill plan default so saving populates it; null → unlimited (blank)
+    document.getElementById('fMaxLeads').value = t.max_leads === undefined ? d.leads : (t.max_leads ?? '');
+    document.getElementById('fMaxUsers').value = t.max_users === undefined ? d.users : (t.max_users ?? '');
+    updateLimitHints();
+  }
+
+  // Shows currently attached counts under each field; warns if usage already exceeds the value entered
+  function updateLimitHints() {
+    const slug     = _editTenantSlug;
+    const planDef  = PLAN_LIMITS[document.getElementById('fPlan').value] || PLAN_LIMITS.trial;
+    const curUsers = slug ? _users.filter(u => u.tenant_id === slug).length : 0;
+    const curLeads = slug ? (_leadsCounts && _leadsCounts[slug] !== undefined ? _leadsCounts[slug] : null) : 0;
+    const setHint = (id, label, cur, entered, def) => {
+      const el = document.getElementById(id);
+      const curTxt = cur === null ? '—' : Number(cur).toLocaleString();
+      let txt = `Attached: ${curTxt} ${label} · Plan default: ${Number(def).toLocaleString()} · Blank = unlimited`;
+      const over = entered !== '' && cur !== null && Number(entered) < cur;
+      if (over) txt = `Attached ${curTxt} ${label} already exceeds this limit`;
+      el.textContent = txt;
+      el.style.color = over ? 'var(--warn)' : '';
+    };
+    setHint('hintMaxLeads', 'leads', curLeads, document.getElementById('fMaxLeads').value.trim(), planDef.leads);
+    setHint('hintMaxUsers', 'users', curUsers, document.getElementById('fMaxUsers').value.trim(), planDef.users);
+  }
+
   /* ══════════════ TENANT MODAL ══════════════ */
   function openCreateTenantModal() {
     _editTenantSlug = null;
@@ -2104,6 +2174,7 @@
     document.getElementById('fName').value   = '';
     document.getElementById('fSlug').value   = '';
     setPlanSelect('trial');
+    applyPlanDefaults();
     document.getElementById('fStatus').value = 'active';
     document.getElementById('slugVal').textContent = '…';
     document.getElementById('fSlug').disabled = false;
@@ -2133,6 +2204,7 @@
     document.getElementById('fName').value   = t.name;
     document.getElementById('fSlug').value   = t.slug;
     setPlanSelect(t.plan || 'trial');
+    loadLimitsForEdit(t);
     document.getElementById('fStatus').value = t.status || 'active';
     document.getElementById('slugVal').textContent = t.slug;
     document.getElementById('fSlug').disabled = true;
@@ -2205,6 +2277,18 @@
     if (!slug)  { toast('Slug is required', 'error'); return; }
     if (!/^[a-z0-9-]+$/.test(slug)) { toast('Slug: lowercase letters, numbers and hyphens only', 'error'); return; }
 
+    // Limits: blank = unlimited (null), otherwise a whole number >= 1
+    const parseLimit = (id, label) => {
+      const raw = document.getElementById(id).value.trim();
+      if (raw === '') return { ok: true, val: null };
+      const n = Number(raw);
+      if (!Number.isInteger(n) || n < 1) { toast(label + ' must be a whole number of 1 or more (or blank for unlimited)', 'error'); return { ok: false }; }
+      return { ok: true, val: n };
+    };
+    const ml = parseLimit('fMaxLeads', 'Max Leads'); if (!ml.ok) return;
+    const mu = parseLimit('fMaxUsers', 'Max Users'); if (!mu.ok) return;
+    const max_leads = ml.val, max_users = mu.val;
+
     const btn = document.getElementById('saveTenantBtn');
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
@@ -2219,7 +2303,7 @@
         if (existing.exists()) {
           const d = existing.data();
           beforeSnap = {
-            name: d.name, plan: d.plan, status: d.status,
+            name: d.name, plan: d.plan, status: d.status, max_leads: d.max_leads ?? null, max_users: d.max_users ?? null,
             timezone: d.timezone, currency: d.currency,
             tenant_contact_email: d.tenant_contact_email, tenant_contact_phone: d.tenant_contact_phone,
             location: d.location, intro_email_subject: d.intro_email_subject, proposal_subject: d.proposal_subject
@@ -2227,7 +2311,7 @@
         }
       }
       const data = {
-        id: slug, name, slug, plan, status,
+        id: slug, name, slug, plan, status, max_leads, max_users,
         timezone, currency, tenant_contact_email, tenant_contact_phone, location,
         intro_email_subject,
         proposal_subject,
@@ -2240,7 +2324,7 @@
       await window._setDoc(ref, data, { merge: !!_editTenantSlug });
       const action = _editTenantSlug ? 'updated' : 'created';
       toast(`Tenant ${action}`, 'success');
-      const afterSnap = { name, plan, status, timezone, currency, tenant_contact_email, tenant_contact_phone, location, intro_email_subject, proposal_subject };
+      const afterSnap = { name, plan, status, max_leads, max_users, timezone, currency, tenant_contact_email, tenant_contact_phone, location, intro_email_subject, proposal_subject };
       writeLog({
         level: 'info', status: 'success',
         module: 'tenant', source: 'saveTenant',
@@ -2528,7 +2612,7 @@
         <td>${stBadge}</td>
         <td>
           <button onclick="filterUsersByTenant('${esc(t.slug)}')" style="background:rgba(0,184,255,.07);border:1px solid rgba(0,184,255,.18);border-radius:5px;padding:2px 9px;font-family:var(--mono);font-size:.7rem;color:var(--accent2);cursor:pointer;">
-            ${userCount} user${userCount!==1?'s':''}
+            <span style="color:${limitColor(userCount, t.max_users)};" title="${t.max_users===undefined?'Max users not set — edit tenant to set':'Attached users / max users'}">${userCount} / ${limitText(t.max_users)} user${t.max_users===1?'':'s'}</span>
           </button>
         </td>
         <td id="leads-${esc(t.slug)}">${leadsCell(t.slug)}</td>
