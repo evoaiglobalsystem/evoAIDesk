@@ -1379,7 +1379,7 @@
         </div>
         <div class="field">
           <label>Max Users</label>
-          <input type="number" id="fMaxUsers" min="1" step="1" placeholder="Unlimited" oninput="updateLimitHints()"/>
+          <input type="number" id="fMaxUsers" min="1" step="1" placeholder="Unlimited" oninput="updateLimitHints()" onblur="applyUserCapUI();updateLimitHints()"/>
           <div class="field-hint" id="hintMaxUsers"></div>
         </div>
 
@@ -2118,11 +2118,30 @@
      (undefined) and show "—" in the table until saved.
      Trial uses the Starter limits for now — change here if needed.        */
   const PLAN_LIMITS = {
-    trial:   { leads: 1500, users: 3 },
+    trial:   { leads: 1500, users: 2 },
     starter: { leads: 1500, users: 3 },
     growth:  { leads: 3000, users: 3 },
     team:    { leads: 5000, users: 5 }
   };
+
+  /* Hard caps: limits that CANNOT be exceeded or set to unlimited for a plan,
+     regardless of what is typed in the tenant form or stored in Firestore.
+     Trial accounts are limited to 2 users.                                  */
+  const PLAN_HARD_CAPS = {
+    trial: { users: 2 }
+  };
+  function planUserCap(plan) {
+    const c = PLAN_HARD_CAPS[(plan || 'trial').toString().toLowerCase()];
+    return c ? c.users : null;   // null = no hard cap for this plan
+  }
+  // Effective user limit for a tenant: stored max_users, but never above the plan's hard cap.
+  // undefined/null (unset/unlimited) on a capped plan resolves to the cap itself.
+  function effectiveMaxUsers(t) {
+    if (!t) return undefined;
+    const cap = planUserCap(t.plan);
+    if (cap === null) return t.max_users;
+    return (typeof t.max_users === 'number' && t.max_users > 0) ? Math.min(t.max_users, cap) : cap;
+  }
 
   // undefined = never set, null = unlimited, number = limit
   function limitText(max) {
@@ -2137,7 +2156,7 @@
   // Attached user count vs tenant max_users. Missing (undefined) or null (unlimited) = never reached.
   function tenantUserLimitInfo(slug) {
     const t     = _tenants.find(x => x.slug === slug);
-    const max   = t ? t.max_users : undefined;
+    const max   = effectiveMaxUsers(t);   // honours the Trial hard cap (2)
     const count = _users.filter(u => u.tenant_id === slug).length;
     return { count, max, reached: typeof max === 'number' && max > 0 && count >= max };
   }
@@ -2146,15 +2165,32 @@
     const d = PLAN_LIMITS[document.getElementById('fPlan').value] || PLAN_LIMITS.trial;
     document.getElementById('fMaxLeads').value = d.leads;
     document.getElementById('fMaxUsers').value = d.users;
+    applyUserCapUI();
     updateLimitHints();
   }
   function onPlanChange() { applyPlanDefaults(); }
+
+  // Reflect the plan's hard user cap on the Max Users input (max attr, placeholder, clamp)
+  function applyUserCapUI() {
+    const cap = planUserCap(document.getElementById('fPlan').value);
+    const el  = document.getElementById('fMaxUsers');
+    if (cap !== null) {
+      el.max = cap;
+      el.placeholder = 'Max ' + cap;
+      const v = el.value.trim();
+      if (v === '' || Number(v) > cap) el.value = cap;
+    } else {
+      el.removeAttribute('max');
+      el.placeholder = 'Unlimited';
+    }
+  }
 
   function loadLimitsForEdit(t) {
     const d = PLAN_LIMITS[t.plan] || PLAN_LIMITS.trial;
     // missing field → prefill plan default so saving populates it; null → unlimited (blank)
     document.getElementById('fMaxLeads').value = t.max_leads === undefined ? d.leads : (t.max_leads ?? '');
     document.getElementById('fMaxUsers').value = t.max_users === undefined ? d.users : (t.max_users ?? '');
+    applyUserCapUI();   // Trial: clamps blank/unlimited or >2 down to 2
     updateLimitHints();
   }
 
@@ -2175,6 +2211,22 @@
     };
     setHint('hintMaxLeads', 'leads', curLeads, document.getElementById('fMaxLeads').value.trim(), planDef.leads);
     setHint('hintMaxUsers', 'users', curUsers, document.getElementById('fMaxUsers').value.trim(), planDef.users);
+    // Trial hard cap messaging for Max Users
+    const cap = planUserCap(document.getElementById('fPlan').value);
+    if (cap !== null) {
+      const el  = document.getElementById('hintMaxUsers');
+      const raw = document.getElementById('fMaxUsers').value.trim();
+      if (raw === '' || Number(raw) > cap) {
+        el.textContent = `Trial accounts are limited to ${cap} users — value will be capped at ${cap}`;
+        el.style.color = 'var(--danger)';
+      } else if (curUsers > cap) {
+        el.textContent = `Trial limit is ${cap} users — ${curUsers} already attached; no new users can be added`;
+        el.style.color = 'var(--warn)';
+      } else {
+        el.textContent = `Attached: ${curUsers} users · Trial hard limit: ${cap} users (cannot be exceeded)`;
+        el.style.color = '';
+      }
+    }
   }
 
   /* ══════════════ TENANT MODAL ══════════════ */
@@ -2297,7 +2349,17 @@
     };
     const ml = parseLimit('fMaxLeads', 'Max Leads'); if (!ml.ok) return;
     const mu = parseLimit('fMaxUsers', 'Max Users'); if (!mu.ok) return;
-    const max_leads = ml.val, max_users = mu.val;
+    const max_leads = ml.val;
+    const max_users = mu.val;
+
+    // Trial hard cap: max 2 users — cannot be unlimited or above the cap
+    const userCap = planUserCap(plan);
+    if (userCap !== null && (max_users === null || max_users > userCap)) {
+      document.getElementById('fMaxUsers').value = userCap;
+      updateLimitHints();
+      toast(`Trial accounts are limited to ${userCap} users. Max Users has been set to ${userCap}.`, 'error');
+      return;
+    }
 
     const btn = document.getElementById('saveTenantBtn');
     btn.disabled = true; btn.textContent = 'Saving…';
@@ -2634,6 +2696,7 @@
       const stBadge   = `<span class="badge badge-${t.status||'active'}">${cap(t.status||'active')}</span>`;
       const userCount = _users.filter(u => u.tenant_id === t.slug).length;
       const ulim      = tenantUserLimitInfo(t.slug);
+      const effMaxUsers = effectiveMaxUsers(t);   // Trial capped at 2
       return `<tr>
         <td><strong>${esc(t.name||'—')}</strong></td>
         <td><span class="slug-chip">${esc(t.slug||t._id||'—')}</span></td>
@@ -2641,7 +2704,7 @@
         <td>${stBadge}</td>
         <td>
           <button onclick="filterUsersByTenant('${esc(t.slug)}')" style="background:rgba(0,184,255,.07);border:1px solid rgba(0,184,255,.18);border-radius:5px;padding:2px 9px;font-family:var(--mono);font-size:.7rem;color:var(--accent2);cursor:pointer;">
-            <span style="color:${limitColor(userCount, t.max_users)};" title="${t.max_users===undefined?'Max users not set — edit tenant to set':'Attached users / max users'}">${userCount} / ${limitText(t.max_users)} user${t.max_users===1?'':'s'}</span>
+            <span style="color:${limitColor(userCount, effMaxUsers)};" title="${effMaxUsers===undefined?'Max users not set — edit tenant to set':(planUserCap(t.plan)!==null?'Attached users / max users (Trial hard limit: '+planUserCap(t.plan)+')':'Attached users / max users')}">${userCount} / ${limitText(effMaxUsers)} user${effMaxUsers===1?'':'s'}</span>
           </button>
         </td>
         <td id="leads-${esc(t.slug)}">${leadsCell(t.slug)}</td>
