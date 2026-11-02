@@ -3180,6 +3180,7 @@ let isMyLeadsMode  = false;
 
 /* ── SELECTION ── */
 let selectedLeads  = new Map();
+let _renderedLeadsById = new Map();   // leadId -> lead for rows in the table view (used by toggleSelect)
 
 /* ── BOARD CACHE ── */
 let boardLeads     = {};
@@ -3626,6 +3627,7 @@ function renderTable(leads) {
       <p>No leads found.</p></div></td></tr>`;
     return;
   }
+  _renderedLeadsById = new Map(leads.map(l => [l.leadId, l]));
   tbody.innerHTML = leads.map(l => {
     const score   = computeScore(l);
     const overdue = isOverdue(l);
@@ -3638,7 +3640,7 @@ function renderTable(leads) {
       : '';
     return `
     <tr class="${sel ? 'selected-row' : ''}">
-      <td style="padding:11px 10px;"><input type="checkbox" class="row-check" data-id="${esc(l.leadId)}" ${sel ? 'checked' : ''} onchange="toggleSelect('${esc(l.leadId)}',this,${JSON.stringify(l).replace(/"/g,'&quot;')})"/></td>
+      <td style="padding:11px 10px;"><input type="checkbox" class="row-check" data-id="${esc(l.leadId)}" ${sel ? 'checked' : ''} onchange="toggleSelect(this.dataset.id,this)"/></td>
       <td>
         <div class="lead-name">${esc(l.name||'—')}${overdue ? ` <span class="overdue-tag" style="font-size:.55rem;padding:1px 5px;">⏰</span>` : ''}</div>
         <div class="lead-sub">${esc(l.email||'')}</div>
@@ -3659,13 +3661,13 @@ function renderTable(leads) {
       <td>${followupCell}</td>
       <td>
         <div class="row-actions">
-          <button class="icon-btn" title="View" onclick="viewLead('${esc(l.leadId)}','${esc(l._docId)}')">
+          <button class="icon-btn" title="View" data-lid="${esc(l.leadId)}" data-did="${esc(l._docId)}" onclick="viewLead(this.dataset.lid,this.dataset.did)">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
-          <button class="icon-btn" title="Edit" onclick="editLeadById('${esc(l.leadId)}','${esc(l._docId)}')">
+          <button class="icon-btn" title="Edit" data-lid="${esc(l.leadId)}" data-did="${esc(l._docId)}" onclick="editLeadById(this.dataset.lid,this.dataset.did)">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="icon-btn icon-btn-danger" title="Move to Trash" onclick="softDeleteLead('${esc(l._docId)}','${esc(l.name||l.email||'')}')">
+          <button class="icon-btn icon-btn-danger" title="Move to Trash" data-did="${esc(l._docId)}" data-name="${esc(l.name||l.email||'')}" onclick="softDeleteLead(this.dataset.did,this.dataset.name)">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
           </button>
         </div>
@@ -3835,7 +3837,7 @@ function renderList(leads) {
     const score   = computeScore(l);
     const dealStr = l.dealvalue ? fmtCurrency(l.dealvalue) : '—';
     return `
-    <div class="list-item" onclick="viewLead('${esc(l.leadId)}','${esc(l._docId)}')">
+    <div class="list-item" data-lid="${esc(l.leadId)}" data-did="${esc(l._docId)}" onclick="viewLead(this.dataset.lid,this.dataset.did)">
       <div class="list-item-contact">
         <div class="list-item-name">${esc(l.name||'—')}</div>
         <div class="list-item-email">${esc(l.email||'')}</div>
@@ -3847,13 +3849,13 @@ function renderList(leads) {
       <div class="list-item-deal">${esc(dealStr)}</div>
       <div>${scoreBadge(score)}</div>
       <div class="list-item-actions" onclick="event.stopPropagation()">
-        <button class="icon-btn" title="View"  onclick="viewLead('${esc(l.leadId)}','${esc(l._docId)}')">
+        <button class="icon-btn" title="View"  data-lid="${esc(l.leadId)}" data-did="${esc(l._docId)}" onclick="viewLead(this.dataset.lid,this.dataset.did)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
-        <button class="icon-btn" title="Edit"  onclick="editLeadById('${esc(l.leadId)}','${esc(l._docId)}')">
+        <button class="icon-btn" title="Edit"  data-lid="${esc(l.leadId)}" data-did="${esc(l._docId)}" onclick="editLeadById(this.dataset.lid,this.dataset.did)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <button class="icon-btn icon-btn-danger" title="Move to Trash" onclick="softDeleteLead('${esc(l._docId)}','${esc(l.name||l.email||'')}')">
+        <button class="icon-btn icon-btn-danger" title="Move to Trash" data-did="${esc(l._docId)}" data-name="${esc(l.name||l.email||'')}" onclick="softDeleteLead(this.dataset.did,this.dataset.name)">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
         </button>
       </div>
@@ -4141,7 +4143,7 @@ async function viewLead(leadId, docId, preloadedLead = null) {
           ${lead.assignedToEmail ? `<div class="assign-email"><a href="mailto:${esc(lead.assignedToEmail)}" style="color:var(--accent2);text-decoration:none;">${esc(lead.assignedToEmail)}</a></div>` : ''}
           <div class="assign-date">Assigned: ${assignedAtStr}</div>
         </div>
-        <button class="assign-me-btn" onclick="quickAssignToMe('${esc(lead._docId||docId)}')">
+        <button class="assign-me-btn" data-did="${esc(lead._docId||docId)}" onclick="quickAssignToMe(this.dataset.did)">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Reassign to Me
         </button>
@@ -4151,7 +4153,7 @@ async function viewLead(leadId, docId, preloadedLead = null) {
       <div class="unassigned-card">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.4"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Unassigned</span>
-        <button class="assign-me-btn" style="margin-left:auto;" onclick="quickAssignToMe('${esc(lead._docId||docId)}')">
+        <button class="assign-me-btn" style="margin-left:auto;" data-did="${esc(lead._docId||docId)}" onclick="quickAssignToMe(this.dataset.did)">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Assign to Me
         </button>
@@ -4658,6 +4660,10 @@ document.addEventListener('click', () => { closeExportDropdown(); closeReportDro
    SELECTION & BULK ACTIONS
 ════════════════════════════════════════════════════ */
 function toggleSelect(leadId, cb, leadObj) {
+  if (leadObj === undefined) {
+    const src = _renderedLeadsById.get(leadId);
+    leadObj = src ? JSON.parse(JSON.stringify(src)) : { leadId };
+  }
   if(cb.checked) selectedLeads.set(leadId, leadObj); else selectedLeads.delete(leadId);
   updateBulkBar();
   const row = cb.closest('tr'); if(row) row.classList.toggle('selected-row', cb.checked);
@@ -5124,11 +5130,11 @@ function renderTrash(leads) {
       <td style="font-size:.72rem;font-family:var(--mono);color:var(--muted);">${l.deletedAt ? esc(fmtDate(l.deletedAt)) : '—'}</td>
       <td>
         <div class="row-actions">
-          <button class="restore-btn" onclick="restoreLead('${esc(l._docId)}','${esc(l.name||l.email||'')}')">
+          <button class="restore-btn" data-did="${esc(l._docId)}" data-name="${esc(l.name||l.email||'')}" onclick="restoreLead(this.dataset.did,this.dataset.name)">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
             Restore
           </button>
-          <button class="perm-del-btn" onclick="permanentDelete('${esc(l._docId)}','${esc(l.name||l.email||'')}')">
+          <button class="perm-del-btn" data-did="${esc(l._docId)}" data-name="${esc(l.name||l.email||'')}" onclick="permanentDelete(this.dataset.did,this.dataset.name)">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
             Delete Forever
           </button>
