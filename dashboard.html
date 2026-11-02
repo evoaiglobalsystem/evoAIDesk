@@ -602,6 +602,7 @@
       type:      activity.type  || 'note',
       text:      activity.text  || '',
       user:      activity.user  || 'Team',
+      tenant_id: window._currentTenantId || '',
       createdAt: serverTimestamp(),
     });
   };
