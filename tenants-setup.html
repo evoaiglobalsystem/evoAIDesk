@@ -2535,6 +2535,12 @@
         return;
       }
     }
+    // Changing an existing user's tenant switches lead data management — require explicit confirmation
+    if (_editUserId && prevTenant && prevTenant !== tenant_id) {
+      const nameOf = slug => { const t = _tenants.find(x => x.slug === slug); return t ? t.name : slug; };
+      const ok = await confirmTenantSwitch(google_id, nameOf(prevTenant), nameOf(tenant_id));
+      if (!ok) return;   // cancelled — user modal stays open, nothing is saved
+    }
     const btn = document.getElementById('saveUserBtn');
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
@@ -2649,7 +2655,28 @@
     };
     document.getElementById('confirmModal').classList.add('open');
   }
-  function closeConfirm() { document.getElementById('confirmModal').classList.remove('open'); }
+  /* Confirmation for moving a user to a different tenant (resolves true only on explicit "Yes") */
+  let _confirmResolve = null;
+  function confirmTenantSwitch(userLabel, fromName, toName) {
+    return new Promise(resolve => {
+      _confirmResolve = resolve;
+      document.getElementById('confirmTitle').textContent = 'Change Tenant?';
+      document.getElementById('confirmBody').innerHTML =
+        `<div style="display:flex;gap:10px;align-items:flex-start;background:rgba(255,183,48,.07);border:1px solid rgba(255,183,48,.22);border-radius:8px;padding:10px 12px;margin-bottom:12px;color:var(--warn);font-size:.8rem;line-height:1.5;">` +
+        `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>` +
+        `<span>Changing the tenant will <strong>switch lead data management</strong> for this user to the new tenant.</span></div>` +
+        `Move <strong>${esc(userLabel)}</strong> from <strong>${esc(fromName)}</strong> to <strong>${esc(toName)}</strong>?<br>Are you sure you want to continue?`;
+      const btn = document.getElementById('confirmOkBtn');
+      btn.textContent = 'Yes, change tenant';
+      btn.onclick = () => { _confirmResolve = null; closeConfirm(); resolve(true); };
+      document.getElementById('confirmModal').classList.add('open');
+    });
+  }
+  function closeConfirm() {
+    document.getElementById('confirmModal').classList.remove('open');
+    document.getElementById('confirmOkBtn').textContent = 'Delete';   // restore default label for delete dialogs
+    if (_confirmResolve) { const r = _confirmResolve; _confirmResolve = null; r(false); }  // Cancel / X / Esc = No
+  }
 
   /* ══════════════ LOAD DATA ══════════════ */
   async function loadTenants() {
