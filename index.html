@@ -536,6 +536,31 @@
     .faq-a { font-size: .8rem; color: var(--muted); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s; }
     .faq-item.open .faq-a { max-height: 200px; padding-top: 12px; }
 
+    /* ── Trial package widget ── */
+    .trial-card {
+      display: flex; align-items: center; justify-content: space-between; gap: 28px; flex-wrap: wrap;
+      background: linear-gradient(135deg, rgba(76,222,60,0.08), rgba(33,150,243,0.08));
+      border: 1px solid rgba(76,222,60,0.35);
+      border-radius: 16px; padding: 28px 32px; margin-bottom: 20px; position: relative;
+      animation: fadeUp .6s ease both; animation-delay: .05s;
+    }
+    .trial-badge {
+      display: inline-block; font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: #000; background: linear-gradient(135deg, var(--accent3), var(--accent2));
+      padding: 4px 10px; border-radius: 99px; margin-bottom: 10px;
+    }
+    .trial-name { font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .trial-desc { font-size: .78rem; color: var(--muted); line-height: 1.6; max-width: 380px; }
+    .trial-limits { display: flex; gap: 10px; flex: 1; min-width: 260px; max-width: 460px; }
+    .trial-limits .limit-pill { padding: 12px 14px; }
+    .trial-limits .limit-pill .lval { font-size: 1.15rem; color: var(--accent); }
+    .trial-btn { white-space: nowrap; width: auto; padding: 12px 24px; }
+    @media (max-width: 768px) {
+      .trial-card { flex-direction: column; align-items: stretch; padding: 24px 20px; }
+      .trial-limits { max-width: none; }
+      .trial-btn { text-align: center; }
+    }
+
     /* ── Responsive pricing ── */
     @media (max-width: 768px) {
       .enterprise-card { flex-direction: column; }
@@ -1084,6 +1109,21 @@
         </div>
         <span class="toggle-label" id="lbl-annual">Annual <span class="save-badge">Save 20%</span></span>
       </div>
+    </div>
+
+    <!-- Trial Package -->
+    <div class="trial-card" id="trial">
+      <div>
+        <div class="trial-badge">Free Trial</div>
+        <div class="trial-name">Trial Package</div>
+        <div class="trial-desc">Try everything before you commit — all features included, no credit card required.</div>
+      </div>
+      <div class="trial-limits">
+        <div class="limit-pill"><div class="lval">2</div><div class="lkey">Users</div></div>
+        <div class="limit-pill"><div class="lval">1,500</div><div class="lkey">Leads</div></div>
+        <div class="limit-pill"><div class="lval">30 Days</div><div class="lkey">Validity</div></div>
+      </div>
+      <a href="login.html" class="plan-btn primary trial-btn">Start Free Trial</a>
     </div>
 
     <!-- Plans -->
