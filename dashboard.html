@@ -5216,6 +5216,15 @@ async function restoreLead(docId, displayName) {
       return;
     }
     await window.dbRestoreLead(docId);
+
+    // Log to activity timeline
+    const restoredBy = window._currentUserEmail || window._currentUserName || 'Team';
+    await window.dbAddActivity(docId, {
+      type: 'note',
+      text: `Lead restored from Trash by ${restoredBy}`,
+      user: document.getElementById('sideUserName')?.textContent || 'Team',
+    }).catch(() => {}); // non-critical
+
     toast(`"${label}" restored successfully`, 'success');
     trashLeads = trashLeads.filter(l => l._docId !== docId);
     renderTrash(trashLeads);
