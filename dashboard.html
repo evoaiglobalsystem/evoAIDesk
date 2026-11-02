@@ -558,7 +558,7 @@
   window.dbPermanentDeleteLead = async (docId) => {
    // 1. Delete all activities using a batch — avoids N parallel deleteDoc calls
    const activitiesRef = collection(db, 'leads', docId, 'activities');
-   const activitiesSnap = await getDocs(activitiesRef);
+   const activitiesSnap = await getDocs(query(activitiesRef, where('tenant_id', '==', window._currentTenantId || '')));
    if (activitiesSnap.docs.length > 0) {
      const batch = writeBatch(db);
      activitiesSnap.docs.forEach(d => batch.delete(d.ref));
@@ -610,12 +610,12 @@
   window.dbLoadActivities = async (leadDocId) => {
     try {
       const activitiesRef = collection(db, 'leads', leadDocId, 'activities');
-      const snap = await getDocs(query(activitiesRef, orderBy('createdAt', 'desc')));
+      const snap = await getDocs(query(activitiesRef, where('tenant_id', '==', window._currentTenantId || '')));
       return snap.docs.map(d => {
         const data = d.data();
         const ts = data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : new Date().toISOString();
         return { type: data.type, text: data.text, user: data.user, ts };
-      });
+      }).sort((x, y) => (x.ts < y.ts ? 1 : x.ts > y.ts ? -1 : 0)); // newest first, sorted client-side (no composite index)
     } catch(e) {
       return [];
     }
